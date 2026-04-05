@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:glass_keep/glass_effect.dart';
 import 'package:glass_keep/l10n/app_localizations.dart';
 
 class VisionGlassCard extends StatefulWidget {
@@ -21,117 +22,95 @@ class VisionGlassCard extends StatefulWidget {
   State<VisionGlassCard> createState() => _VisionGlassCardState();
 }
 
-class _VisionGlassCardState extends State<VisionGlassCard> with SingleTickerProviderStateMixin {
-  late AnimationController _hoverController;
-  
+class _VisionGlassCardState extends State<VisionGlassCard> {
   @override
-  void initState() {
-    super.initState();
-    _hoverController = AnimationController(
-      duration: const Duration(milliseconds: 400),
-      vsync: this,
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(widget.borderRadius),
+        boxShadow: const [
+          BoxShadow(
+            color: Color.fromARGB(51, 0, 0, 0),
+            blurRadius: 6,
+            offset: Offset(0, 6),
+          ),
+          BoxShadow(
+            color: Color.fromARGB(26, 0, 0, 0),
+            blurRadius: 20,
+            offset: Offset(0, 0),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(widget.borderRadius),
+        child: Stack(
+          children: [
+            // Backdrop blur effect
+            BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: widget.blur, sigmaY: widget.blur),
+              child: const SizedBox.expand(),
+            ),
+
+            // Liquid glass tint layer
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.25),
+              ),
+            ),
+
+            // Glass distortion effect layer
+            GlassDistortionEffect(
+              borderRadius: widget.borderRadius,
+              distortionStrength: 3.0,
+              distortionScale: 0.02,
+              child: const SizedBox.expand(),
+            ),
+
+            // Inset shine effect
+            _ShineLayer(borderRadius: widget.borderRadius),
+
+            // Content
+            Padding(
+              padding: widget.padding ?? const EdgeInsets.all(16),
+              child: widget.child,
+            ),
+          ],
+        ),
+      ),
     );
   }
+}
 
-  @override
-  void dispose() {
-    _hoverController.dispose();
-    super.dispose();
-  }
+/// Inset shine effect for glass morphism
+class _ShineLayer extends StatelessWidget {
+  final double borderRadius;
 
-  void _onHoverStart() {
-    _hoverController.forward();
-  }
-
-  void _onHoverEnd() {
-    _hoverController.reverse();
-  }
+  const _ShineLayer({required this.borderRadius});
 
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => _onHoverStart(),
-      onExit: (_) => _onHoverEnd(),
-      child: AnimatedBuilder(
-        animation: _hoverController,
-        builder: (context, child) {
-          return Container(
-            margin: const EdgeInsets.only(bottom: 12),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(widget.borderRadius),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.2 + 0.1 * _hoverController.value),
-                  blurRadius: 6 + 10 * _hoverController.value,
-                  offset: const Offset(0, 6),
-                ),
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1 + 0.05 * _hoverController.value),
-                  blurRadius: 20 + 10 * _hoverController.value,
-                  offset: const Offset(0, 0),
-                ),
-              ],
+    return Positioned.fill(
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(borderRadius),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.white.withValues(alpha: 0.5),
+              blurRadius: 1,
+              spreadRadius: 0,
+              offset: const Offset(2, 2),
+              inset: true,
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(widget.borderRadius),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(
-                  sigmaX: widget.blur + 2 * _hoverController.value, 
-                  sigmaY: widget.blur + 2 * _hoverController.value
-                ),
-                child: Stack(
-                  children: [
-                    // Background tint layer (liquid glass effect)
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(widget.borderRadius),
-                        color: Colors.white.withValues(alpha: 0.25),
-                      ),
-                    ),
-                    // Shine/highlight effect
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(widget.borderRadius),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.white.withValues(alpha: 0.5),
-                            blurRadius: 0,
-                            spreadRadius: 0,
-                            offset: const Offset(2, 2),
-                            inset: true,
-                          ),
-                          BoxShadow(
-                            color: Colors.white.withValues(alpha: 0.5),
-                            blurRadius: 1,
-                            spreadRadius: 1,
-                            offset: const Offset(-1, -1),
-                            inset: true,
-                          ),
-                        ],
-                      ),
-                    ),
-                    // Border with enhanced visibility
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(widget.borderRadius),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.4),
-                          width: 1.2,
-                        ),
-                      ),
-                    ),
-                    // Content
-                    Padding(
-                      padding: widget.padding ?? const EdgeInsets.all(16),
-                      child: child,
-                    ),
-                  ],
-                ),
-              ),
+            BoxShadow(
+              color: Colors.white.withValues(alpha: 0.5),
+              blurRadius: 1,
+              spreadRadius: 1,
+              offset: const Offset(-1, -1),
+              inset: true,
             ),
-          );
-        },
-        child: null,
+          ],
+        ),
       ),
     );
   }
