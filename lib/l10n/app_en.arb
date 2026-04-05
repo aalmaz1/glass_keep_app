@@ -1,0 +1,12 @@
+{
+  "newNote": "New Note",
+  "save": "Save",
+  "logout": "Logout",
+  "title": "Title",
+  "note": "Note",
+  "labelsHint": "Labels (work, idea...)",
+  "noNotes": "No notes found",
+  "searchHint": "Search notes...",
+  "delete": "Delete",
+  "archive": "Archive"
+}
