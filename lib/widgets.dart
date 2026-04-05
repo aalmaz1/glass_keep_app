@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:glass_keep/l10n/app_localizations.dart';
 
-class VisionGlassCard extends StatelessWidget {
+class VisionGlassCard extends StatefulWidget {
   final Widget child;
   final EdgeInsetsGeometry? padding;
   final double borderRadius;
@@ -18,73 +18,120 @@ class VisionGlassCard extends StatelessWidget {
   });
 
   @override
+  State<VisionGlassCard> createState() => _VisionGlassCardState();
+}
+
+class _VisionGlassCardState extends State<VisionGlassCard> with SingleTickerProviderStateMixin {
+  late AnimationController _hoverController;
+  
+  @override
+  void initState() {
+    super.initState();
+    _hoverController = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+  }
+
+  @override
+  void dispose() {
+    _hoverController.dispose();
+    super.dispose();
+  }
+
+  void _onHoverStart() {
+    _hoverController.forward();
+  }
+
+  void _onHoverEnd() {
+    _hoverController.reverse();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(borderRadius),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 32,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(borderRadius),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-          child: Container(
+    return MouseRegion(
+      onEnter: (_) => _onHoverStart(),
+      onExit: (_) => _onHoverEnd(),
+      child: AnimatedBuilder(
+        animation: _hoverController,
+        builder: (context, child) {
+          return Container(
+            margin: const EdgeInsets.only(bottom: 12),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(borderRadius),
-              color: Colors.white.withValues(alpha: 0.05),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.3),
-                width: 1,
-              ),
-            ),
-            child: Stack(
-              children: [
-                Positioned(
-                  top: 0, left: 0, right: 0,
-                  child: Container(
-                    height: 1,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Colors.transparent,
-                          Colors.white.withValues(alpha: 0.6),
-                          Colors.transparent,
-                        ],
-                      ),
-                    ),
-                  ),
+              borderRadius: BorderRadius.circular(widget.borderRadius),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.2 + 0.1 * _hoverController.value),
+                  blurRadius: 6 + 10 * _hoverController.value,
+                  offset: const Offset(0, 6),
                 ),
-                Positioned(
-                  top: 0, left: 0, bottom: 0, width: 1,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.white.withValues(alpha: 0.6),
-                          Colors.transparent,
-                          Colors.white.withValues(alpha: 0.2),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: padding ?? const EdgeInsets.all(16),
-                  child: child,
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.1 + 0.05 * _hoverController.value),
+                  blurRadius: 20 + 10 * _hoverController.value,
+                  offset: const Offset(0, 0),
                 ),
               ],
             ),
-          ),
-        ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(widget.borderRadius),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(
+                  sigmaX: widget.blur + 2 * _hoverController.value, 
+                  sigmaY: widget.blur + 2 * _hoverController.value
+                ),
+                child: Stack(
+                  children: [
+                    // Background tint layer (liquid glass effect)
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(widget.borderRadius),
+                        color: Colors.white.withValues(alpha: 0.25),
+                      ),
+                    ),
+                    // Shine/highlight effect
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(widget.borderRadius),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.white.withValues(alpha: 0.5),
+                            blurRadius: 0,
+                            spreadRadius: 0,
+                            offset: const Offset(2, 2),
+                            inset: true,
+                          ),
+                          BoxShadow(
+                            color: Colors.white.withValues(alpha: 0.5),
+                            blurRadius: 1,
+                            spreadRadius: 1,
+                            offset: const Offset(-1, -1),
+                            inset: true,
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Border with enhanced visibility
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(widget.borderRadius),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.4),
+                          width: 1.2,
+                        ),
+                      ),
+                    ),
+                    // Content
+                    Padding(
+                      padding: widget.padding ?? const EdgeInsets.all(16),
+                      child: child,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+        child: null,
       ),
     );
   }
