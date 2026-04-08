@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:glass_keep/constants.dart';
 
 /// Apple-style glass card with blur and subtle border
-/// Optimized for light theme with iOS 17+ aesthetics
 class GlassCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry? padding;
@@ -29,14 +28,11 @@ class GlassCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(borderRadius),
       child: Stack(
         children: [
-          // Backdrop blur effect
           if (hasBlur)
             BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
               child: const SizedBox.expand(),
             ),
-
-          // Glass tint layer - semi-transparent white
           Container(
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.65),
@@ -46,8 +42,6 @@ class GlassCard extends StatelessWidget {
               ),
             ),
           ),
-
-          // Content
           Padding(
             padding: padding ?? const EdgeInsets.all(16),
             child: child,
@@ -80,7 +74,6 @@ class GlassCard extends StatelessWidget {
   }
 }
 
-/// Interactive glass card with press animation
 class _InteractiveGlassCard extends StatefulWidget {
   final Widget child;
   final VoidCallback onTap;
@@ -109,11 +102,7 @@ class _InteractiveGlassCardState extends State<_InteractiveGlassCard>
       vsync: this,
     );
     _scaleAnimation = Tween<double>(begin: 1.0, end: 0.97).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeOutCubic,
-        reverseCurve: Curves.spring,
-      ),
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic, reverseCurve: Curves.spring),
     );
   }
 
@@ -123,58 +112,43 @@ class _InteractiveGlassCardState extends State<_InteractiveGlassCard>
     super.dispose();
   }
 
-  void _handleTapDown(TapDownDetails details) {
-    _controller.forward();
-  }
-
-  void _handleTapUp(TapUpDetails details) {
-    _controller.reverse();
-    widget.onTap();
-  }
-
-  void _handleTapCancel() {
-    _controller.reverse();
-  }
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTapDown: _handleTapDown,
-      onTapUp: _handleTapUp,
-      onTapCancel: _handleTapCancel,
+      onTapDown: (_) => _controller.forward(),
+      onTapUp: (_) { _controller.reverse(); widget.onTap(); },
+      onTapCancel: () => _controller.reverse(),
       child: AnimatedBuilder(
         animation: _scaleAnimation,
-        builder: (context, child) {
-          return Transform.scale(
-            scale: _scaleAnimation.value,
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(widget.borderRadius),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: widget.child,
+        builder: (context, child) => Transform.scale(
+          scale: _scaleAnimation.value,
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(widget.borderRadius),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.08),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
-          );
-        },
+            child: widget.child,
+          ),
+        ),
       ),
     );
   }
 }
 
-/// Apple glassmorphism button with iOS blue color
-/// Semi-transparent blue with backdrop blur
+/// Apple glassmorphism button - голубая полупрозрачная с размытием
 class GlassButton extends StatefulWidget {
   final String text;
   final VoidCallback onPressed;
   final double borderRadius;
   final EdgeInsetsGeometry? padding;
   final bool isLoading;
+  final IconData? icon;
 
   const GlassButton({
     super.key,
@@ -183,29 +157,23 @@ class GlassButton extends StatefulWidget {
     this.borderRadius = 14,
     this.padding,
     this.isLoading = false,
+    this.icon,
   });
 
   @override
   State<GlassButton> createState() => _GlassButtonState();
 }
 
-class _GlassButtonState extends State<GlassButton>
-    with SingleTickerProviderStateMixin {
+class _GlassButtonState extends State<GlassButton> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 200),
-      vsync: this,
-    );
+    _controller = AnimationController(duration: const Duration(milliseconds: 200), vsync: this);
     _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeInOut,
-      ),
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
   }
 
@@ -215,94 +183,75 @@ class _GlassButtonState extends State<GlassButton>
     super.dispose();
   }
 
-  void _handleTapDown(TapDownDetails details) {
-    _controller.forward();
-  }
-
-  void _handleTapUp(TapUpDetails details) {
-    _controller.reverse();
-    if (!widget.isLoading) {
-      widget.onPressed();
-    }
-  }
-
-  void _handleTapCancel() {
-    _controller.reverse();
-  }
-
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _scaleAnimation,
-      builder: (context, child) {
-        return Transform.scale(
-          scale: _scaleAnimation.value,
-          child: GestureDetector(
-            onTapDown: _handleTapDown,
-            onTapUp: _handleTapUp,
-            onTapCancel: _handleTapCancel,
-            onTap: widget.isLoading ? null : widget.onPressed,
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(widget.borderRadius),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.accentBlue.withValues(alpha: 0.2),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
+      builder: (context, child) => Transform.scale(
+        scale: _scaleAnimation.value,
+        child: GestureDetector(
+          onTapDown: (_) => _controller.forward(),
+          onTapUp: (_) { _controller.reverse(); if (!widget.isLoading) widget.onPressed(); },
+          onTapCancel: () => _controller.reverse(),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(widget.borderRadius),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.accentBlue.withValues(alpha: 0.2),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(widget.borderRadius),
+              child: Stack(
+                children: [
+                  BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.accentBlue.withValues(alpha: 0.7),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: widget.padding ?? const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                    child: Center(
+                      child: widget.isLoading
+                          ? const CupertinoActivityIndicator(color: Colors.white, radius: 10)
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                if (widget.icon != null) ...[
+                                  Icon(widget.icon, color: Colors.white, size: 20),
+                                  const SizedBox(width: 8),
+                                ],
+                                Text(
+                                  widget.text,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 17,
+                                    letterSpacing: -0.2,
+                                  ),
+                                ),
+                              ],
+                            ),
+                    ),
                   ),
                 ],
               ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(widget.borderRadius),
-                child: Stack(
-                  children: [
-                    // Backdrop blur underlay
-                    BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: AppColors.accentBlue.withValues(alpha: 0.7),
-                        ),
-                      ),
-                    ),
-
-                    // Content
-                    Container(
-                      padding: widget.padding ??
-                          const EdgeInsets.symmetric(
-                            horizontal: 32,
-                            vertical: 16,
-                          ),
-                      child: Center(
-                        child: widget.isLoading
-                            ? const CupertinoActivityIndicator(
-                                color: Colors.white,
-                                radius: 10,
-                              )
-                            : Text(
-                                widget.text,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 17,
-                                  letterSpacing: -0.2,
-                                ),
-                              ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
             ),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }
 
-/// Glass-style text field with backdrop blur
+/// Glass-styled text field
 class GlassTextField extends StatelessWidget {
   final String? hintText;
   final TextEditingController controller;
@@ -313,6 +262,7 @@ class GlassTextField extends StatelessWidget {
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
   final bool hasBlur;
+  final Widget? suffixIcon;
 
   const GlassTextField({
     super.key,
@@ -325,6 +275,7 @@ class GlassTextField extends StatelessWidget {
     this.onChanged,
     this.onSubmitted,
     this.hasBlur = true,
+    this.suffixIcon,
   });
 
   @override
@@ -333,17 +284,13 @@ class GlassTextField extends StatelessWidget {
       borderRadius: BorderRadius.circular(12),
       child: Stack(
         children: [
-          // Backdrop blur
           if (hasBlur)
             BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
               child: Container(
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.5),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.3),
-                    width: 1,
-                  ),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1),
                 ),
               ),
             ),
@@ -351,14 +298,9 @@ class GlassTextField extends StatelessWidget {
             Container(
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.5),
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.3),
-                  width: 1,
-                ),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1),
               ),
             ),
-
-          // Content
           TextField(
             controller: controller,
             obscureText: obscureText,
@@ -366,30 +308,19 @@ class GlassTextField extends StatelessWidget {
             textInputAction: textInputAction,
             onChanged: onChanged,
             onSubmitted: onSubmitted,
-            style: const TextStyle(
-              color: AppColors.primaryText,
-              fontSize: 16,
-            ),
+            style: const TextStyle(color: AppColors.primaryText, fontSize: 16),
             decoration: InputDecoration(
               hintText: hintText,
-              hintStyle: TextStyle(
-                color: AppColors.tertiaryText.withValues(alpha: 0.6),
-              ),
+              hintStyle: TextStyle(color: AppColors.tertiaryText.withValues(alpha: 0.6)),
               border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 14,
-              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               icon: icon != null
                   ? Padding(
                       padding: const EdgeInsets.only(left: 12, right: 8),
-                      child: Icon(
-                        icon,
-                        color: AppColors.secondaryText,
-                        size: 20,
-                      ),
+                      child: Icon(icon, color: AppColors.secondaryText, size: 20),
                     )
                   : null,
+              suffixIcon: suffixIcon,
             ),
           ),
         ],
@@ -398,8 +329,7 @@ class GlassTextField extends StatelessWidget {
   }
 }
 
-/// Light background with subtle gradient
-/// iOS 17+ style neutral light background
+/// Light background - светлый нейтральный фон
 class LightBackground extends StatelessWidget {
   final Widget? child;
 
@@ -413,8 +343,8 @@ class LightBackground extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFFF5F5F7), // Apple light gray
-            Color(0xFFF9F9FB), // Slightly lighter
+            Color(0xFFF5F5F7),
+            Color(0xFFF9F9FB),
           ],
         ),
       ),
@@ -444,23 +374,16 @@ class AnimatedGlassCard extends StatefulWidget {
   State<AnimatedGlassCard> createState() => _AnimatedGlassCardState();
 }
 
-class _AnimatedGlassCardState extends State<AnimatedGlassCard>
-    with SingleTickerProviderStateMixin {
+class _AnimatedGlassCardState extends State<AnimatedGlassCard> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: widget.duration,
-      vsync: this,
-    );
+    _controller = AnimationController(duration: widget.duration, vsync: this);
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeInOut,
-      ),
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
     _controller.forward();
   }
@@ -486,39 +409,34 @@ class _AnimatedGlassCardState extends State<AnimatedGlassCard>
   }
 }
 
-/// Hero glass card for smooth note transitions
-class HeroGlassCard extends StatelessWidget {
-  final String heroTag;
-  final Widget child;
-  final EdgeInsetsGeometry? padding;
-  final double borderRadius;
+/// Label chip
+class LabelChip extends StatelessWidget {
+  final String label;
+  final VoidCallback? onDelete;
 
-  const HeroGlassCard({
-    super.key,
-    required this.heroTag,
-    required this.child,
-    this.padding,
-    this.borderRadius = 20,
-  });
+  const LabelChip({super.key, required this.label, this.onDelete});
 
   @override
   Widget build(BuildContext context) {
-    return Hero(
-      tag: heroTag,
-      flightShuttleBuilder: (flightContext, animation, direction, fromContext, toContext) {
-        return Material(
-          color: Colors.transparent,
-          child: GlassCard(
-            padding: padding,
-            borderRadius: borderRadius,
-            child: child,
-          ),
-        );
-      },
-      child: GlassCard(
-        padding: padding,
-        borderRadius: borderRadius,
-        child: child,
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: AppColors.accentBlue.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.accentBlue.withValues(alpha: 0.2), width: 0.5),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(label, style: const TextStyle(color: AppColors.accentBlue, fontSize: 13, fontWeight: FontWeight.w500)),
+          if (onDelete != null) ...[
+            const SizedBox(width: 4),
+            GestureDetector(
+              onTap: onDelete,
+              child: const Icon(CupertinoIcons.xmark_circle_fill, size: 14, color: AppColors.tertiaryText),
+            ),
+          ],
+        ],
       ),
     );
   }
