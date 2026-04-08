@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:glass_keep/main.dart';
 import 'package:noise/noise.dart';
 
 /// Liquid glass distortion painter using Perlin noise
@@ -90,8 +91,9 @@ class GlassDistortionPainter extends CustomPainter {
   bool shouldRebuildSemantics(GlassDistortionPainter oldDelegate) => false;
 }
 
-/// Animated glass distortion effect widget with lifecycle management
-class GlassDistortionEffect extends StatefulWidget {
+/// Glass distortion effect widget using shared AnimationController
+/// from GlassAnimationProvider for optimal performance
+class GlassDistortionEffect extends StatelessWidget {
   final Widget child;
   final double borderRadius;
   final double distortionStrength;
@@ -106,42 +108,26 @@ class GlassDistortionEffect extends StatefulWidget {
   });
 
   @override
-  State<GlassDistortionEffect> createState() => _GlassDistortionEffectState();
-}
-
-class _GlassDistortionEffectState extends State<GlassDistortionEffect>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(seconds: 8),
-      vsync: this,
-    )..repeat();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final animationProvider = GlassAnimationProvider.of(context);
+    
+    // Fallback to static if provider not available
+    if (animationProvider == null) {
+      return child;
+    }
+
     return AnimatedBuilder(
-      animation: _controller,
+      animation: animationProvider.animation,
       builder: (context, child) => Stack(
         children: [
           // Distortion layer
           ClipRRect(
-            borderRadius: BorderRadius.circular(widget.borderRadius),
+            borderRadius: BorderRadius.circular(borderRadius),
             child: CustomPaint(
               painter: GlassDistortionPainter(
-                time: _controller.value * 8,
-                strength: widget.distortionStrength,
-                scale: widget.distortionScale,
+                time: animationProvider.animation.value * 8,
+                strength: distortionStrength,
+                scale: distortionScale,
               ),
               child: const SizedBox.expand(),
             ),
@@ -150,7 +136,7 @@ class _GlassDistortionEffectState extends State<GlassDistortionEffect>
           child!,
         ],
       ),
-      child: widget.child,
+      child: child,
     );
   }
 }

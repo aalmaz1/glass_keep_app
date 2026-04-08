@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -22,11 +23,19 @@ class _NotesScreenState extends State<NotesScreen> {
   String _search = '';
   final bool _showArchived = false;
   late TextEditingController _searchController;
+  late Stream<List<Note>> _notesStream;
+  
+  // Cache for filtered and sorted notes
+  List<Note>? _filteredNotes;
+  String _lastSearch = '';
+  List<Note>? _lastSourceNotes;
 
   @override
   void initState() {
     super.initState();
     _searchController = TextEditingController();
+    // Initialize stream once to avoid rebuilding
+    _notesStream = widget.storage.getNotesStream();
   }
 
   @override
@@ -36,6 +45,7 @@ class _NotesScreenState extends State<NotesScreen> {
   }
 
   void _logout() async {
+    widget.storage.clearCache();
     await FirebaseAuth.instance.signOut();
   }
 
@@ -47,6 +57,37 @@ class _NotesScreenState extends State<NotesScreen> {
       barrierColor: Colors.black54,
       builder: (context) => NoteEditScreen(note: note, storage: widget.storage),
     );
+  }
+
+  /// Memoized filter and sort for notes
+  List<Note> _getFilteredAndSortedNotes(List<Note> sourceNotes) {
+    // Return cached result if inputs haven't changed
+    if (_filteredNotes != null && 
+        _lastSearch == _search && 
+        _lastSourceNotes != null &&
+        _lastSourceNotes!.length == sourceNotes.length) {
+      return _filteredNotes!;
+    }
+
+    var notes = sourceNotes.where((n) => n.isArchived == _showArchived).toList();
+    if (_search.isNotEmpty) {
+      final q = _search.toLowerCase();
+      notes = notes.where((n) => 
+        n.title.toLowerCase().contains(q) || 
+        n.content.toLowerCase().contains(q)
+      ).toList();
+    }
+    notes.sort((a, b) {
+      if (a.isPinned != b.isPinned) return a.isPinned ? -1 : 1;
+      return b.updatedAt.compareTo(a.updatedAt);
+    });
+
+    // Cache the result
+    _filteredNotes = notes;
+    _lastSearch = _search;
+    _lastSourceNotes = List.unmodifiable(sourceNotes);
+    
+    return notes;
   }
 
   @override
@@ -63,7 +104,6 @@ class _NotesScreenState extends State<NotesScreen> {
           const Positioned.fill(child: VisionBackground()),
           SafeArea(
             child: CustomScrollView(
-              // Physics удален для автоматического выбора платформой (адаптивность)
               slivers: [
                 SliverToBoxAdapter(
                   child: Padding(
@@ -106,7 +146,7 @@ class _NotesScreenState extends State<NotesScreen> {
                   ),
                 ),
                 StreamBuilder<List<Note>>(
-                  stream: widget.storage.getNotesStream(),
+                  stream: _notesStream,
                   builder: (context, snapshot) {
                     if (snapshot.hasError) {
                       return SliverFillRemaining(
@@ -119,15 +159,7 @@ class _NotesScreenState extends State<NotesScreen> {
                       );
                     }
                     
-                    var notes = snapshot.data!.where((n) => n.isArchived == _showArchived).toList();
-                    if (_search.isNotEmpty) {
-                      final q = _search.toLowerCase();
-                      notes = notes.where((n) => n.title.toLowerCase().contains(q) || n.content.toLowerCase().contains(q)).toList();
-                    }
-                    notes.sort((a, b) {
-                      if (a.isPinned != b.isPinned) return a.isPinned ? -1 : 1;
-                      return b.updatedAt.compareTo(a.updatedAt);
-                    });
+                    final notes = _getFilteredAndSortedNotes(snapshot.data!);
 
                     if (notes.isEmpty) {
                       return SliverFillRemaining(
@@ -135,7 +167,7 @@ class _NotesScreenState extends State<NotesScreen> {
                       );
                     }
 
-                    int crossAxisCount = size.width > 900 ? 4 : (size.width > 600 ? 3 : 2);
+                    final crossAxisCount = size.width > 900 ? 4 : (size.width > 600 ? 3 : 2);
 
                     return SliverPadding(
                       padding: EdgeInsets.symmetric(horizontal: paddingH, vertical: 8),
@@ -164,40 +196,69 @@ class _NotesScreenState extends State<NotesScreen> {
             bottom: size.height * 0.04,
             left: 0,
             right: 0,
-            child: Center(
-              child: MouseRegion(
-                cursor: SystemMouseCursors.click,
-                child: GestureDetector(
-                  onTap: () {
-                    final n = Note(id: '', title: '', content: '', updatedAt: DateTime.now());
-                    _openNote(context, n);
-                  },
-                  child: VisionGlassCard(
-                    borderRadius: 30,
-                    padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(CupertinoIcons.add, color: Colors.white, size: 28),
-                        const SizedBox(width: 8),
-                        Text(
-                          l10n.newNote,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                            letterSpacing: -0.5,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
+            child: const Center(
+              child: _NewNoteButton(),
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Extracted widget to reduce rebuilds
+class _NewNoteButton extends StatelessWidget {
+  const _NewNoteButton();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: () {
+          final storage = _getStorageService(context);
+          final n = Note(id: '', title: '', content: '', updatedAt: DateTime.now());
+          _openNoteEditor(context, n, storage);
+        },
+        child: VisionGlassCard(
+          borderRadius: 30,
+          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(CupertinoIcons.add, color: Colors.white, size: 28),
+              const SizedBox(width: 8),
+              Text(
+                l10n.newNote,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                  letterSpacing: -0.5,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+  
+  StorageService _getStorageService(BuildContext context) {
+    // Access storage through NotesScreen's storage
+    final state = context.findAncestorStateOfType<_NotesScreenState>();
+    return state!.widget.storage;
+  }
+  
+  void _openNoteEditor(BuildContext context, Note note, StorageService storage) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black54,
+      builder: (context) => NoteEditScreen(note: note, storage: storage),
     );
   }
 }
@@ -213,8 +274,41 @@ class NoteCard extends StatefulWidget {
 }
 
 class _NoteCardState extends State<NoteCard> with AutomaticKeepAliveClientMixin {
+  Uint8List? _decodedImage;
+  late Note _lastNote;
+
   @override
   bool get wantKeepAlive => true;
+
+  @override
+  void initState() {
+    super.initState();
+    _lastNote = widget.note;
+    _decodeImageIfNeeded();
+  }
+
+  @override
+  void didUpdateWidget(NoteCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Only re-decode if image data changed
+    if (oldWidget.note.imageBase64 != widget.note.imageBase64 ||
+        oldWidget.note.id != widget.note.id) {
+      _lastNote = widget.note;
+      _decodeImageIfNeeded();
+    }
+  }
+
+  void _decodeImageIfNeeded() {
+    if (widget.note.imageBase64 != null && widget.note.imageBase64!.isNotEmpty) {
+      try {
+        _decodedImage = base64Decode(widget.note.imageBase64!);
+      } catch (e) {
+        _decodedImage = null;
+      }
+    } else {
+      _decodedImage = null;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -222,38 +316,41 @@ class _NoteCardState extends State<NoteCard> with AutomaticKeepAliveClientMixin 
     final note = widget.note;
     final heroTag = note.id.isEmpty ? null : 'note-${note.id}';
     
-    Widget content = VisionGlassCard(
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (note.imageBase64 != null) Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.memory(base64Decode(note.imageBase64!), fit: BoxFit.cover),
+    // Wrap in RepaintBoundary to isolate painting
+    Widget content = RepaintBoundary(
+      child: VisionGlassCard(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (_decodedImage != null) Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.memory(_decodedImage!, fit: BoxFit.cover),
+              ),
             ),
-          ),
-          Row(
-            children: [
-              if (note.isPinned) const Icon(CupertinoIcons.pin_fill, size: 14, color: CupertinoColors.activeBlue),
-              if (note.isPinned) const SizedBox(width: 6),
-              Expanded(child: Text(note.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white, letterSpacing: -0.2))),
+            Row(
+              children: [
+                if (note.isPinned) const Icon(CupertinoIcons.pin_fill, size: 14, color: CupertinoColors.activeBlue),
+                if (note.isPinned) const SizedBox(width: 6),
+                Expanded(child: Text(note.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white, letterSpacing: -0.2))),
+              ],
+            ),
+            if (note.content.isNotEmpty) Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(note.content, maxLines: 6, overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 14, height: 1.3)),
+            ),
+            if (note.labels.isNotEmpty) ...[
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: note.labels.map((l) => LabelChip(label: l)).toList(),
+              ),
             ],
-          ),
-          if (note.content.isNotEmpty) Padding(
-            padding: const EdgeInsets.only(top: 6),
-            child: Text(note.content, maxLines: 6, overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 14, height: 1.3)),
-          ),
-          if (note.labels.isNotEmpty) ...[
-            const SizedBox(height: 10),
-            Wrap(
-              spacing: 6,
-              runSpacing: 6,
-              children: note.labels.map((l) => LabelChip(label: l)).toList().cast<Widget>(),
-            ),
           ],
-        ],
+        ),
       ),
     );
 
@@ -264,46 +361,6 @@ class _NoteCardState extends State<NoteCard> with AutomaticKeepAliveClientMixin 
     return GestureDetector(
       onTap: widget.onTap,
       child: content,
-    );
-  }
-}
-
-class VisionBackground extends StatelessWidget {
-  const VisionBackground({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Positioned(
-          top: -100,
-          right: -50,
-          child: _BlurCircle(color: CupertinoColors.activeBlue.withValues(alpha: 0.2), size: 400),
-        ),
-        Positioned(
-          bottom: -150,
-          left: -100,
-          child: _BlurCircle(color: CupertinoColors.systemPurple.withValues(alpha: 0.15), size: 500),
-        ),
-      ],
-    );
-  }
-}
-
-class _BlurCircle extends StatelessWidget {
-  final Color color;
-  final double size;
-  const _BlurCircle({required this.color, required this.size});
-
-  @override
-  Widget build(BuildContext context) {
-    return RepaintBoundary(
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(shape: BoxShape.circle, color: color),
-        child: BackdropFilter(filter: ImageFilter.blur(sigmaX: 80, sigmaY: 80), child: Container()),
-      ),
     );
   }
 }
@@ -322,6 +379,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
   String? _img;
   DateTime? _rem;
   final _picker = ImagePicker();
+  Uint8List? _decodedImage;
 
   @override
   void initState() {
@@ -331,6 +389,27 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
     _l = TextEditingController(text: widget.note.labels.join(', '));
     _img = widget.note.imageBase64;
     _rem = widget.note.reminder;
+    _decodeImageIfNeeded();
+  }
+
+  @override
+  void dispose() {
+    _t.dispose();
+    _c.dispose();
+    _l.dispose();
+    super.dispose();
+  }
+
+  void _decodeImageIfNeeded() {
+    if (_img != null && _img!.isNotEmpty) {
+      try {
+        _decodedImage = base64Decode(_img!);
+      } catch (e) {
+        _decodedImage = null;
+      }
+    } else {
+      _decodedImage = null;
+    }
   }
 
   void _save() {
@@ -471,10 +550,13 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
       child: Column(
         children: [
-          if (_img != null) Stack(
+          if (_decodedImage != null) Stack(
             children: [
-              ClipRRect(borderRadius: BorderRadius.circular(20), child: Image.memory(base64Decode(_img!))),
-              Positioned(right: 8, top: 8, child: CupertinoButton(padding: EdgeInsets.zero, child: const Icon(CupertinoIcons.xmark_circle_fill, color: Colors.white70), onPressed: () => setState(() => _img = null))),
+              ClipRRect(borderRadius: BorderRadius.circular(20), child: Image.memory(_decodedImage!)),
+              Positioned(right: 8, top: 8, child: CupertinoButton(padding: EdgeInsets.zero, child: const Icon(CupertinoIcons.xmark_circle_fill, color: Colors.white70), onPressed: () => setState(() {
+                _img = null;
+                _decodedImage = null;
+              }))),
             ],
           ),
           TextField(
@@ -502,7 +584,10 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                       final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
                       if (image != null) {
                         final bytes = await image.readAsBytes();
-                        setState(() => _img = base64Encode(bytes));
+                        setState(() {
+                          _img = base64Encode(bytes);
+                          _decodedImage = bytes;
+                        });
                       }
                     },
                   ),
