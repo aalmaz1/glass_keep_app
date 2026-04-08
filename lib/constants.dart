@@ -1,18 +1,35 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-/// Core color constants for the app
+/// Core color constants for the app - Apple Glassmorphism Light Theme
 class AppColors {
-  static const Color background = Color(0xFF0A0A14);
-  static const Color surface = Color(0xFF1E1E2E);
+  // Light background colors (Apple style)
+  static const Color background = Color(0xFFF5F5F7);
+  static const Color surface = Color(0xFFFFFFFF);
+  static const Color secondaryBackground = Color(0xFFE8E8ED);
   
-  // Glass morphism
-  static const Color glassLight = Color.fromARGB(64, 255, 255, 255);
-  static const Color glassDark = Color.fromARGB(26, 0, 0, 0);
+  // Text colors
+  static const Color primaryText = Color(0xFF1D1D1F);
+  static const Color secondaryText = Color(0xFF6E6E73);
+  static const Color tertiaryText = Color(0xFF86868B);
+  
+  // Glass morphism - Light theme
+  static const Color glassLight = Color.fromARGB(48, 255, 255, 255);
+  static const Color glassDark = Color.fromARGB(20, 0, 0, 0);
+  static const Color glassBorder = Color.fromARGB(25, 0, 0, 0);
   
   // Utilities
   static const Color white24 = Color.fromARGB(61, 255, 255, 255);
   static const Color white12 = Color.fromARGB(31, 255, 255, 255);
+  static const Color black12 = Color.fromARGB(31, 0, 0, 0);
+  static const Color black24 = Color.fromARGB(61, 0, 0, 0);
+  
+  // Accent colors
+  static const Color accentBlue = Color(0xFF007AFF);
+  static const Color accentRed = Color(0xFFFF3B30);
+  static const Color accentGreen = Color(0xFF34C759);
+  static const Color accentOrange = Color(0xFFFF9500);
+  static const Color accentPurple = Color(0xFFAF52DE);
 }
 
 /// Responsive dimensions helper
