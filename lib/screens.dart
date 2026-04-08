@@ -11,6 +11,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:glass_keep/l10n/app_localizations.dart';
 import 'package:glass_keep/data.dart';
 import 'package:glass_keep/widgets.dart';
+import 'package:glass_keep/styles.dart';
 import 'package:glass_keep/constants.dart';
 
 class NotesScreen extends StatefulWidget {
@@ -138,7 +139,7 @@ class _NotesScreenState extends State<NotesScreen>
       extendBodyBehindAppBar: true,
       body: Stack(
         children: [
-          const Positioned.fill(child: VisionBackground()),
+          const Positioned.fill(child: LightBackground()),
           SafeArea(
             child: CustomScrollView(
               slivers: [
@@ -514,8 +515,11 @@ class _NoteCardState extends State<NoteCard>
           child: child,
         );
       },
-      child: VisionGlassCard(
+      child: GlassCard(
         padding: const EdgeInsets.all(14),
+        borderRadius: 20,
+        onTap: widget.onTap,
+        isInteractive: true,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -723,11 +727,11 @@ class _NoteEditScreenState extends State<NoteEditScreen>
         child: Container(
           height: size.height * 0.85,
           decoration: BoxDecoration(
-            color: AppColors.background.withValues(alpha: 0.95),
+            color: Colors.white.withValues(alpha: 0.7),
             borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
+                color: Colors.black.withValues(alpha: 0.08),
                 blurRadius: 40,
                 offset: const Offset(0, -10),
               ),
@@ -736,7 +740,7 @@ class _NoteEditScreenState extends State<NoteEditScreen>
           child: ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
             child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 50, sigmaY: 50),
+              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
               child: Stack(
                 children: [
                   // Top gradient line
@@ -750,7 +754,7 @@ class _NoteEditScreenState extends State<NoteEditScreen>
                         gradient: LinearGradient(
                           colors: [
                             Colors.transparent,
-                            Colors.white.withValues(alpha: 0.8),
+                            Colors.white.withValues(alpha: 0.5),
                             Colors.transparent,
                           ],
                         ),
@@ -837,18 +841,11 @@ class _NoteEditScreenState extends State<NoteEditScreen>
                             },
                             child: Container(
                               decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                  colors: [
-                                    AppColors.accentBlue,
-                                    AppColors.accentBlue.withValues(alpha: 0.9),
-                                  ],
-                                ),
+                                color: AppColors.accentBlue.withValues(alpha: 0.7),
                                 borderRadius: BorderRadius.circular(30),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: AppColors.accentBlue.withValues(alpha: 0.3),
+                                    color: AppColors.accentBlue.withValues(alpha: 0.2),
                                     blurRadius: 16,
                                     offset: const Offset(0, 8),
                                   ),
@@ -857,7 +854,7 @@ class _NoteEditScreenState extends State<NoteEditScreen>
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(30),
                                 child: BackdropFilter(
-                                  filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                                   child: Padding(
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 24,
@@ -971,7 +968,7 @@ class _NoteEditScreenState extends State<NoteEditScreen>
             ),
           ),
           const SizedBox(height: 24),
-          VisionGlassCard(
+          GlassCard(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             child: IntrinsicHeight(
               child: Row(
@@ -1189,7 +1186,7 @@ class _TrashScreenState extends State<TrashScreen> {
       extendBodyBehindAppBar: true,
       body: Stack(
         children: [
-          const Positioned.fill(child: VisionBackground()),
+          const Positioned.fill(child: LightBackground()),
           SafeArea(
             child: CustomScrollView(
               slivers: [
@@ -1387,7 +1384,7 @@ class _TrashNoteCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return VisionGlassCard(
+    return GlassCard(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
