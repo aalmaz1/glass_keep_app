@@ -10,17 +10,21 @@ import 'package:flutter/foundation.dart';
 import 'package:glass_keep/data.dart';
 import 'package:glass_keep/screens.dart';
 import 'package:glass_keep/auth_screen.dart';
+import 'package:glass_keep/constants.dart';
 import 'firebase_options.dart';
 
 void main() async {
   runZonedGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
-    
+
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
 
-    if (!kIsWeb && (defaultTargetPlatform == TargetPlatform.windows || defaultTargetPlatform == TargetPlatform.linux || defaultTargetPlatform == TargetPlatform.macOS)) {
+    if (!kIsWeb &&
+        (defaultTargetPlatform == TargetPlatform.windows ||
+            defaultTargetPlatform == TargetPlatform.linux ||
+            defaultTargetPlatform == TargetPlatform.macOS)) {
       await windowManager.ensureInitialized();
       WindowOptions windowOptions = const WindowOptions(
         size: Size(1200, 800),
@@ -86,10 +90,10 @@ class _GlassKeepAppState extends State<GlassKeepApp>
     // Initialize streams and futures once to avoid rebuilding
     _authStream = FirebaseAuth.instance.authStateChanges();
     _storageFuture = StorageService.init();
-    
+
     // Single AnimationController for all glass distortion effects
     _glassAnimationController = AnimationController(
-      duration: const Duration(seconds: 8),
+      duration: const Duration(seconds: 10),
       vsync: this,
     )..repeat();
   }
@@ -109,13 +113,37 @@ class _GlassKeepAppState extends State<GlassKeepApp>
         title: 'Glass Keep',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
-          brightness: Brightness.dark,
+          brightness: Brightness.light,
           useMaterial3: true,
-          scaffoldBackgroundColor: const Color(0xFF0A0A14),
-          colorSchemeSeed: CupertinoColors.activeBlue,
+          scaffoldBackgroundColor: AppColors.background,
+          colorSchemeSeed: AppColors.accentBlue,
+          fontFamily: '.SF Pro Display',
           cupertinoOverrideTheme: const CupertinoThemeData(
-            brightness: Brightness.dark,
-            primaryColor: CupertinoColors.activeBlue,
+            brightness: Brightness.light,
+            primaryColor: AppColors.accentBlue,
+          ),
+          appBarTheme: const AppBarTheme(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            centerTitle: true,
+            titleTextStyle: TextStyle(
+              color: AppColors.primaryText,
+              fontSize: 17,
+              fontWeight: FontWeight.w600,
+              letterSpacing: -0.4,
+            ),
+          ),
+          inputDecorationTheme: InputDecorationTheme(
+            filled: true,
+            fillColor: Colors.transparent,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 14,
+            ),
           ),
         ),
         localizationsDelegates: const [
@@ -132,26 +160,78 @@ class _GlassKeepAppState extends State<GlassKeepApp>
           stream: _authStream,
           builder: (context, snapshot) {
             if (snapshot.hasError) {
-              return Scaffold(body: Center(child: Text('Auth Error: ${snapshot.error}')));
-            }
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Scaffold(
-                body: Center(child: CupertinoActivityIndicator(color: CupertinoColors.activeBlue, radius: 15)),
+              return Scaffold(
+                body: Center(
+                  child: Text('Auth Error: ${snapshot.error}'),
+                ),
               );
             }
-            
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Scaffold(
+                backgroundColor: AppColors.background,
+                body: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 60,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              AppColors.accentBlue.withValues(alpha: 0.8),
+                              AppColors.accentPurple.withValues(alpha: 0.8),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.accentBlue.withValues(alpha: 0.3),
+                              blurRadius: 20,
+                              offset: const Offset(0, 10),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          CupertinoIcons.doc_text,
+                          size: 30,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      const CupertinoActivityIndicator(
+                        color: AppColors.accentBlue,
+                        radius: 14,
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+
             if (snapshot.hasData) {
               return FutureBuilder<StorageService>(
                 future: _storageFuture,
                 builder: (context, storeSnapshot) {
                   if (storeSnapshot.hasError) {
-                    return Scaffold(body: Center(child: Text('Storage Error: ${storeSnapshot.error}')));
+                    return Scaffold(
+                      body: Center(
+                        child: Text('Storage Error: ${storeSnapshot.error}'),
+                      ),
+                    );
                   }
                   if (storeSnapshot.hasData) {
                     return NotesScreen(storage: storeSnapshot.data!);
                   }
                   return const Scaffold(
-                    body: Center(child: CupertinoActivityIndicator(color: CupertinoColors.activeBlue)),
+                    backgroundColor: AppColors.background,
+                    body: Center(
+                      child: CupertinoActivityIndicator(
+                        color: AppColors.accentBlue,
+                      ),
+                    ),
                   );
                 },
               );
