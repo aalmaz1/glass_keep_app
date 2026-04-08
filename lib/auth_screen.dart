@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:glass_keep/widgets.dart';
+import 'package:glass_keep/styles.dart';
 import 'package:glass_keep/constants.dart';
 import 'package:glass_keep/l10n/app_localizations.dart';
 
@@ -114,7 +115,7 @@ class _AuthScreenState extends State<AuthScreen>
       backgroundColor: AppColors.background,
       body: Stack(
         children: [
-          const Positioned.fill(child: VisionBackground()),
+          const Positioned.fill(child: LightBackground()),
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
@@ -136,13 +137,13 @@ class _AuthScreenState extends State<AuthScreen>
                               end: Alignment.bottomRight,
                               colors: [
                                 AppColors.accentBlue.withValues(alpha: 0.8),
-                                AppColors.accentPurple.withValues(alpha: 0.8),
+                                AppColors.accentBlue.withValues(alpha: 0.6),
                               ],
                             ),
                             borderRadius: BorderRadius.circular(28),
                             boxShadow: [
                               BoxShadow(
-                                color: AppColors.accentBlue.withValues(alpha: 0.3),
+                                color: AppColors.accentBlue.withValues(alpha: 0.2),
                                 blurRadius: 20,
                                 offset: const Offset(0, 10),
                               ),
@@ -185,60 +186,27 @@ class _AuthScreenState extends State<AuthScreen>
                         const SizedBox(height: 48),
 
                         // Glass Input Card
-                        VisionGlassCard(
+                        GlassCard(
                           padding: const EdgeInsets.all(20),
                           child: Column(
                             children: [
                               // Email Field
-                              TextField(
+                              GlassTextField(
                                 controller: _emailController,
                                 keyboardType: TextInputType.emailAddress,
                                 textInputAction: TextInputAction.next,
-                                style: const TextStyle(
-                                  color: AppColors.primaryText,
-                                  fontSize: 16,
-                                ),
-                                decoration: InputDecoration(
-                                  hintText: l10n.email,
-                                  hintStyle: TextStyle(
-                                    color: AppColors.tertiaryText.withValues(alpha: 0.6),
-                                  ),
-                                  border: InputBorder.none,
-                                  icon: const Icon(
-                                    CupertinoIcons.mail,
-                                    color: AppColors.secondaryText,
-                                    size: 22,
-                                  ),
-                                ),
+                                hintText: l10n.email,
+                                icon: CupertinoIcons.mail,
                               ),
-                              const SizedBox(height: 8),
-                              Divider(
-                                color: AppColors.secondaryBackground,
-                                height: 1,
-                              ),
-                              const SizedBox(height: 8),
+                              const SizedBox(height: 12),
                               // Password Field
-                              TextField(
+                              GlassTextField(
                                 controller: _passwordController,
                                 obscureText: true,
                                 textInputAction: TextInputAction.done,
                                 onSubmitted: (_) => _submit(),
-                                style: const TextStyle(
-                                  color: AppColors.primaryText,
-                                  fontSize: 16,
-                                ),
-                                decoration: InputDecoration(
-                                  hintText: l10n.password,
-                                  hintStyle: TextStyle(
-                                    color: AppColors.tertiaryText.withValues(alpha: 0.6),
-                                  ),
-                                  border: InputBorder.none,
-                                  icon: const Icon(
-                                    CupertinoIcons.lock,
-                                    color: AppColors.secondaryText,
-                                    size: 22,
-                                  ),
-                                ),
+                                hintText: l10n.password,
+                                icon: CupertinoIcons.lock,
                               ),
                             ],
                           ),
@@ -252,7 +220,10 @@ class _AuthScreenState extends State<AuthScreen>
                                 color: AppColors.accentBlue,
                                 radius: 16,
                               )
-                            : _buildAuthButton(l10n),
+                            : GlassButton(
+                                text: _isLogin ? l10n.login : l10n.signUp,
+                                onPressed: _submit,
+                              ),
 
                         const SizedBox(height: 24),
 
@@ -284,46 +255,6 @@ class _AuthScreenState extends State<AuthScreen>
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildAuthButton(AppLocalizations l10n) {
-    return GestureDetector(
-      onTap: _submit,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        width: double.infinity,
-        height: 56,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppColors.accentBlue,
-              AppColors.accentBlue.withValues(alpha: 0.9),
-            ],
-          ),
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.accentBlue.withValues(alpha: 0.3),
-              blurRadius: 12,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Center(
-          child: Text(
-            _isLogin ? l10n.login : l10n.signUp,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 17,
-              fontWeight: FontWeight.w600,
-              letterSpacing: -0.2,
-            ),
-          ),
-        ),
       ),
     );
   }
