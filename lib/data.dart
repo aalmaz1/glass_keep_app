@@ -13,7 +13,7 @@ class Note {
   DateTime updatedAt;
   String? userId;
 
-  Note({
+  const Note({
     required this.id,
     required this.title,
     required this.content,
@@ -56,19 +56,52 @@ class Note {
 class StorageService {
   final _db = FirebaseFirestore.instance;
   final _auth = FirebaseAuth.instance;
+  
+  // Cached stream for notes to avoid multiple subscriptions
+  Stream<List<Note>>? _notesStream;
+  // Cache for the latest notes data
+  List<Note>? _notesCache;
+  // Track if persistence is enabled
+  static bool _initialized = false;
 
   static Future<StorageService> init() async {
-    FirebaseFirestore.instance.settings = const Settings(persistenceEnabled: true);
+    if (!_initialized) {
+      FirebaseFirestore.instance.settings = const Settings(persistenceEnabled: true);
+      _initialized = true;
+    }
     return StorageService();
   }
 
   String get _uid => _auth.currentUser?.uid ?? 'anonymous';
 
   Stream<List<Note>> getNotesStream() {
-    return _db.collection('notes')
+    // Return cached broadcast stream if available
+    if (_notesStream != null) {
+      return _notesStream!;
+    }
+    
+    // Create a new stream and cache it as broadcast
+    final stream = _db.collection('notes')
         .where('userId', isEqualTo: _uid)
         .snapshots()
-        .map((s) => s.docs.map((d) => Note.fromMap(d.data())).toList());
+        .map((s) {
+          final notes = s.docs.map((d) => Note.fromMap(d.data())).toList();
+          _notesCache = notes;
+          return notes;
+        });
+    
+    // Convert to broadcast stream to allow multiple listeners
+    _notesStream = stream.asBroadcastStream();
+    return _notesStream!;
+  }
+  
+  /// Get cached notes if available
+  List<Note>? get cachedNotes => _notesCache;
+  
+  /// Clear the cache - useful for logout scenarios
+  void clearCache() {
+    _notesStream = null;
+    _notesCache = null;
   }
 
   Future<void> save(Note note) async {

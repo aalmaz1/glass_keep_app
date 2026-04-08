@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:glass_keep/glass_effect.dart';
 import 'package:glass_keep/l10n/app_localizations.dart';
 
-class VisionGlassCard extends StatefulWidget {
+class VisionGlassCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry? padding;
   final double borderRadius;
@@ -19,16 +19,11 @@ class VisionGlassCard extends StatefulWidget {
   });
 
   @override
-  State<VisionGlassCard> createState() => _VisionGlassCardState();
-}
-
-class _VisionGlassCardState extends State<VisionGlassCard> {
-  @override
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(widget.borderRadius),
+        borderRadius: BorderRadius.circular(borderRadius),
         boxShadow: const [
           BoxShadow(
             color: Color.fromARGB(51, 0, 0, 0),
@@ -43,12 +38,12 @@ class _VisionGlassCardState extends State<VisionGlassCard> {
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(widget.borderRadius),
+        borderRadius: BorderRadius.circular(borderRadius),
         child: Stack(
           children: [
             // Backdrop blur effect
             BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: widget.blur, sigmaY: widget.blur),
+              filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
               child: const SizedBox.expand(),
             ),
 
@@ -59,21 +54,24 @@ class _VisionGlassCardState extends State<VisionGlassCard> {
               ),
             ),
 
-            // Glass distortion effect layer
-            GlassDistortionEffect(
-              borderRadius: widget.borderRadius,
-              distortionStrength: 3.0,
-              distortionScale: 0.02,
-              child: const SizedBox.expand(),
+            // Glass distortion effect layer wrapped in RepaintBoundary
+            // to isolate animations from the rest of the widget tree
+            RepaintBoundary(
+              child: GlassDistortionEffect(
+                borderRadius: borderRadius,
+                distortionStrength: 3.0,
+                distortionScale: 0.02,
+                child: const SizedBox.expand(),
+              ),
             ),
 
             // Inset shine effect
-            _ShineLayer(borderRadius: widget.borderRadius),
+            _ShineLayer(borderRadius: borderRadius),
 
             // Content
             Padding(
-              padding: widget.padding ?? const EdgeInsets.all(16),
-              child: widget.child,
+              padding: padding ?? const EdgeInsets.all(16),
+              child: child,
             ),
           ],
         ),
@@ -146,6 +144,7 @@ class GlassSearchBar extends StatelessWidget {
 class LabelChip extends StatelessWidget {
   final String label;
   const LabelChip({super.key, required this.label});
+  
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -162,6 +161,7 @@ class LabelChip extends StatelessWidget {
 
 class VisionBackground extends StatelessWidget {
   const VisionBackground({super.key});
+  
   @override
   Widget build(BuildContext context) {
     return Container(

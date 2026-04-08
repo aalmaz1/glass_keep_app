@@ -47,64 +47,118 @@ void main() async {
   });
 }
 
-class GlassKeepApp extends StatelessWidget {
+/// Global provider for sharing a single AnimationController across all glass effects
+class GlassAnimationProvider extends InheritedWidget {
+  final AnimationController animationController;
+  final Animation<double> animation;
+
+  const GlassAnimationProvider({
+    super.key,
+    required this.animationController,
+    required this.animation,
+    required super.child,
+  });
+
+  static GlassAnimationProvider? of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<GlassAnimationProvider>();
+  }
+
+  @override
+  bool updateShouldNotify(GlassAnimationProvider oldWidget) => false;
+}
+
+class GlassKeepApp extends StatefulWidget {
   const GlassKeepApp({super.key});
 
   @override
+  State<GlassKeepApp> createState() => _GlassKeepAppState();
+}
+
+class _GlassKeepAppState extends State<GlassKeepApp>
+    with TickerProviderStateMixin {
+  late Stream<User?> _authStream;
+  late Future<StorageService> _storageFuture;
+  late AnimationController _glassAnimationController;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize streams and futures once to avoid rebuilding
+    _authStream = FirebaseAuth.instance.authStateChanges();
+    _storageFuture = StorageService.init();
+    
+    // Single AnimationController for all glass distortion effects
+    _glassAnimationController = AnimationController(
+      duration: const Duration(seconds: 8),
+      vsync: this,
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _glassAnimationController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Glass Keep',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        brightness: Brightness.dark,
-        useMaterial3: true,
-        scaffoldBackgroundColor: const Color(0xFF0A0A14),
-        colorSchemeSeed: CupertinoColors.activeBlue,
-        cupertinoOverrideTheme: const CupertinoThemeData(
+    return GlassAnimationProvider(
+      animationController: _glassAnimationController,
+      animation: _glassAnimationController,
+      child: MaterialApp(
+        title: 'Glass Keep',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
           brightness: Brightness.dark,
-          primaryColor: CupertinoColors.activeBlue,
+          useMaterial3: true,
+          scaffoldBackgroundColor: const Color(0xFF0A0A14),
+          colorSchemeSeed: CupertinoColors.activeBlue,
+          cupertinoOverrideTheme: const CupertinoThemeData(
+            brightness: Brightness.dark,
+            primaryColor: CupertinoColors.activeBlue,
+          ),
         ),
-      ),
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: const [
-        Locale('en'),
-        Locale('ru'),
-      ],
-      home: StreamBuilder<User?>(
-        stream: FirebaseAuth.instance.authStateChanges(),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Scaffold(body: Center(child: Text('Auth Error: ${snapshot.error}')));
-          }
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Scaffold(
-              body: Center(child: CupertinoActivityIndicator(color: CupertinoColors.activeBlue, radius: 15)),
-            );
-          }
-          
-          if (snapshot.hasData) {
-            return FutureBuilder<StorageService>(
-              future: StorageService.init(),
-              builder: (context, storeSnapshot) {
-                if (storeSnapshot.hasError) {
-                  return Scaffold(body: Center(child: Text('Storage Error: ${storeSnapshot.error}')));
-                }
-                if (storeSnapshot.hasData) {
-                  return NotesScreen(storage: storeSnapshot.data!);
-                }
-                return const Scaffold(
-                  body: Center(child: CupertinoActivityIndicator(color: CupertinoColors.activeBlue)),
-                );
-              },
-            );
-          }
-          return const AuthScreen();
-        },
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [
+          Locale('en'),
+          Locale('ru'),
+        ],
+        home: StreamBuilder<User?>(
+          stream: _authStream,
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return Scaffold(body: Center(child: Text('Auth Error: ${snapshot.error}')));
+            }
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Scaffold(
+                body: Center(child: CupertinoActivityIndicator(color: CupertinoColors.activeBlue, radius: 15)),
+              );
+            }
+            
+            if (snapshot.hasData) {
+              return FutureBuilder<StorageService>(
+                future: _storageFuture,
+                builder: (context, storeSnapshot) {
+                  if (storeSnapshot.hasError) {
+                    return Scaffold(body: Center(child: Text('Storage Error: ${storeSnapshot.error}')));
+                  }
+                  if (storeSnapshot.hasData) {
+                    return NotesScreen(storage: storeSnapshot.data!);
+                  }
+                  return const Scaffold(
+                    body: Center(child: CupertinoActivityIndicator(color: CupertinoColors.activeBlue)),
+                  );
+                },
+              );
+            }
+            return const AuthScreen();
+          },
+        ),
       ),
     );
   }
