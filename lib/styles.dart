@@ -11,6 +11,7 @@ class GlassCard extends StatelessWidget {
   final double borderRadius;
   final VoidCallback? onTap;
   final bool isInteractive;
+  final bool hasBlur;
 
   const GlassCard({
     super.key,
@@ -19,6 +20,7 @@ class GlassCard extends StatelessWidget {
     this.borderRadius = 20,
     this.onTap,
     this.isInteractive = false,
+    this.hasBlur = true,
   });
 
   @override
@@ -28,10 +30,11 @@ class GlassCard extends StatelessWidget {
       child: Stack(
         children: [
           // Backdrop blur effect
-          BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-            child: const SizedBox.expand(),
-          ),
+          if (hasBlur)
+            BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+              child: const SizedBox.expand(),
+            ),
 
           // Glass tint layer - semi-transparent white
           Container(
@@ -309,6 +312,7 @@ class GlassTextField extends StatelessWidget {
   final TextInputAction? textInputAction;
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
+  final bool hasBlur;
 
   const GlassTextField({
     super.key,
@@ -320,6 +324,7 @@ class GlassTextField extends StatelessWidget {
     this.textInputAction,
     this.onChanged,
     this.onSubmitted,
+    this.hasBlur = true,
   });
 
   @override
@@ -329,9 +334,21 @@ class GlassTextField extends StatelessWidget {
       child: Stack(
         children: [
           // Backdrop blur
-          BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-            child: Container(
+          if (hasBlur)
+            BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.5),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.3),
+                    width: 1,
+                  ),
+                ),
+              ),
+            ),
+          if (!hasBlur)
+            Container(
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.5),
                 border: Border.all(
@@ -340,7 +357,6 @@ class GlassTextField extends StatelessWidget {
                 ),
               ),
             ),
-          ),
 
           // Content
           TextField(

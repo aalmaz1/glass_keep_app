@@ -116,6 +116,13 @@ class _AuthScreenState extends State<AuthScreen>
       body: Stack(
         children: [
           const Positioned.fill(child: LightBackground()),
+          // Single BackdropFilter for the whole background
+          Positioned.fill(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+              child: Container(color: Colors.transparent),
+            ),
+          ),
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
@@ -185,9 +192,10 @@ class _AuthScreenState extends State<AuthScreen>
                         ),
                         const SizedBox(height: 48),
 
-                        // Glass Input Card
+                        // Glass Input Card (blur disabled, using background blur)
                         GlassCard(
                           padding: const EdgeInsets.all(20),
+                          hasBlur: false,
                           child: Column(
                             children: [
                               // Email Field
@@ -197,6 +205,7 @@ class _AuthScreenState extends State<AuthScreen>
                                 textInputAction: TextInputAction.next,
                                 hintText: l10n.email,
                                 icon: CupertinoIcons.mail,
+                                hasBlur: false,
                               ),
                               const SizedBox(height: 12),
                               // Password Field
@@ -207,6 +216,7 @@ class _AuthScreenState extends State<AuthScreen>
                                 onSubmitted: (_) => _submit(),
                                 hintText: l10n.password,
                                 icon: CupertinoIcons.lock,
+                                hasBlur: false,
                               ),
                             ],
                           ),

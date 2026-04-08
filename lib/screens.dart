@@ -432,11 +432,13 @@ class NoteCard extends StatefulWidget {
 }
 
 class _NoteCardState extends State<NoteCard>
-    with AutomaticKeepAliveClientMixin, SingleTickerProviderStateMixin {
+    with AutomaticKeepAliveClientMixin, TickerProviderStateMixin {
   Uint8List? _decodedImage;
   late Note _lastNote;
   late AnimationController _pressController;
   late Animation<double> _scaleAnimation;
+  late AnimationController _fadeController;
+  late Animation<double> _fadeAnimation;
 
   @override
   bool get wantKeepAlive => true;
@@ -457,6 +459,16 @@ class _NoteCardState extends State<NoteCard>
         reverseCurve: Curves.spring,
       ),
     );
+
+    _fadeController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _fadeAnimation = CurvedAnimation(
+      parent: _fadeController,
+      curve: Curves.easeInOut,
+    );
+    _fadeController.forward();
   }
 
   @override
@@ -472,6 +484,7 @@ class _NoteCardState extends State<NoteCard>
   @override
   void dispose() {
     _pressController.dispose();
+    _fadeController.dispose();
     super.dispose();
   }
 
@@ -507,15 +520,17 @@ class _NoteCardState extends State<NoteCard>
     final note = widget.note;
     final heroTag = note.id.isEmpty ? null : 'note-${note.id}';
 
-    Widget content = AnimatedBuilder(
-      animation: _scaleAnimation,
-      builder: (context, child) {
-        return Transform.scale(
-          scale: _scaleAnimation.value,
-          child: child,
-        );
-      },
-      child: GlassCard(
+    Widget content = FadeTransition(
+      opacity: _fadeAnimation,
+      child: AnimatedBuilder(
+        animation: _scaleAnimation,
+        builder: (context, child) {
+          return Transform.scale(
+            scale: _scaleAnimation.value,
+            child: child,
+          );
+        },
+        child: GlassCard(
         padding: const EdgeInsets.all(14),
         borderRadius: 20,
         onTap: widget.onTap,
