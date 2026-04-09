@@ -1,6 +1,8 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:glass_keep/widgets.dart';
+import 'package:glass_keep/styles.dart';
 import 'package:glass_keep/constants.dart' show AppColors, AppUtils;
 
 class AuthScreen extends StatefulWidget {
@@ -103,183 +105,249 @@ class _AuthScreenState extends State<AuthScreen> {
     
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: Center(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.all(
-            size.width > 600 ? 48 : 24,
-          ),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 400),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Logo
-                Icon(
-                  Icons.blur_on,
-                  size: 80,
-                  color: Colors.blueAccent.shade100,
+      body: Stack(
+        children: [
+          // Light gradient background
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    AppColors.background,
+                    const Color(0xFFF9F9FB),
+                  ],
                 ),
-                const SizedBox(height: 24),
-                
-                // Title
-                const Text(
-                  'Glass Keep',
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    letterSpacing: 1.5,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Secure Cloud Notes',
-                  style: TextStyle(
-                    color: Colors.white54,
-                    fontSize: 14,
-                  ),
-                ),
-                const SizedBox(height: 48),
-                
-                // Form
-                Form(
-                  key: _formKey,
-                  child: VisionGlassCard(
-                    child: Column(
-                      children: [
-                        // Email input
-                        TextFormField(
-                          controller: _emailController,
-                          style: const TextStyle(color: Colors.white),
-                          keyboardType: TextInputType.emailAddress,
-                          enabled: !_isLoading,
-                          decoration: InputDecoration(
-                            hintText: 'Email',
-                            hintStyle: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.3),
-                            ),
-                            border: InputBorder.none,
-                            icon: const Icon(
-                              Icons.email_outlined,
-                              color: Colors.white38,
-                            ),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Email is required';
-                            }
-                            if (!AppUtils.isValidEmail(value.trim())) {
-                              return 'Please enter a valid email';
-                            }
-                            return null;
-                          },
-                          onFieldSubmitted: (_) => _submit(),
-                        ),
-                        const Divider(color: Colors.white12, height: 0),
-                        
-                        // Password input
-                        TextFormField(
-                          controller: _passwordController,
-                          style: const TextStyle(color: Colors.white),
-                          obscureText: true,
-                          enabled: !_isLoading,
-                          decoration: InputDecoration(
-                            hintText: 'Password',
-                            hintStyle: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.3),
-                            ),
-                            border: InputBorder.none,
-                            icon: const Icon(
-                              Icons.lock_outline,
-                              color: Colors.white38,
-                            ),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Password is required';
-                            }
-                            if (!AppUtils.isValidPassword(value)) {
-                              return 'Password must be at least 6 characters';
-                            }
-                            return null;
-                          },
-                          onFieldSubmitted: (_) => _submit(),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                
-                // Error message
-                if (_errorMessage != null) ...[
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.red.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: Colors.red.withValues(alpha: 0.5),
-                      ),
-                    ),
-                    child: Text(
-                      _errorMessage!,
-                      style: const TextStyle(
-                        color: Color.fromARGB(255, 255, 100, 100),
-                        fontSize: 13,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                ],
-                
-                // Submit button
-                SizedBox(
-                  width: double.infinity,
-                  height: 56,
-                  child: _isLoading
-                      ? const Center(
-                          child: CircularProgressIndicator(
-                            color: Colors.blueAccent,
-                          ),
-                        )
-                      : ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blueAccent,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                          ),
-                          onPressed: _submit,
-                          child: Text(
-                            _isLogin ? 'Login' : 'Create Account',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                ),
-                const SizedBox(height: 16),
-                
-                // Toggle login/signup
-                TextButton(
-                  onPressed: _isLoading
-                      ? null
-                      : () => setState(() => _isLogin = !_isLogin),
-                  child: Text(
-                    _isLogin
-                        ? "Don't have an account? Sign up"
-                        : 'Already have an account? Login',
-                    style: const TextStyle(color: Colors.white54),
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
-        ),
+          // Subtle blur orbs for depth
+          Positioned(
+            top: 100,
+            right: -100,
+            child: Container(
+              width: 400,
+              height: 400,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    AppColors.accentBlue.withValues(alpha: 0.08),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 200,
+            left: -50,
+            child: Container(
+              width: 300,
+              height: 300,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    AppColors.accentPurple.withValues(alpha: 0.06),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Center(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.all(
+                size.width > 600 ? 48 : 24,
+              ),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 400),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Logo
+                    Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            AppColors.accentBlue.withValues(alpha: 0.8),
+                            AppColors.accentPurple.withValues(alpha: 0.8),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.accentBlue.withValues(alpha: 0.3),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        CupertinoIcons.doc_text_fill,
+                        size: 40,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    
+                    // Title
+                    const Text(
+                      'Glass Keep',
+                      style: TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primaryText,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Secure Cloud Notes',
+                      style: TextStyle(
+                        color: AppColors.secondaryText,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 48),
+                    
+                    // Form - Glass card
+                    GlassCard(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Column(
+                        children: [
+                          // Email input
+                          TextFormField(
+                            controller: _emailController,
+                            style: const TextStyle(color: AppColors.primaryText),
+                            keyboardType: TextInputType.emailAddress,
+                            enabled: !_isLoading,
+                            decoration: InputDecoration(
+                              hintText: 'Email',
+                              hintStyle: TextStyle(
+                                color: AppColors.tertiaryText.withValues(alpha: 0.6),
+                              ),
+                              border: InputBorder.none,
+                              icon: const Icon(
+                                Icons.email_outlined,
+                                color: AppColors.secondaryText,
+                              ),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Email is required';
+                              }
+                              if (!AppUtils.isValidEmail(value.trim())) {
+                                return 'Please enter a valid email';
+                              }
+                              return null;
+                            },
+                            onFieldSubmitted: (_) => _submit(),
+                          ),
+                          Divider(color: AppColors.tertiaryText.withValues(alpha: 0.2), height: 0),
+                          
+                          // Password input
+                          TextFormField(
+                            controller: _passwordController,
+                            style: const TextStyle(color: AppColors.primaryText),
+                            obscureText: true,
+                            enabled: !_isLoading,
+                            decoration: InputDecoration(
+                              hintText: 'Password',
+                              hintStyle: TextStyle(
+                                color: AppColors.tertiaryText.withValues(alpha: 0.6),
+                              ),
+                              border: InputBorder.none,
+                              icon: const Icon(
+                                Icons.lock_outline,
+                                color: AppColors.secondaryText,
+                              ),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Password is required';
+                              }
+                              if (!AppUtils.isValidPassword(value)) {
+                                return 'Password must be at least 6 characters';
+                              }
+                              return null;
+                            },
+                            onFieldSubmitted: (_) => _submit(),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    
+                    // Error message
+                    if (_errorMessage != null) ...[
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppColors.accentRed.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: AppColors.accentRed.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Text(
+                          _errorMessage!,
+                          style: const TextStyle(
+                            color: AppColors.accentRed,
+                            fontSize: 13,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                    
+                    // Submit button - Apple glassmorphism style
+                    SizedBox(
+                      width: double.infinity,
+                      height: 56,
+                      child: _isLoading
+                          ? const Center(
+                              child: CupertinoActivityIndicator(
+                                color: AppColors.accentBlue,
+                              ),
+                            )
+                          : GlassButton(
+                              text: _isLogin ? 'Login' : 'Create Account',
+                              onPressed: _submit,
+                              isLoading: _isLoading,
+                            ),
+                    ),
+                    const SizedBox(height: 16),
+                    
+                    // Toggle login/signup
+                    CupertinoButton(
+                      padding: EdgeInsets.zero,
+                      onPressed: _isLoading
+                          ? null
+                          : () => setState(() => _isLogin = !_isLogin),
+                      child: Text(
+                        _isLogin
+                            ? "Don't have an account? Sign up"
+                            : 'Already have an account? Login',
+                        style: TextStyle(
+                          color: AppColors.accentBlue,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
