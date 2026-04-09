@@ -35,9 +35,9 @@ class GlassCard extends StatelessWidget {
             ),
           Container(
             decoration: BoxDecoration(
-              color: AppColors.obsidianLight.withValues(alpha: 0.4),
+              color: AppColors.obsidianLight.withOpacity(0.4),
               border: Border.all(
-                color: Colors.white.withValues(alpha: 0.1),
+                color: Colors.white.withOpacity(0.1),
                 width: 1,
               ),
             ),
@@ -63,7 +63,7 @@ class GlassCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(borderRadius),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
+            color: Colors.black.withOpacity(0.08),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -127,7 +127,7 @@ class _InteractiveGlassCardState extends State<_InteractiveGlassCard>
               borderRadius: BorderRadius.circular(widget.borderRadius),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.08),
+                  color: Colors.black.withOpacity(0.08),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -198,7 +198,7 @@ class _GlassButtonState extends State<GlassButton> with SingleTickerProviderStat
               borderRadius: BorderRadius.circular(widget.borderRadius),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.accentBlue.withValues(alpha: 0.2),
+                  color: AppColors.accentBlue.withOpacity(0.2),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -212,7 +212,7 @@ class _GlassButtonState extends State<GlassButton> with SingleTickerProviderStat
                     filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                     child: Container(
                       decoration: BoxDecoration(
-                        color: AppColors.accentBlue.withValues(alpha: 0.7),
+                        color: AppColors.accentBlue.withOpacity(0.7),
                       ),
                     ),
                   ),
@@ -289,16 +289,16 @@ class GlassTextField extends StatelessWidget {
               filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.5),
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1),
+                  color: Colors.white.withOpacity(0.5),
+                  border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
                 ),
               ),
             ),
           if (!hasBlur)
             Container(
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.5),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1),
+                color: Colors.white.withOpacity(0.5),
+                border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
               ),
             ),
           TextField(
@@ -311,7 +311,7 @@ class GlassTextField extends StatelessWidget {
             style: const TextStyle(color: AppColors.primaryText, fontSize: 16),
             decoration: InputDecoration(
               hintText: hintText,
-              hintStyle: TextStyle(color: AppColors.tertiaryText.withValues(alpha: 0.6)),
+              hintStyle: TextStyle(color: AppColors.tertiaryText.withOpacity(0.6)),
               border: InputBorder.none,
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               icon: icon != null
@@ -421,9 +421,9 @@ class LabelChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: AppColors.accentBlue.withValues(alpha: 0.1),
+        color: AppColors.accentBlue.withOpacity(0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.accentBlue.withValues(alpha: 0.2), width: 0.5),
+        border: Border.all(color: AppColors.accentBlue.withOpacity(0.2), width: 0.5),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -38,7 +39,7 @@ class VisionGlassCard extends StatelessWidget {
           // Layer 1: Outer soft shadow for Luxury Look
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.15),
+              color: Colors.black.withOpacity(0.15),
               blurRadius: 24,
               offset: const Offset(0, 8),
               spreadRadius: -4,
@@ -62,12 +63,12 @@ class VisionGlassCard extends StatelessWidget {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      AppColors.obsidianLight.withValues(alpha: 0.7),
-                      AppColors.obsidianDark.withValues(alpha: 0.4),
+                      AppColors.obsidianLight.withOpacity(0.7),
+                      AppColors.obsidianDark.withOpacity(0.4),
                     ],
                   ),
                   border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.15),
+                    color: Colors.white.withOpacity(0.12),
                     width: 0.5,
                   ),
                 ),
@@ -114,7 +115,7 @@ class _ShineLayer extends StatelessWidget {
           borderRadius: BorderRadius.circular(borderRadius),
           boxShadow: [
             BoxShadow(
-              color: Colors.white.withValues(alpha: 0.05),
+              color: Colors.white.withOpacity(0.05),
               blurRadius: 1,
               spreadRadius: 0,
               offset: const Offset(1, 1),
@@ -151,7 +152,7 @@ class GlassSearchBar extends StatelessWidget {
         decoration: InputDecoration(
           hintText: l10n.searchHint,
           hintStyle: TextStyle(
-            color: Colors.white.withValues(alpha: 0.4),
+            color: Colors.white.withOpacity(0.4),
           ),
           border: InputBorder.none,
           icon: const Icon(
@@ -174,10 +175,10 @@ class LabelChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: AppColors.accentBlue.withValues(alpha: 0.12),
+        color: AppColors.accentBlue.withOpacity(0.12),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: AppColors.accentBlue.withValues(alpha: 0.2),
+          color: AppColors.accentBlue.withOpacity(0.2),
           width: 0.5,
         ),
       ),
@@ -242,8 +243,8 @@ class BreathingGlow extends StatelessWidget {
       animation: animationProvider.animation,
       builder: (context, child) {
         final value = animationProvider.animation.value;
-        final breathe = (1.0 + 0.1 * (value * 2 * 3.14159).sin()) / 1.1;
-        
+        final breathe = (1.0 + 0.1 * math.sin(value * 2 * math.pi)) / 1.1;
+
         return Stack(
           children: [
             Positioned(
@@ -291,7 +292,7 @@ class _GlowOrb extends StatelessWidget {
         shape: BoxShape.circle,
         gradient: RadialGradient(
           colors: [
-            color.withValues(alpha: opacity),
+            color.withOpacity(opacity),
             Colors.transparent,
           ],
         ),
@@ -429,9 +430,9 @@ class _GlassButtonState extends State<GlassButton>
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: [
-                            AppColors.accentBlue.withValues(alpha: 0.8),
-                            AppColors.accentBlue.withValues(alpha: 0.9),
-                          ],
+                                AppColors.accentBlue.withOpacity(0.8),
+                                AppColors.accentBlue.withOpacity(0.9),
+                              ],
                         ),
                       )
                     : null,

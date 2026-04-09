@@ -33,7 +33,7 @@ class GlassDistortionPainter extends CustomPainter {
     final cellHeight = size.height / _gridResolution;
 
     final paint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.12)
+      ..color = Colors.white.withOpacity(0.12)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 0.5;
 

@@ -1,16 +1,16 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-/// Core color constants for the app - Apple Glassmorphism Light Theme
+/// Core color constants for the app - Obsidian Vision Premium Dark Theme
 class AppColors {
-  // Light background colors (Apple style)
-  static const Color background = Color(0xFFF5F5F7);
-  static const Color surface = Color(0xFFFFFFFF);
-  static const Color secondaryBackground = Color(0xFFE8E8ED);
-  
+  // Obsidian dark background colors
+  static const Color background = Color(0xFF0A0A0C);
+  static const Color surface = Color(0xFF1A1A1E);
+  static const Color secondaryBackground = Color(0xFF2A2A30);
+
   // Text colors
-  static const Color primaryText = Color(0xFFFFFFFF);
-  static const Color secondaryText = Color(0xFFEBEBF5);
+  static const Color primaryText = Colors.white;
+  static Color get secondaryText => Colors.white.withOpacity(0.7);
   static const Color tertiaryText = Color(0xFF86868B);
   
   // Glass morphism - Light theme
