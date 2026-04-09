@@ -35,18 +35,13 @@ class VisionGlassCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(borderRadius),
-          // Layer 1: Outer soft shadow
+          // Layer 1: Outer soft shadow for Luxury Look
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
+              color: Colors.black.withValues(alpha: 0.15),
               blurRadius: 24,
               offset: const Offset(0, 8),
               spreadRadius: -4,
-            ),
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
             ),
           ],
         ),
@@ -54,26 +49,26 @@ class VisionGlassCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(borderRadius),
           child: Stack(
             children: [
-              // Layer 2: Backdrop blur effect (optimized sigma)
+              // Layer 2: Backdrop blur effect (Optimized)
               BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
                 child: const SizedBox.expand(),
               ),
 
-              // Layer 3 & 4: Gradient tint + thin border for edge glow
+              // Layer 3 & 4: Obsidian Gradient tint + thin border for edge glow
               Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      Colors.white.withValues(alpha: 0.12),
-                      Colors.white.withValues(alpha: 0.04),
+                      AppColors.obsidianLight.withValues(alpha: 0.7),
+                      AppColors.obsidianDark.withValues(alpha: 0.4),
                     ],
                   ),
                   border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.2),
-                    width: 1,
+                    color: Colors.white.withValues(alpha: 0.15),
+                    width: 0.5,
                   ),
                 ),
               ),
@@ -83,13 +78,13 @@ class VisionGlassCard extends StatelessWidget {
                 RepaintBoundary(
                   child: GlassDistortionEffect(
                     borderRadius: borderRadius,
-                    distortionStrength: 2.0,
-                    distortionScale: 0.015,
+                    distortionStrength: 1.5,
+                    distortionScale: 0.012,
                     child: const SizedBox.expand(),
                   ),
                 ),
 
-              // Layer 5: Inset shine effect
+              // Layer 5: Inset shine effect (Internal Glow)
               _ShineLayer(borderRadius: borderRadius),
 
               // Content
@@ -105,7 +100,7 @@ class VisionGlassCard extends StatelessWidget {
   }
 }
 
-/// Inset shine effect for glass morphism - adjusted for light theme
+/// Inset shine effect for glass morphism - adjusted for Obsidian theme
 class _ShineLayer extends StatelessWidget {
   final double borderRadius;
 
@@ -119,17 +114,10 @@ class _ShineLayer extends StatelessWidget {
           borderRadius: BorderRadius.circular(borderRadius),
           boxShadow: [
             BoxShadow(
-              color: Colors.white.withValues(alpha: 0.9),
+              color: Colors.white.withValues(alpha: 0.05),
               blurRadius: 1,
               spreadRadius: 0,
               offset: const Offset(1, 1),
-              inset: true,
-            ),
-            BoxShadow(
-              color: Colors.white.withValues(alpha: 0.3),
-              blurRadius: 0.5,
-              spreadRadius: 0.5,
-              offset: const Offset(-0.5, -0.5),
               inset: true,
             ),
           ],
@@ -156,19 +144,19 @@ class GlassSearchBar extends StatelessWidget {
         controller: controller,
         onChanged: onChanged,
         style: const TextStyle(
-          color: AppColors.primaryText,
+          color: Colors.white,
           fontSize: 17,
         ),
         cursorColor: AppColors.accentBlue,
         decoration: InputDecoration(
           hintText: l10n.searchHint,
           hintStyle: TextStyle(
-            color: AppColors.secondaryText.withValues(alpha: 0.6),
+            color: Colors.white.withValues(alpha: 0.4),
           ),
           border: InputBorder.none,
           icon: const Icon(
             CupertinoIcons.search,
-            color: AppColors.secondaryText,
+            color: Colors.white70,
             size: 20,
           ),
         ),
@@ -210,52 +198,87 @@ class VisionBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFFF5F5F7),
-            Color(0xFFE8E8ED),
+    return const ObsidianBackground();
+  }
+}
+
+class ObsidianBackground extends StatelessWidget {
+  const ObsidianBackground({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return RepaintBoundary(
+      child: Container(
+        decoration: const BoxDecoration(
+          gradient: RadialGradient(
+            center: Alignment.center,
+            radius: 1.2,
+            colors: [
+              AppColors.obsidianLight,
+              AppColors.obsidianDark,
+            ],
+          ),
+        ),
+        child: const Stack(
+          children: [
+            Positioned.fill(child: BreathingGlow()),
+            Positioned.fill(child: MicroNoise(opacity: 0.02)),
           ],
         ),
-      ),
-      child: const Stack(
-        children: [
-          // Subtle gradient orbs for depth
-          Positioned(
-            top: 100,
-            right: -100,
-            child: _GradientOrb(
-              color: AppColors.accentBlue,
-              alpha: 0.08,
-              size: 400,
-            ),
-          ),
-          Positioned(
-            bottom: 200,
-            left: -50,
-            child: _GradientOrb(
-              color: AppColors.accentPurple,
-              alpha: 0.06,
-              size: 300,
-            ),
-          ),
-        ],
       ),
     );
   }
 }
 
-class _GradientOrb extends StatelessWidget {
+class BreathingGlow extends StatelessWidget {
+  const BreathingGlow({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final animationProvider = GlassAnimationProvider.of(context);
+    if (animationProvider == null) return const SizedBox.shrink();
+
+    return AnimatedBuilder(
+      animation: animationProvider.animation,
+      builder: (context, child) {
+        final value = animationProvider.animation.value;
+        final breathe = (1.0 + 0.1 * (value * 2 * 3.14159).sin()) / 1.1;
+        
+        return Stack(
+          children: [
+            Positioned(
+              top: -100,
+              right: -50,
+              child: _GlowOrb(
+                color: AppColors.accentBlue,
+                opacity: 0.05 * breathe,
+                size: 500 * breathe,
+              ),
+            ),
+            Positioned(
+              bottom: -50,
+              left: -100,
+              child: _GlowOrb(
+                color: AppColors.accentPurple,
+                opacity: 0.04 * breathe,
+                size: 400 * breathe,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _GlowOrb extends StatelessWidget {
   final Color color;
-  final double alpha;
+  final double opacity;
   final double size;
 
-  const _GradientOrb({
+  const _GlowOrb({
     required this.color,
-    required this.alpha,
+    required this.opacity,
     required this.size,
   });
 
@@ -268,12 +291,54 @@ class _GradientOrb extends StatelessWidget {
         shape: BoxShape.circle,
         gradient: RadialGradient(
           colors: [
-            color.withValues(alpha: alpha),
+            color.withValues(alpha: opacity),
             Colors.transparent,
           ],
         ),
       ),
     );
+  }
+}
+
+class MicroNoise extends StatelessWidget {
+  final double opacity;
+  const MicroNoise({super.key, required this.opacity});
+
+  @override
+  Widget build(BuildContext context) {
+    return Opacity(
+      opacity: opacity,
+      child: CustomPaint(
+        painter: _NoisePainter(),
+        child: const SizedBox.expand(),
+      ),
+    );
+  }
+}
+
+class _NoisePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = Colors.white;
+    final random = java_math_Random(42); // Seeded for consistency
+    for (int i = 0; i < 1000; i++) {
+      final x = random.nextDouble() * size.width;
+      final y = random.nextDouble() * size.height;
+      canvas.drawRect(Rect.fromLTWH(x, y, 1, 1), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_NoisePainter oldDelegate) => false;
+}
+
+// Helper to avoid importing dart:math everywhere and keep it simple
+class java_math_Random {
+  int seed;
+  java_math_Random(this.seed);
+  double nextDouble() {
+    seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+    return seed / 0x7fffffff;
   }
 }
 
