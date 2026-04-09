@@ -4,9 +4,13 @@ import 'package:noise/noise.dart';
 
 /// Liquid glass distortion painter using Perlin noise
 /// Generates wavy distortion effect similar to macOS glass morphism
+/// Optimized for minimal noise calculations
 class GlassDistortionPainter extends CustomPainter {
   static final Perlin _noise = Perlin();
-  static const int _gridResolution = 15;
+  // Reduced grid resolution for better performance
+  static const int _gridResolution = 10;
+  // Cache for noise values to reduce redundant calculations
+  static final Map<int, double> _noiseCache = {};
 
   final double time;
   final double strength;
@@ -23,32 +27,35 @@ class GlassDistortionPainter extends CustomPainter {
     _drawWavyDistortion(canvas, size);
   }
 
-  /// Draw wavy distortion using grid-based approach with Perlin noise
+  /// Draw wavy distortion using optimized grid-based approach with Perlin noise
   void _drawWavyDistortion(Canvas canvas, Size size) {
     final cellWidth = size.width / _gridResolution;
     final cellHeight = size.height / _gridResolution;
-    
+
     final paint = Paint()
       ..color = Colors.white.withValues(alpha: 0.12)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 0.5;
 
-    // Draw horizontal waves
+    // Cache key prefix based on time to invalidate old values
+    final timeHash = (time * 100).toInt();
+
+    // Draw horizontal waves only (skip vertical for performance)
     for (int y = 0; y <= _gridResolution; y++) {
       final path = Path();
       bool isFirstPoint = true;
 
       for (int x = 0; x <= _gridResolution; x++) {
-        final noiseVal = _getNoiseOffset(
+        // Use cached noise or calculate new
+        final cacheKey = (timeHash * 10000 + y * 100 + x).toString();
+        final noiseVal = _getNoiseOffsetCached(
           x.toDouble(),
           y.toDouble(),
+          cacheKey,
         );
 
         final px = x * cellWidth + noiseVal;
-        final py = y * cellHeight + _getNoiseOffset(
-          x.toDouble() + 100,
-          y.toDouble() + 100,
-        );
+        final py = y * cellHeight;
 
         if (isFirstPoint) {
           path.moveTo(px, py);
@@ -59,28 +66,31 @@ class GlassDistortionPainter extends CustomPainter {
       }
       canvas.drawPath(path, paint);
     }
+
+    // Clear old cache entries periodically
+    if (_noiseCache.length > 1000) {
+      _noiseCache.clear();
+    }
   }
 
-  /// Sample Perlin noise with layered octaves for natural-looking distortion
-  double _getNoiseOffset(double x, double y) {
-    double result = 0;
-    double amplitude = 1;
-    double frequency = 1;
-    double maxVal = 0;
-
-    // Two octaves of noise for complexity without performance hit
-    for (int i = 0; i < 2; i++) {
-      final sampleX = (x * scale * frequency + time * 0.25) / _gridResolution;
-      final sampleY = (y * scale * frequency) / _gridResolution;
-
-      result += _noise.noise2D(sampleX, sampleY) * amplitude;
-      maxVal += amplitude;
-
-      amplitude *= 0.5;
-      frequency *= 2;
+  /// Get cached noise value or calculate new one
+  double _getNoiseOffsetCached(double x, double y, String cacheKey) {
+    // Simple LRU-like behavior - recalculate every few frames
+    final hashKey = cacheKey.hashCode;
+    if (_noiseCache.containsKey(hashKey)) {
+      return _noiseCache[hashKey]!;
     }
+    final value = _getNoiseOffset(x, y);
+    _noiseCache[hashKey] = value;
+    return value;
+  }
 
-    return (result / maxVal) * strength;
+  /// Sample Perlin noise with single octave for better performance
+  double _getNoiseOffset(double x, double y) {
+    // Single octave of noise for performance
+    final sampleX = (x * scale + time * 0.25) / _gridResolution;
+    final sampleY = (y * scale) / _gridResolution;
+    return _noise.noise2D(sampleX, sampleY) * strength;
   }
 
   @override
