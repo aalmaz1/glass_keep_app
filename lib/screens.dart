@@ -144,15 +144,15 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final paddingH = size.width * 0.04;
+    final paddingH = ResponsiveDimensions.gridPadding;
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.obsidianDark,
       extendBodyBehindAppBar: true,
       body: Stack(
         children: [
-          const Positioned.fill(child: LightBackground()),
+          const Positioned.fill(child: VisionBackground()),
           SafeArea(
             child: CustomScrollView(
               slivers: [
@@ -229,19 +229,17 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
                       );
                     }
 
-                    final crossAxisCount = size.width > 900
-                        ? 4
-                        : (size.width > 600 ? 3 : 2);
+                    final crossAxisCount = ((size.width - 2 * paddingH + ResponsiveDimensions.gridGap) / (ResponsiveDimensions.cardMinWidth + ResponsiveDimensions.gridGap)).floor().clamp(1, 6);
 
                     return SliverPadding(
                       padding: EdgeInsets.symmetric(
                         horizontal: paddingH,
-                        vertical: 8,
+                        vertical: 18,
                       ),
                       sliver: SliverMasonryGrid.count(
                         crossAxisCount: crossAxisCount,
-                        mainAxisSpacing: 12,
-                        crossAxisSpacing: 12,
+                        mainAxisSpacing: ResponsiveDimensions.gridGap,
+                        crossAxisSpacing: ResponsiveDimensions.gridGap,
                         itemBuilder: (context, i) => NoteCard(
                           key: ValueKey('note_${notes[i].id}'),
                           note: notes[i],
@@ -278,14 +276,15 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
       builder: (context) => Container(
         margin: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.95),
+          color: AppColors.obsidianDark.withValues(alpha: 0.95),
           borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(height: 12),
-            Container(width: 36, height: 5, decoration: BoxDecoration(color: AppColors.tertiaryText.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2.5))),
+            Container(width: 36, height: 5, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2.5))),
             const SizedBox(height: 20),
             _MenuItem(icon: CupertinoIcons.trash, label: 'Trash', onTap: () { Navigator.pop(context); _openTrash(context); }),
             _MenuItem(icon: CupertinoIcons.arrow_right_square, label: 'Logout', onTap: () { Navigator.pop(context); _logout(); }, isDestructive: true),
@@ -316,7 +315,7 @@ class _MenuItem extends StatelessWidget {
           children: [
             Icon(icon, color: isDestructive ? AppColors.accentRed : AppColors.accentBlue, size: 22),
             const SizedBox(width: 16),
-            Text(label, style: TextStyle(fontSize: 17, color: isDestructive ? AppColors.accentRed : AppColors.primaryText)),
+            Text(label, style: TextStyle(fontSize: 17, color: isDestructive ? AppColors.accentRed : Colors.white)),
           ],
         ),
       ),
@@ -408,6 +407,7 @@ class NoteCard extends StatefulWidget {
 class _NoteCardState extends State<NoteCard> with AutomaticKeepAliveClientMixin {
   Uint8List? _decodedImage;
   String? _lastImageBase64;
+  bool _isHovered = false;
 
   @override
   bool get wantKeepAlive => true;
@@ -435,72 +435,92 @@ class _NoteCardState extends State<NoteCard> with AutomaticKeepAliveClientMixin 
     super.build(context);
     final note = widget.note;
 
-    return RepaintBoundary(
-      child: GlassCard(
-        onTap: widget.onTap,
-        isInteractive: true,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (_decodedImage != null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.memory(
-                    _decodedImage!,
-                    fit: BoxFit.cover,
-                    // Optimize image caching
-                    cacheWidth: 400,
-                    gaplessPlayback: true,
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: AnimatedScale(
+        scale: _isHovered ? 1.01 : 1.0,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeOutCubic,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeOutCubic,
+          transform: Matrix4.translationValues(0, _isHovered ? -6 : 0, 0),
+          child: RepaintBoundary(
+            child: VisionGlassCard(
+              padding: EdgeInsets.zero,
+              child: InkWell(
+                onTap: widget.onTap,
+                borderRadius: BorderRadius.circular(20),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (_decodedImage != null)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.memory(
+                              _decodedImage!,
+                              fit: BoxFit.cover,
+                              // Optimize image caching
+                              cacheWidth: 400,
+                              gaplessPlayback: true,
+                            ),
+                          ),
+                        ),
+                      Row(
+                        children: [
+                          if (note.isPinned)
+                            const Icon(
+                              CupertinoIcons.pin_fill,
+                              size: 14,
+                              color: AppColors.accentBlue,
+                            ),
+                          if (note.isPinned) const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              note.title,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                color: Colors.white,
+                                letterSpacing: -0.2,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (note.content.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 6),
+                          child: Text(
+                            note.content,
+                            maxLines: 6,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.7),
+                              fontSize: 14,
+                              height: 1.3,
+                            ),
+                          ),
+                        ),
+                      if (note.labels.isNotEmpty) ...[
+                        const SizedBox(height: 10),
+                        Wrap(
+                          spacing: 6,
+                          runSpacing: 6,
+                          children: note.labels.map((l) => LabelChip(label: l)).toList(),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
               ),
-            Row(
-              children: [
-                if (note.isPinned)
-                  const Icon(
-                    CupertinoIcons.pin_fill,
-                    size: 14,
-                    color: AppColors.accentBlue,
-                  ),
-                if (note.isPinned) const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    note.title,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: AppColors.primaryText,
-                      letterSpacing: -0.2,
-                    ),
-                  ),
-                ),
-              ],
             ),
-            if (note.content.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(top: 6),
-                child: Text(
-                  note.content,
-                  maxLines: 6,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: AppColors.secondaryText,
-                    fontSize: 14,
-                    height: 1.3,
-                  ),
-                ),
-              ),
-            if (note.labels.isNotEmpty) ...[
-              const SizedBox(height: 10),
-              Wrap(
-                spacing: 6,
-                runSpacing: 6,
-                children: note.labels.map((l) => LabelChip(label: l)).toList(),
-              ),
-            ],
-          ],
+          ),
         ),
       ),
     );
@@ -567,9 +587,9 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
       child: Container(
         height: size.height * 0.85,
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.95),
+          color: AppColors.obsidianDark.withValues(alpha: 0.9),
           borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.15), width: 1),
         ),
         child: ClipRRect(
           borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
@@ -579,7 +599,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
               children: [
                 Positioned(
                   top: 0, left: 0, right: 0, height: 1,
-                  child: Container(decoration: BoxDecoration(gradient: LinearGradient(colors: [Colors.transparent, Colors.white.withValues(alpha: 0.6), Colors.transparent]))),
+                  child: Container(decoration: BoxDecoration(gradient: LinearGradient(colors: [Colors.transparent, Colors.white.withValues(alpha: 0.1), Colors.transparent]))),
                 ),
                 Scaffold(
                   resizeToAvoidBottomInset: false,
@@ -690,19 +710,19 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                 ),
               ],
             ),
-          TextField(controller: _t, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: AppColors.primaryText, letterSpacing: -0.5), decoration: InputDecoration(hintText: l10n.title, hintStyle: TextStyle(color: AppColors.tertiaryText.withValues(alpha: 0.5)), border: InputBorder.none)),
-          TextField(controller: _c, maxLines: null, style: TextStyle(color: AppColors.secondaryText, fontSize: 18, height: 1.5), decoration: InputDecoration(hintText: l10n.note, hintStyle: TextStyle(color: AppColors.tertiaryText.withValues(alpha: 0.5)), border: InputBorder.none)),
+          TextField(controller: _t, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: -0.5), decoration: InputDecoration(hintText: l10n.title, hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)), border: InputBorder.none)),
+          TextField(controller: _c, maxLines: null, style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 18, height: 1.5), decoration: InputDecoration(hintText: l10n.note, hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)), border: InputBorder.none)),
           const SizedBox(height: 24),
-          GlassCard(
+          VisionGlassCard(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            hasBlur: false,
+            useDistortion: false,
             child: IntrinsicHeight(
               child: Row(
                 children: [
                   IconButton(
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
-                    icon: const Icon(CupertinoIcons.photo, color: AppColors.secondaryText),
+                    icon: const Icon(CupertinoIcons.photo, color: Colors.white70),
                     onPressed: _isLoading ? null : () async {
                       setState(() => _isLoading = true);
                       try {
@@ -729,8 +749,8 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                       }
                     },
                   ),
-                  const VerticalDivider(color: AppColors.tertiaryText, indent: 8, endIndent: 8),
-                  IconButton(padding: EdgeInsets.zero, constraints: const BoxConstraints(), icon: const Icon(CupertinoIcons.alarm, color: AppColors.secondaryText), onPressed: () async {
+                  const VerticalDivider(color: Colors.white24, indent: 8, endIndent: 8),
+                  IconButton(padding: EdgeInsets.zero, constraints: const BoxConstraints(), icon: const Icon(CupertinoIcons.alarm, color: Colors.white70), onPressed: () async {
                     final now = DateTime.now();
                     final d = await showDatePicker(context: context, initialDate: now, firstDate: now, lastDate: now.add(const Duration(days: 365)));
                     if (d == null || !context.mounted) return;
@@ -746,7 +766,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
             ),
           ),
           const SizedBox(height: 20),
-          TextField(controller: _l, style: const TextStyle(color: AppColors.secondaryText, fontSize: 15), decoration: InputDecoration(hintText: l10n.labelsHint, hintStyle: TextStyle(color: AppColors.tertiaryText.withValues(alpha: 0.5)), border: InputBorder.none)),
+          TextField(controller: _l, style: const TextStyle(color: Colors.white70, fontSize: 15), decoration: InputDecoration(hintText: l10n.labelsHint, hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)), border: InputBorder.none)),
           const SizedBox(height: 100),
         ],
       ),
@@ -779,10 +799,10 @@ class _TrashScreenState extends State<TrashScreen> {
     final paddingH = size.width * 0.04;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.obsidianDark,
       body: Stack(
         children: [
-          const Positioned.fill(child: LightBackground()),
+          const Positioned.fill(child: VisionBackground()),
           SafeArea(
             child: Column(
               children: [
@@ -795,15 +815,15 @@ class _TrashScreenState extends State<TrashScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.5),
+                            color: Colors.white.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+                            border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
                           ),
-                          child: const Icon(CupertinoIcons.back, color: AppColors.secondaryText, size: 22),
+                          child: const Icon(CupertinoIcons.back, color: Colors.white70, size: 22),
                         ),
                       ),
                       const SizedBox(width: 16),
-                      Text(l10n.trash, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.primaryText)),
+                      Text(l10n.trash, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
                     ],
                   ),
                 ),
@@ -867,7 +887,7 @@ class _TrashNoteCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RepaintBoundary(
-      child: GlassCard(
+      child: VisionGlassCard(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -879,7 +899,7 @@ class _TrashNoteCard extends StatelessWidget {
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
-                      color: AppColors.primaryText,
+                      color: Colors.white,
                     ),
                   ),
                 ),
@@ -910,8 +930,8 @@ class _TrashNoteCard extends StatelessWidget {
                   note.content,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: AppColors.secondaryText,
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.7),
                     fontSize: 14,
                   ),
                 ),

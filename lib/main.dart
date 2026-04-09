@@ -113,13 +113,13 @@ class _GlassKeepAppState extends State<GlassKeepApp>
         title: 'Glass Keep',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
-          brightness: Brightness.light,
+          brightness: Brightness.dark,
           useMaterial3: true,
-          scaffoldBackgroundColor: AppColors.background,
+          scaffoldBackgroundColor: AppColors.obsidianDark,
           colorSchemeSeed: AppColors.accentBlue,
           fontFamily: '.SF Pro Display',
           cupertinoOverrideTheme: const CupertinoThemeData(
-            brightness: Brightness.light,
+            brightness: Brightness.dark,
             primaryColor: AppColors.accentBlue,
           ),
           appBarTheme: const AppBarTheme(
@@ -127,7 +127,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
             elevation: 0,
             centerTitle: true,
             titleTextStyle: TextStyle(
-              color: AppColors.primaryText,
+              color: Colors.white,
               fontSize: 17,
               fontWeight: FontWeight.w600,
               letterSpacing: -0.4,
@@ -168,7 +168,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
             }
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Scaffold(
-                backgroundColor: AppColors.background,
+                backgroundColor: AppColors.obsidianDark,
                 body: Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -226,7 +226,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
                     return NotesScreen(storage: storeSnapshot.data!);
                   }
                   return const Scaffold(
-                    backgroundColor: AppColors.background,
+                    backgroundColor: AppColors.obsidianDark,
                     body: Center(
                       child: CupertinoActivityIndicator(
                         color: AppColors.accentBlue,

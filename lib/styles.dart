@@ -35,9 +35,9 @@ class GlassCard extends StatelessWidget {
             ),
           Container(
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.65),
+              color: AppColors.obsidianLight.withValues(alpha: 0.4),
               border: Border.all(
-                color: Colors.white.withValues(alpha: 0.3),
+                color: Colors.white.withValues(alpha: 0.1),
                 width: 1,
               ),
             ),
@@ -329,7 +329,7 @@ class GlassTextField extends StatelessWidget {
   }
 }
 
-/// Light background - светлый нейтральный фон
+/// Obsidian background - темный нейтральный фон
 class LightBackground extends StatelessWidget {
   final Widget? child;
 
@@ -339,12 +339,12 @@ class LightBackground extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+        gradient: RadialGradient(
+          center: Alignment.center,
+          radius: 1.2,
           colors: [
-            Color(0xFFF5F5F7),
-            Color(0xFFF9F9FB),
+            AppColors.obsidianLight,
+            AppColors.obsidianDark,
           ],
         ),
       ),

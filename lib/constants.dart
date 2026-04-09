@@ -9,14 +9,18 @@ class AppColors {
   static const Color secondaryBackground = Color(0xFFE8E8ED);
   
   // Text colors
-  static const Color primaryText = Color(0xFF1D1D1F);
-  static const Color secondaryText = Color(0xFF6E6E73);
+  static const Color primaryText = Color(0xFFFFFFFF);
+  static const Color secondaryText = Color(0xFFEBEBF5);
   static const Color tertiaryText = Color(0xFF86868B);
   
   // Glass morphism - Light theme
   static const Color glassLight = Color.fromARGB(48, 255, 255, 255);
   static const Color glassDark = Color.fromARGB(20, 0, 0, 0);
   static const Color glassBorder = Color.fromARGB(25, 0, 0, 0);
+
+  // Obsidian theme colors
+  static const Color obsidianDark = Color(0xFF0A0A0C);
+  static const Color obsidianLight = Color(0xFF1A1A1E);
   
   // Utilities
   static const Color white24 = Color.fromARGB(61, 255, 255, 255);
@@ -48,6 +52,10 @@ class ResponsiveDimensions {
   static const double borderRadiusMd = 12.0;
   static const double borderRadiusLg = 20.0;
   static const double borderRadiusXl = 30.0;
+
+  static const double gridPadding = 24.0;
+  static const double gridGap = 18.0;
+  static const double cardMinWidth = 300.0;
   
   /// Get horizontal padding based on screen width
   static double getHorizontalPadding(Size size) {

@@ -149,7 +149,24 @@ class StorageService {
         .asyncMap((snapshot) async {
           // Process notes in microtask to avoid blocking UI
           return Future.microtask(() {
-            final notes = snapshot.docs.map((d) => Note.fromMap(d.data())).toList();
+            final oldNotes = _notesCache ?? [];
+            final notes = snapshot.docs.map((d) {
+              final data = d.data();
+              final noteId = data['id'] ?? '';
+              final updatedAt = data['updatedAt'] ?? 0;
+              
+              // Try to find existing note in cache
+              final existingNote = oldNotes.cast<Note?>().firstWhere(
+                (n) => n?.id == noteId && n?.updatedAt.millisecondsSinceEpoch == updatedAt,
+                orElse: () => null,
+              );
+              
+              if (existingNote != null) {
+                return existingNote;
+              }
+              
+              return Note.fromMap(data);
+            }).toList();
             _notesCache = List.unmodifiable(notes);
             return notes;
           });
