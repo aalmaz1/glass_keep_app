@@ -5,80 +5,100 @@ import 'package:glass_keep/glass_effect.dart';
 import 'package:glass_keep/l10n/app_localizations.dart';
 import 'package:glass_keep/constants.dart';
 
+/// Optimized Vision Glass Card with perfect glassmorphism effect
+/// Layer structure:
+///   1. Outer soft shadow
+///   2. BackdropFilter with blur
+///   3. Gradient tint layer
+///   4. Thin border for edge glow
+///   5. Optional distortion effect
 class VisionGlassCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry? padding;
   final double borderRadius;
   final double blur;
+  final bool useDistortion;
 
   const VisionGlassCard({
     super.key,
     required this.child,
     this.padding,
     this.borderRadius = 20,
-    this.blur = 20,
+    this.blur = 12,
+    this.useDistortion = true,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(borderRadius),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 24,
-            offset: const Offset(0, 0),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(borderRadius),
-        child: Stack(
-          children: [
-            // Backdrop blur effect
-            BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-              child: const SizedBox.expand(),
+    return RepaintBoundary(
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(borderRadius),
+          // Layer 1: Outer soft shadow
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 24,
+              offset: const Offset(0, 8),
+              spreadRadius: -4,
             ),
-
-            // Glass tint layer - subtle white for light theme
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.72),
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.5),
-                  width: 1,
-                ),
-              ),
-            ),
-
-            // Glass distortion effect layer wrapped in RepaintBoundary
-            // to isolate animations from the rest of the widget tree
-            RepaintBoundary(
-              child: GlassDistortionEffect(
-                borderRadius: borderRadius,
-                distortionStrength: 2.0,
-                distortionScale: 0.015,
-                child: const SizedBox.expand(),
-              ),
-            ),
-
-            // Inset shine effect - subtle for light theme
-            _ShineLayer(borderRadius: borderRadius),
-
-            // Content
-            Padding(
-              padding: padding ?? const EdgeInsets.all(16),
-              child: child,
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
             ),
           ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(borderRadius),
+          child: Stack(
+            children: [
+              // Layer 2: Backdrop blur effect (optimized sigma)
+              BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+                child: const SizedBox.expand(),
+              ),
+
+              // Layer 3 & 4: Gradient tint + thin border for edge glow
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Colors.white.withValues(alpha: 0.12),
+                      Colors.white.withValues(alpha: 0.04),
+                    ],
+                  ),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    width: 1,
+                  ),
+                ),
+              ),
+
+              // Optional distortion effect layer (isolated)
+              if (useDistortion)
+                RepaintBoundary(
+                  child: GlassDistortionEffect(
+                    borderRadius: borderRadius,
+                    distortionStrength: 2.0,
+                    distortionScale: 0.015,
+                    child: const SizedBox.expand(),
+                  ),
+                ),
+
+              // Layer 5: Inset shine effect
+              _ShineLayer(borderRadius: borderRadius),
+
+              // Content
+              Padding(
+                padding: padding ?? const EdgeInsets.all(16),
+                child: child,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -130,16 +150,27 @@ class GlassSearchBar extends StatelessWidget {
     return VisionGlassCard(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
       borderRadius: 14,
+      blur: 8,
+      useDistortion: false,
       child: TextField(
         controller: controller,
         onChanged: onChanged,
-        style: const TextStyle(color: AppColors.primaryText, fontSize: 17),
+        style: const TextStyle(
+          color: AppColors.primaryText,
+          fontSize: 17,
+        ),
         cursorColor: AppColors.accentBlue,
         decoration: InputDecoration(
           hintText: l10n.searchHint,
-          hintStyle: TextStyle(color: AppColors.secondaryText.withValues(alpha: 0.6)),
+          hintStyle: TextStyle(
+            color: AppColors.secondaryText.withValues(alpha: 0.6),
+          ),
           border: InputBorder.none,
-          icon: const Icon(CupertinoIcons.search, color: AppColors.secondaryText, size: 20),
+          icon: const Icon(
+            CupertinoIcons.search,
+            color: AppColors.secondaryText,
+            size: 20,
+          ),
         ),
       ),
     );
@@ -149,7 +180,7 @@ class GlassSearchBar extends StatelessWidget {
 class LabelChip extends StatelessWidget {
   final String label;
   const LabelChip({super.key, required this.label});
-  
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -157,7 +188,10 @@ class LabelChip extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.accentBlue.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.accentBlue.withValues(alpha: 0.2), width: 0.5),
+        border: Border.all(
+          color: AppColors.accentBlue.withValues(alpha: 0.2),
+          width: 0.5,
+        ),
       ),
       child: Text(
         label,
@@ -173,7 +207,7 @@ class LabelChip extends StatelessWidget {
 
 class VisionBackground extends StatelessWidget {
   const VisionBackground({super.key});
-  
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -187,44 +221,57 @@ class VisionBackground extends StatelessWidget {
           ],
         ),
       ),
-      child: Stack(
+      child: const Stack(
         children: [
           // Subtle gradient orbs for depth
           Positioned(
             top: 100,
             right: -100,
-            child: Container(
-              width: 400,
-              height: 400,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    AppColors.accentBlue.withValues(alpha: 0.08),
-                    Colors.transparent,
-                  ],
-                ),
-              ),
+            child: _GradientOrb(
+              color: AppColors.accentBlue,
+              alpha: 0.08,
+              size: 400,
             ),
           ),
           Positioned(
             bottom: 200,
             left: -50,
-            child: Container(
-              width: 300,
-              height: 300,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    AppColors.accentPurple.withValues(alpha: 0.06),
-                    Colors.transparent,
-                  ],
-                ),
-              ),
+            child: _GradientOrb(
+              color: AppColors.accentPurple,
+              alpha: 0.06,
+              size: 300,
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _GradientOrb extends StatelessWidget {
+  final Color color;
+  final double alpha;
+  final double size;
+
+  const _GradientOrb({
+    required this.color,
+    required this.alpha,
+    required this.size,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: RadialGradient(
+          colors: [
+            color.withValues(alpha: alpha),
+            Colors.transparent,
+          ],
+        ),
       ),
     );
   }
@@ -308,6 +355,7 @@ class _GlassButtonState extends State<GlassButton>
               padding: widget.padding,
               borderRadius: widget.borderRadius,
               blur: widget.isPrimary ? 30 : 20,
+              useDistortion: false,
               child: Container(
                 decoration: widget.isPrimary
                     ? BoxDecoration(
@@ -324,7 +372,9 @@ class _GlassButtonState extends State<GlassButton>
                     : null,
                 child: DefaultTextStyle(
                   style: TextStyle(
-                    color: widget.isPrimary ? Colors.white : AppColors.primaryText,
+                    color: widget.isPrimary
+                        ? Colors.white
+                        : AppColors.primaryText,
                     fontWeight: FontWeight.w600,
                     fontSize: 16,
                   ),
@@ -402,6 +452,8 @@ class _GlassIconButtonState extends State<GlassIconButton>
             child: VisionGlassCard(
               padding: EdgeInsets.zero,
               borderRadius: widget.size / 2,
+              blur: 10,
+              useDistortion: false,
               child: SizedBox(
                 width: widget.size,
                 height: widget.size,

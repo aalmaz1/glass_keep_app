@@ -91,9 +91,9 @@ class _GlassKeepAppState extends State<GlassKeepApp>
     _authStream = FirebaseAuth.instance.authStateChanges();
     _storageFuture = StorageService.init();
 
-    // Single AnimationController for all glass distortion effects
+    // Single AnimationController for all glass distortion effects (8s duration for optimal visual)
     _glassAnimationController = AnimationController(
-      duration: const Duration(seconds: 10),
+      duration: const Duration(seconds: 8),
       vsync: this,
     )..repeat();
   }
