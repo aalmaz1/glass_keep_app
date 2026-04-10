@@ -13,6 +13,7 @@ import 'package:glass_keep/l10n/app_localizations.dart';
 import 'package:glass_keep/data.dart';
 import 'package:glass_keep/widgets.dart';
 import 'package:glass_keep/constants.dart';
+import 'package:glass_keep/main.dart';
 
 class NotesScreen extends StatefulWidget {
   final StorageService storage;
@@ -269,6 +270,7 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
   }
 
   void _showMenu(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -285,8 +287,51 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
             const SizedBox(height: 12),
             Container(width: 36, height: 5, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2.5))),
             const SizedBox(height: 20),
-            _MenuItem(icon: CupertinoIcons.trash, label: 'Trash', onTap: () { Navigator.pop(context); _openTrash(context); }),
-            _MenuItem(icon: CupertinoIcons.arrow_right_square, label: 'Logout', onTap: () { Navigator.pop(context); _logout(); }, isDestructive: true),
+            _MenuItem(icon: CupertinoIcons.globe, label: l10n.language, onTap: () { Navigator.pop(context); _showLanguagePicker(context); }),
+            _MenuItem(icon: CupertinoIcons.trash, label: l10n.trash, onTap: () { Navigator.pop(context); _openTrash(context); }),
+            _MenuItem(icon: CupertinoIcons.arrow_right_square, label: l10n.logout, onTap: () { Navigator.pop(context); _logout(); }, isDestructive: true),
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showLanguagePicker(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final provider = GlassAnimationProvider.of(context);
+    if (provider == null) return;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        margin: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.obsidianDark.withOpacity(0.95),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.white.withOpacity(0.1)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 12),
+            Container(width: 36, height: 5, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2.5))),
+            const SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              child: Row(
+                children: [
+                  const Icon(CupertinoIcons.globe, color: AppColors.accentBlue, size: 22),
+                  const SizedBox(width: 12),
+                  Text(l10n.language, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white)),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
+            _LanguageOption(locale: const Locale('en'), flag: '🇺🇸', name: 'English', currentLocale: provider.locale, onTap: provider.onLocaleChanged),
+            _LanguageOption(locale: const Locale('ru'), flag: '🇷🇺', name: 'Русский', currentLocale: provider.locale, onTap: provider.onLocaleChanged),
+            _LanguageOption(locale: const Locale('ko'), flag: '🇰🇷', name: '한국어', currentLocale: provider.locale, onTap: provider.onLocaleChanged),
             const SizedBox(height: 20),
           ],
         ),
@@ -315,6 +360,68 @@ class _MenuItem extends StatelessWidget {
             Icon(icon, color: isDestructive ? AppColors.accentRed : AppColors.accentBlue, size: 22),
             const SizedBox(width: 16),
             Text(label, style: TextStyle(fontSize: 17, color: isDestructive ? AppColors.accentRed : Colors.white)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _LanguageOption extends StatelessWidget {
+  final Locale locale;
+  final String flag;
+  final String name;
+  final Locale currentLocale;
+  final Function(Locale) onTap;
+
+  const _LanguageOption({
+    required this.locale,
+    required this.flag,
+    required this.name,
+    required this.currentLocale,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isSelected = locale == currentLocale;
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.mediumImpact();
+        onTap(locale);
+        Navigator.pop(context);
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.accentBlue.withOpacity(0.2) : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? AppColors.accentBlue : Colors.white.withOpacity(0.1),
+            width: 1.5,
+          ),
+        ),
+        child: Row(
+          children: [
+            Text(flag, style: const TextStyle(fontSize: 24)),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                name,
+                style: TextStyle(
+                  fontSize: 17,
+                  color: isSelected ? AppColors.accentBlue : Colors.white,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                ),
+              ),
+            ),
+            if (isSelected)
+              const Icon(
+                CupertinoIcons.checkmark_circle_fill,
+                color: AppColors.accentBlue,
+                size: 22,
+              ),
           ],
         ),
       ),

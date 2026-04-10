@@ -76,4 +76,10 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get secureCloudSync => 'Безопасная синхронизация';
+
+  @override
+  String get language => 'Язык';
+
+  @override
+  String get settings => 'Настройки';
 }

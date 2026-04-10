@@ -1,4 +1,5 @@
 {
+  "@@locale": "ru",
   "newNote": "Новая заметка",
   "save": "Сохранить",
   "logout": "Выйти",
@@ -19,5 +20,7 @@
   "password": "Пароль",
   "dontHaveAccount": "Нет аккаунта? Зарегистрируйтесь",
   "alreadyHaveAccount": "Уже есть аккаунт? Войдите",
-  "secureCloudSync": "Безопасная синхронизация"
+  "secureCloudSync": "Безопасная синхронизация",
+  "language": "Язык",
+  "settings": "Настройки"
 }
