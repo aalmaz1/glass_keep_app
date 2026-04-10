@@ -1,18 +1,39 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-/// Core color constants for the app
+/// Core color constants for the app - Obsidian Vision Premium Dark Theme
 class AppColors {
-  static const Color background = Color(0xFF0A0A14);
-  static const Color surface = Color(0xFF1E1E2E);
+  // Obsidian dark background colors
+  static const Color background = Color(0xFF0A0A0C);
+  static const Color surface = Color(0xFF1A1A1E);
+  static const Color secondaryBackground = Color(0xFF2A2A30);
+
+  // Text colors
+  static const Color primaryText = Colors.white;
+  static Color get secondaryText => Colors.white.withOpacity(0.7);
+  static const Color tertiaryText = Color(0xFF86868B);
   
-  // Glass morphism
-  static const Color glassLight = Color.fromARGB(64, 255, 255, 255);
-  static const Color glassDark = Color.fromARGB(26, 0, 0, 0);
+  // Glass morphism - Light theme
+  static const Color glassLight = Color.fromARGB(48, 255, 255, 255);
+  static const Color glassDark = Color.fromARGB(20, 0, 0, 0);
+  static const Color glassBorder = Color.fromARGB(25, 0, 0, 0);
+
+  // Obsidian theme colors
+  static const Color obsidianDark = Color(0xFF0A0A0C);
+  static const Color obsidianLight = Color(0xFF1A1A1E);
   
   // Utilities
   static const Color white24 = Color.fromARGB(61, 255, 255, 255);
   static const Color white12 = Color.fromARGB(31, 255, 255, 255);
+  static const Color black12 = Color.fromARGB(31, 0, 0, 0);
+  static const Color black24 = Color.fromARGB(61, 0, 0, 0);
+  
+  // Accent colors
+  static const Color accentBlue = Color(0xFF007AFF);
+  static const Color accentRed = Color(0xFFFF3B30);
+  static const Color accentGreen = Color(0xFF34C759);
+  static const Color accentOrange = Color(0xFFFF9500);
+  static const Color accentPurple = Color(0xFFAF52DE);
 }
 
 /// Responsive dimensions helper
@@ -31,6 +52,10 @@ class ResponsiveDimensions {
   static const double borderRadiusMd = 12.0;
   static const double borderRadiusLg = 20.0;
   static const double borderRadiusXl = 30.0;
+
+  static const double gridPadding = 24.0;
+  static const double gridGap = 18.0;
+  static const double cardMinWidth = 300.0;
   
   /// Get horizontal padding based on screen width
   static double getHorizontalPadding(Size size) {
