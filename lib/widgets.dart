@@ -25,7 +25,7 @@ class VisionGlassCard extends StatelessWidget {
     required this.child,
     this.padding,
     this.borderRadius = 20,
-    this.blur = 12,
+    this.blur = 16,
     this.useDistortion = true,
   });
 
@@ -39,9 +39,9 @@ class VisionGlassCard extends StatelessWidget {
           // Layer 1: Outer soft shadow for Luxury Look
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.15),
-              blurRadius: 24,
-              offset: const Offset(0, 8),
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 32,
+              offset: const Offset(0, 12),
               spreadRadius: -4,
             ),
           ],
@@ -63,13 +63,13 @@ class VisionGlassCard extends StatelessWidget {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      AppColors.obsidianLight.withOpacity(0.7),
-                      AppColors.obsidianDark.withOpacity(0.4),
+                      AppColors.obsidianLight.withOpacity(0.6),
+                      AppColors.obsidianDark.withOpacity(0.3),
                     ],
                   ),
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.12),
-                    width: 0.5,
+                    color: Colors.white.withOpacity(0.15),
+                    width: 0.8,
                   ),
                 ),
               ),
@@ -79,8 +79,8 @@ class VisionGlassCard extends StatelessWidget {
                 RepaintBoundary(
                   child: GlassDistortionEffect(
                     borderRadius: borderRadius,
-                    distortionStrength: 1.5,
-                    distortionScale: 0.012,
+                    distortionStrength: 1.2,
+                    distortionScale: 0.01,
                     child: const SizedBox.expand(),
                   ),
                 ),
