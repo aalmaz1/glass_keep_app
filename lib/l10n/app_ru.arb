@@ -8,5 +8,16 @@
   "noNotes": "Заметки не найдены",
   "searchHint": "Поиск заметок...",
   "delete": "Удалить",
-  "archive": "В архив"
+  "archive": "В архив",
+  "trash": "Корзина",
+  "emptyTrash": "Очистить корзину",
+  "noNotesInTrash": "Корзина пуста",
+  "trashEmptyHint": "Архивированные заметки появляются здесь",
+  "login": "Войти",
+  "signUp": "Создать аккаунт",
+  "email": "Email",
+  "password": "Пароль",
+  "dontHaveAccount": "Нет аккаунта? Зарегистрируйтесь",
+  "alreadyHaveAccount": "Уже есть аккаунт? Войдите",
+  "secureCloudSync": "Безопасная синхронизация"
 }

@@ -37,4 +37,43 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get archive => 'В архив';
+
+  @override
+  String get trash => 'Корзина';
+
+  @override
+  String get restore => 'Восстановить';
+
+  @override
+  String get deleteForever => 'Удалить навсегда';
+
+  @override
+  String get noNotesInTrash => 'Нет заметок в корзине';
+
+  @override
+  String get trashEmptyHint => 'Удаленные заметки появятся здесь';
+
+  @override
+  String get emptyTrash => 'Очистить корзину';
+
+  @override
+  String get login => 'Войти';
+
+  @override
+  String get signUp => 'Регистрация';
+
+  @override
+  String get email => 'Email';
+
+  @override
+  String get password => 'Пароль';
+
+  @override
+  String get alreadyHaveAccount => 'Уже есть аккаунт?';
+
+  @override
+  String get dontHaveAccount => 'Нет аккаунта?';
+
+  @override
+  String get secureCloudSync => 'Безопасная синхронизация';
 }

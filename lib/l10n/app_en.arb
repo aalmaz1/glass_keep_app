@@ -8,5 +8,16 @@
   "noNotes": "No notes found",
   "searchHint": "Search notes...",
   "delete": "Delete",
-  "archive": "Archive"
+  "archive": "Archive",
+  "trash": "Trash",
+  "emptyTrash": "Empty Trash",
+  "noNotesInTrash": "Trash is empty",
+  "trashEmptyHint": "Archived notes appear here",
+  "login": "Sign In",
+  "signUp": "Create Account",
+  "email": "Email",
+  "password": "Password",
+  "dontHaveAccount": "Don't have an account? Sign up",
+  "alreadyHaveAccount": "Already have an account? Sign in",
+  "secureCloudSync": "Secure cloud sync"
 }
