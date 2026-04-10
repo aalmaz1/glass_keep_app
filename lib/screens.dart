@@ -12,7 +12,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:glass_keep/l10n/app_localizations.dart';
 import 'package:glass_keep/data.dart';
 import 'package:glass_keep/widgets.dart';
-import 'package:glass_keep/styles.dart';
 import 'package:glass_keep/constants.dart';
 
 class NotesScreen extends StatefulWidget {
