@@ -321,7 +321,7 @@ class _NoisePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..color = Colors.white;
-    final random = java_math_Random(42); // Seeded for consistency
+    final random = math.Random(42); // Seeded for consistency
     for (int i = 0; i < 1000; i++) {
       final x = random.nextDouble() * size.width;
       final y = random.nextDouble() * size.height;
@@ -331,16 +331,6 @@ class _NoisePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_NoisePainter oldDelegate) => false;
-}
-
-// Helper to avoid importing dart:math everywhere and keep it simple
-class java_math_Random {
-  int seed;
-  java_math_Random(this.seed);
-  double nextDouble() {
-    seed = (seed * 1103515245 + 12345) & 0x7fffffff;
-    return seed / 0x7fffffff;
-  }
 }
 
 /// Apple-style glass button with spring animation
