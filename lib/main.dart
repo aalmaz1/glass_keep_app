@@ -7,7 +7,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:glass_keep/l10n/app_localizations.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:glass_keep/data.dart';
 import 'package:glass_keep/screens.dart';
 import 'package:glass_keep/auth_screen.dart';
@@ -42,7 +41,6 @@ void main() async {
     }
 
     FlutterError.onError = (FlutterErrorDetails details) {
-      FlutterError.presentError(details);
       debugPrint('FlutterError: ${details.exception}');
     };
 
@@ -55,12 +53,10 @@ void main() async {
 /// Global provider for sharing a single AnimationController across all glass effects
 class GlassAnimationProvider extends InheritedWidget {
   final AnimationController animationController;
-  final Animation<double> animation;
 
   const GlassAnimationProvider({
     super.key,
     required this.animationController,
-    required this.animation,
     required super.child,
   });
 
@@ -109,7 +105,6 @@ class _GlassKeepAppState extends State<GlassKeepApp>
   Widget build(BuildContext context) {
     return GlassAnimationProvider(
       animationController: _glassAnimationController,
-      animation: _glassAnimationController,
       child: MaterialApp(
         title: 'Glass Keep',
         debugShowCheckedModeBanner: false,

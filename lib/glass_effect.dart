@@ -127,7 +127,7 @@ class GlassDistortionEffect extends StatelessWidget {
     }
 
     return AnimatedBuilder(
-      animation: animationProvider.animation,
+      animation: animationProvider.animationController,
       builder: (context, child) => Stack(
         children: [
           // Distortion layer
@@ -135,7 +135,7 @@ class GlassDistortionEffect extends StatelessWidget {
             borderRadius: BorderRadius.circular(borderRadius),
             child: CustomPaint(
               painter: GlassDistortionPainter(
-                time: animationProvider.animation.value * 8,
+                time: animationProvider.animationController.value * 8,
                 strength: distortionStrength,
                 scale: distortionScale,
               ),

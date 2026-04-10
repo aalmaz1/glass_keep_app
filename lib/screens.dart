@@ -245,8 +245,8 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
                           note: notes[i],
                           onTap: () => _openNote(context, notes[i]),
                           onArchive: () {
-                            notes[i].isArchived = !notes[i].isArchived;
-                            widget.storage.save(notes[i]);
+                            final updatedNote = notes[i].copyWith(isArchived: !notes[i].isArchived);
+                            widget.storage.save(updatedNote);
                           },
                         ),
                         childCount: notes.length,
@@ -415,8 +415,7 @@ class _NoteCardState extends State<NoteCard> with AutomaticKeepAliveClientMixin 
   @override
   void initState() {
     super.initState();
-    _decodedImage = widget.note.cachedImage;
-    _lastImageBase64 = widget.note.imageBase64;
+    _updateImage();
   }
 
   @override
@@ -424,10 +423,13 @@ class _NoteCardState extends State<NoteCard> with AutomaticKeepAliveClientMixin 
     super.didUpdateWidget(oldWidget);
     if (oldWidget.note.imageBase64 != widget.note.imageBase64 ||
         oldWidget.note.id != widget.note.id) {
-      _lastImageBase64 = widget.note.imageBase64;
-      // Lazy decode only when needed
-      _decodedImage = widget.note.cachedImage;
+      _updateImage();
     }
+  }
+
+  void _updateImage() {
+    _lastImageBase64 = widget.note.imageBase64;
+    _decodedImage = widget.note.cachedImage;
   }
 
   @override
@@ -567,13 +569,16 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
 
   void _save() {
     if (_t.text.trim().isEmpty && _c.text.trim().isEmpty && _img == null) return;
-    widget.note.title = _t.text.trim();
-    widget.note.content = _c.text.trim();
-    widget.note.labels = _l.text.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
-    widget.note.imageBase64 = _img;
-    widget.note.reminder = _rem;
-    widget.note.updatedAt = DateTime.now();
-    widget.storage.save(widget.note);
+    
+    final updatedNote = widget.note.copyWith(
+      title: _t.text.trim(),
+      content: _c.text.trim(),
+      labels: _l.text.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+      imageBase64: _img,
+      reminder: _rem,
+      updatedAt: DateTime.now(),
+    );
+    widget.storage.save(updatedNote);
   }
 
   @override
@@ -621,7 +626,11 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                               CupertinoButton(
                                 padding: EdgeInsets.zero,
                                 child: Icon(widget.note.isPinned ? CupertinoIcons.pin_fill : CupertinoIcons.pin, color: AppColors.accentBlue, size: 22),
-                                onPressed: () => setState(() => widget.note.isPinned = !widget.note.isPinned),
+                                onPressed: () {
+                                  final updatedNote = widget.note.copyWith(isPinned: !widget.note.isPinned);
+                                  widget.storage.save(updatedNote);
+                                  setState(() {});
+                                },
                               ),
                               CupertinoButton(
                                 padding: EdgeInsets.zero,
@@ -851,8 +860,8 @@ class _TrashScreenState extends State<TrashScreen> {
                             child: _TrashNoteCard(
                               note: note,
                               onRestore: () {
-                                note.isArchived = false;
-                                widget.storage.save(note);
+                                final updatedNote = note.copyWith(isArchived: false);
+                                widget.storage.save(updatedNote);
                               },
                               onDelete: () {
                                 widget.storage.delete(note.id);

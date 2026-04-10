@@ -6,10 +6,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 
 class Note {
-  String id;
-  String title;
-  String content;
-  List<String> labels;
+  final String id;
+  final String title;
+  final String content;
+  final List<String> labels;
   bool isPinned;
   bool isArchived;
   DateTime? reminder;
@@ -19,7 +19,6 @@ class Note {
 
   /// Cached decoded image bytes to avoid repeated base64 decoding
   Uint8List? _cachedImage;
-  bool _imageDecoded = false;
 
   Note({
     required this.id,
@@ -36,16 +35,14 @@ class Note {
 
   /// Get cached image bytes, decoding only on first access
   Uint8List? get cachedImage {
-    if (_imageDecoded) return _cachedImage;
+    if (_cachedImage != null) return _cachedImage;
     _cachedImage = decodeImage();
-    _imageDecoded = true;
     return _cachedImage;
   }
 
   /// Clear the cached image (useful when imageBase64 changes)
   void clearImageCache() {
     _cachedImage = null;
-    _imageDecoded = false;
   }
 
   /// Decode base64 image synchronously - call this only when needed
@@ -96,7 +93,7 @@ class Note {
     DateTime? updatedAt,
     String? userId,
   }) {
-    final note = Note(
+    return Note(
       id: id ?? this.id,
       title: title ?? this.title,
       content: content ?? this.content,
@@ -108,11 +105,6 @@ class Note {
       updatedAt: updatedAt ?? this.updatedAt,
       userId: userId ?? this.userId,
     );
-    // Clear cache if image changed
-    if (imageBase64 != null && imageBase64 != this.imageBase64) {
-      note.clearImageCache();
-    }
-    return note;
   }
 }
 
@@ -197,12 +189,13 @@ class StorageService {
 
   Future<void> save(Note note) async {
     try {
-      note.userId = _uid;
+      // Create a new note instance with updated userId to maintain immutability
+      final updatedNote = note.copyWith(userId: _uid);
       if (note.id.isEmpty) {
         final doc = _db.collection('notes').doc();
-        note.id = doc.id;
+        updatedNote.id = doc.id;
       }
-      await _db.collection('notes').doc(note.id).set(note.toMap());
+      await _db.collection('notes').doc(updatedNote.id).set(updatedNote.toMap());
     } catch (e) {
       debugPrint('save note error: $e');
       rethrow;
