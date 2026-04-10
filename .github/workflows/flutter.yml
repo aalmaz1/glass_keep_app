@@ -1,40 +1,4 @@
---- .github/workflows/flutter.yml (原始)
-name: Flutter CI
-
-on:
-  push:
-    branches: ["main"]
-  pull_request:
-    branches: ["main"]
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: 'stable'
-
-      - name: Enable Web
-        run: flutter config --enable-web
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Analyze project source
-        run: flutter analyze
-
-      # Тесты отключены. Если появятся тесты, уберите символы # в двух строках ниже
-      # - name: Run tests
-      #   run: flutter test
-
-      - name: Build Web
-        run: flutter build web --release
-
-+++ .github/workflows/flutter.yml (修改后)
-name: Flutter CI and Deploy
+name: Flutter CI and Deploygit 
 
 on:
   push:
@@ -63,7 +27,7 @@ jobs:
         run: flutter build web --release --base-href="/${{ github.event.repository.name }}/"
 
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
+        uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./build/web
