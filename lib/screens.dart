@@ -9,6 +9,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:glass_keep/l10n/app_localizations.dart';
 import 'package:glass_keep/data.dart';
 import 'package:glass_keep/widgets.dart';
+import 'package:glass_keep/constants.dart';
 
 class NotesScreen extends StatefulWidget {
   final StorageService storage;
@@ -52,11 +53,11 @@ class _NotesScreenState extends State<NotesScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final paddingH = size.width * 0.04;
+    final paddingH = ResponsiveDimensions.getHorizontalPadding(size);
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0A14),
+      backgroundColor: AppColors.background,
       extendBodyBehindAppBar: true,
       body: Stack(
         children: [
@@ -131,11 +132,11 @@ class _NotesScreenState extends State<NotesScreen> {
 
                     if (notes.isEmpty) {
                       return SliverFillRemaining(
-                        child: Center(child: Text(l10n.noNotes, style: const TextStyle(color: Colors.white24, fontSize: 17))),
+                        child: Center(child: Text(l10n.noNotes, style: const TextStyle(color: AppColors.white24, fontSize: 17))),
                       );
                     }
 
-                    int crossAxisCount = size.width > 900 ? 4 : (size.width > 600 ? 3 : 2);
+                    int crossAxisCount = ResponsiveDimensions.getGridColumns(size);
 
                     return SliverPadding(
                       padding: EdgeInsets.symmetric(horizontal: paddingH, vertical: 8),
