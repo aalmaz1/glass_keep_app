@@ -30,14 +30,14 @@ class GlassCard extends StatelessWidget {
         children: [
           if (hasBlur)
             BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
               child: const SizedBox.expand(),
             ),
           Container(
             decoration: BoxDecoration(
-              color: AppColors.obsidianLight.withOpacity(0.4),
+              color: AppColors.obsidianLight.withOpacity(0.35),
               border: Border.all(
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withOpacity(0.12),
                 width: 1,
               ),
             ),
@@ -63,9 +63,9 @@ class GlassCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(borderRadius),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
@@ -286,19 +286,19 @@ class GlassTextField extends StatelessWidget {
         children: [
           if (hasBlur)
             BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.5),
-                  border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
+                  color: Colors.white.withOpacity(0.4),
+                  border: Border.all(color: Colors.white.withOpacity(0.2), width: 1),
                 ),
               ),
             ),
           if (!hasBlur)
             Container(
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.5),
-                border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
+                color: Colors.white.withOpacity(0.4),
+                border: Border.all(color: Colors.white.withOpacity(0.2), width: 1),
               ),
             ),
           TextField(

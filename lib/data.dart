@@ -10,12 +10,12 @@ class Note {
   final String title;
   final String content;
   final List<String> labels;
-  bool isPinned;
-  bool isArchived;
-  DateTime? reminder;
-  String? imageBase64;
-  DateTime updatedAt;
-  String? userId;
+  final bool isPinned;
+  final bool isArchived;
+  final DateTime? reminder;
+  final String? imageBase64;
+  final DateTime updatedAt;
+  final String? userId;
 
   /// Cached decoded image bytes to avoid repeated base64 decoding
   Uint8List? _cachedImage;
@@ -189,13 +189,14 @@ class StorageService {
 
   Future<void> save(Note note) async {
     try {
-      // Create a new note instance with updated userId to maintain immutability
-      final updatedNote = note.copyWith(userId: _uid);
       if (note.id.isEmpty) {
         final doc = _db.collection('notes').doc();
-        updatedNote.id = doc.id;
+        final newNote = note.copyWith(id: doc.id, userId: _uid);
+        await _db.collection('notes').doc(newNote.id).set(newNote.toMap());
+      } else {
+        final updatedNote = note.copyWith(userId: _uid);
+        await _db.collection('notes').doc(note.id).set(updatedNote.toMap());
       }
-      await _db.collection('notes').doc(updatedNote.id).set(updatedNote.toMap());
     } catch (e) {
       debugPrint('save note error: $e');
       rethrow;

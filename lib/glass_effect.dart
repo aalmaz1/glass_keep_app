@@ -7,10 +7,12 @@ import 'package:noise/noise.dart';
 /// Optimized for minimal noise calculations
 class GlassDistortionPainter extends CustomPainter {
   static final Perlin _noise = Perlin();
-  // Reduced grid resolution for better performance
-  static const int _gridResolution = 10;
+  // Reduced grid resolution for better performance on all devices
+  static const int _gridResolution = 8;
   // Cache for noise values to reduce redundant calculations
   static final Map<int, double> _noiseCache = {};
+  // Cache generation to invalidate old entries
+  static int _cacheGeneration = 0;
 
   final double time;
   final double strength;
@@ -18,8 +20,8 @@ class GlassDistortionPainter extends CustomPainter {
 
   GlassDistortionPainter({
     required this.time,
-    this.strength = 3.0,
-    this.scale = 0.02,
+    this.strength = 2.0,
+    this.scale = 0.015,
   });
 
   @override
@@ -33,12 +35,17 @@ class GlassDistortionPainter extends CustomPainter {
     final cellHeight = size.height / _gridResolution;
 
     final paint = Paint()
-      ..color = Colors.white.withOpacity(0.12)
+      ..color = Colors.white.withOpacity(0.08)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.5;
+      ..strokeWidth = 0.3;
 
     // Cache key prefix based on time to invalidate old values
     final timeHash = (time * 100).toInt();
+
+    // Increment cache generation periodically to allow old entries to be cleared
+    if (timeHash % 10 == 0) {
+      _cacheGeneration++;
+    }
 
     // Draw horizontal waves only (skip vertical for performance)
     for (int y = 0; y <= _gridResolution; y++) {
@@ -47,7 +54,7 @@ class GlassDistortionPainter extends CustomPainter {
 
       for (int x = 0; x <= _gridResolution; x++) {
         // Use cached noise or calculate new
-        final cacheKey = (timeHash * 10000 + y * 100 + x).toString();
+        final cacheKey = (_cacheGeneration * 10000 + y * 100 + x);
         final noiseVal = _getNoiseOffsetCached(
           x.toDouble(),
           y.toDouble(),
@@ -67,21 +74,19 @@ class GlassDistortionPainter extends CustomPainter {
       canvas.drawPath(path, paint);
     }
 
-    // Clear old cache entries periodically
-    if (_noiseCache.length > 1000) {
+    // Clear old cache entries when generation changes significantly
+    if (_noiseCache.length > 500) {
       _noiseCache.clear();
     }
   }
 
   /// Get cached noise value or calculate new one
-  double _getNoiseOffsetCached(double x, double y, String cacheKey) {
-    // Simple LRU-like behavior - recalculate every few frames
-    final hashKey = cacheKey.hashCode;
-    if (_noiseCache.containsKey(hashKey)) {
-      return _noiseCache[hashKey]!;
+  double _getNoiseOffsetCached(double x, double y, int cacheKey) {
+    if (_noiseCache.containsKey(cacheKey)) {
+      return _noiseCache[cacheKey]!;
     }
     final value = _getNoiseOffset(x, y);
-    _noiseCache[hashKey] = value;
+    _noiseCache[cacheKey] = value;
     return value;
   }
 
@@ -113,15 +118,15 @@ class GlassDistortionEffect extends StatelessWidget {
     super.key,
     required this.child,
     this.borderRadius = 20,
-    this.distortionStrength = 3.0,
-    this.distortionScale = 0.02,
+    this.distortionStrength = 2.0,
+    this.distortionScale = 0.015,
   });
 
   @override
   Widget build(BuildContext context) {
     final animationProvider = GlassAnimationProvider.of(context);
     
-    // Fallback to static if provider not available
+    // Fallback to static if provider not available or on low-end devices
     if (animationProvider == null) {
       return child;
     }
