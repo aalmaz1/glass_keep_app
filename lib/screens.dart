@@ -577,93 +577,112 @@ class _NoteCardState extends State<NoteCard> with AutomaticKeepAliveClientMixin 
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final note = widget.note;
-
-    return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
-      child: AnimatedScale(
-        scale: _isHovered ? 1.01 : 1.0,
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeOutCubic,
-        child: AnimatedContainer(
+    return RepaintBoundary(
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _isHovered = true),
+        onExit: (_) => setState(() => _isHovered = false),
+        child: AnimatedScale(
+          scale: _isHovered ? 1.01 : 1.0,
           duration: const Duration(milliseconds: 500),
           curve: Curves.easeOutCubic,
-          transform: Matrix4.translationValues(0, _isHovered ? -6 : 0, 0),
-          child: RepaintBoundary(
-            child: VisionGlassCard(
-              padding: EdgeInsets.zero,
-              child: InkWell(
-                onTap: widget.onTap,
-                borderRadius: BorderRadius.circular(20),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (_decodedImage != null)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 10),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Image.memory(
-                              _decodedImage!,
-                              fit: BoxFit.cover,
-                              // Optimize image caching
-                              cacheWidth: 400,
-                              gaplessPlayback: true,
-                            ),
-                          ),
-                        ),
-                      Row(
-                        children: [
-                          if (note.isPinned)
-                            const Icon(
-                              CupertinoIcons.pin_fill,
-                              size: 14,
-                              color: AppColors.accentBlue,
-                            ),
-                          if (note.isPinned) const SizedBox(width: 6),
-                          Expanded(
-                            child: Text(
-                              note.title,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                color: Colors.white,
-                                letterSpacing: -0.2,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      if (note.content.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 6),
-                          child: Text(
-                            note.content,
-                            maxLines: 6,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(0.7),
-                              fontSize: 14,
-                              height: 1.3,
-                            ),
-                          ),
-                        ),
-                      if (note.labels.isNotEmpty) ...[
-                        const SizedBox(height: 10),
-                        Wrap(
-                          spacing: 6,
-                          runSpacing: 6,
-                          children: note.labels.map((l) => LabelChip(label: l)).toList(),
-                        ),
-                      ],
-                    ],
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeOutCubic,
+            transform: Matrix4.translationValues(0, _isHovered ? -6 : 0, 0),
+            child: _NoteCardContent(
+              note: widget.note,
+              decodedImage: _decodedImage,
+              onTap: widget.onTap,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Вынесенный контент карточки для оптимизации перерисовки
+class _NoteCardContent extends StatelessWidget {
+  final Note note;
+  final Uint8List? decodedImage;
+  final VoidCallback onTap;
+
+  const _NoteCardContent({
+    required this.note,
+    required this.decodedImage,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return VisionGlassCard(
+      padding: EdgeInsets.zero,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (decodedImage != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.memory(
+                      decodedImage!,
+                      fit: BoxFit.cover,
+                      cacheWidth: 400,
+                      gaplessPlayback: true,
+                    ),
                   ),
                 ),
+              Row(
+                children: [
+                  if (note.isPinned)
+                    const Icon(
+                      CupertinoIcons.pin_fill,
+                      size: 14,
+                      color: AppColors.accentBlue,
+                    ),
+                  if (note.isPinned) const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      note.title,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: Colors.white,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
+              if (note.content.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Text(
+                    note.content,
+                    maxLines: 6,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.7),
+                      fontSize: 14,
+                      height: 1.3,
+                    ),
+                  ),
+                ),
+              if (note.labels.isNotEmpty) ...[
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: note.labels.map((l) => LabelChip(label: l)).toList(),
+                ),
+              ],
+            ],
           ),
         ),
       ),
