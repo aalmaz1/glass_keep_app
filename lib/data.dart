@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 
 class Note {
   String id;
@@ -195,15 +196,25 @@ class StorageService {
   }
 
   Future<void> save(Note note) async {
-    note.userId = _uid;
-    if (note.id.isEmpty) {
-      final doc = _db.collection('notes').doc();
-      note.id = doc.id;
+    try {
+      note.userId = _uid;
+      if (note.id.isEmpty) {
+        final doc = _db.collection('notes').doc();
+        note.id = doc.id;
+      }
+      await _db.collection('notes').doc(note.id).set(note.toMap());
+    } catch (e) {
+      debugPrint('save note error: $e');
+      rethrow;
     }
-    await _db.collection('notes').doc(note.id).set(note.toMap());
   }
 
   Future<void> delete(String id) async {
-    await _db.collection('notes').doc(id).delete();
+    try {
+      await _db.collection('notes').doc(id).delete();
+    } catch (e) {
+      debugPrint('delete note error: $e');
+      rethrow;
+    }
   }
 }

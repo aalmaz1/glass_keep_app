@@ -7,6 +7,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:glass_keep/l10n/app_localizations.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:glass_keep/data.dart';
 import 'package:glass_keep/screens.dart';
 import 'package:glass_keep/auth_screen.dart';
