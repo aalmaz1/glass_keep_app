@@ -14,6 +14,7 @@ import 'package:glass_keep/data.dart';
 import 'package:glass_keep/widgets.dart';
 import 'package:glass_keep/constants.dart';
 import 'package:glass_keep/main.dart';
+import 'package:glass_keep/settings_screen.dart';
 
 class NotesScreen extends StatefulWidget {
   final StorageService storage;
@@ -34,6 +35,9 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
   List<Note>? _lastSourceNotes;
   // Debounce timer for search
   Timer? _searchDebounceTimer;
+  // Background state
+  Color? _backgroundColor;
+  Decoration? _backgroundDecoration;
 
   @override
   void initState() {
@@ -148,11 +152,14 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor: AppColors.obsidianDark,
+      backgroundColor: _backgroundColor ?? AppColors.obsidianDark,
       extendBodyBehindAppBar: true,
       body: Stack(
         children: [
-          const Positioned.fill(child: VisionBackground()),
+          if (_backgroundDecoration != null)
+            Positioned.fill(child: Container(decoration: _backgroundDecoration))
+          else
+            const Positioned.fill(child: VisionBackground()),
           SafeArea(
             child: CustomScrollView(
               slivers: [
@@ -287,11 +294,27 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
             const SizedBox(height: 12),
             Container(width: 36, height: 5, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2.5))),
             const SizedBox(height: 20),
+            _MenuItem(icon: CupertinoIcons.paintbrush, label: 'Фон', onTap: () { Navigator.pop(context); _openBackgroundSettings(context); }),
             _MenuItem(icon: CupertinoIcons.globe, label: l10n.language, onTap: () { Navigator.pop(context); _showLanguagePicker(context); }),
             _MenuItem(icon: CupertinoIcons.trash, label: l10n.trash, onTap: () { Navigator.pop(context); _openTrash(context); }),
             _MenuItem(icon: CupertinoIcons.arrow_right_square, label: l10n.logout, onTap: () { Navigator.pop(context); _logout(); }, isDestructive: true),
             const SizedBox(height: 20),
           ],
+        ),
+      ),
+    );
+  }
+
+  void _openBackgroundSettings(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => SettingsScreen(
+          onThemeChanged: (Color? color, Decoration? decoration) {
+            setState(() {
+              _backgroundColor = color;
+              _backgroundDecoration = decoration;
+            });
+          },
         ),
       ),
     );
