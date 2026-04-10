@@ -58,29 +58,49 @@ class StorageService {
   final _auth = FirebaseAuth.instance;
 
   static Future<StorageService> init() async {
-    FirebaseFirestore.instance.settings = const Settings(persistenceEnabled: true);
-    return StorageService();
+    try {
+      FirebaseFirestore.instance.settings = const Settings(persistenceEnabled: true);
+      return StorageService();
+    } catch (e) {
+      debugPrint('StorageService initialization error: $e');
+      rethrow;
+    }
   }
 
   String get _uid => _auth.currentUser?.uid ?? 'anonymous';
 
   Stream<List<Note>> getNotesStream() {
-    return _db.collection('notes')
-        .where('userId', isEqualTo: _uid)
-        .snapshots()
-        .map((s) => s.docs.map((d) => Note.fromMap(d.data())).toList());
+    try {
+      return _db.collection('notes')
+          .where('userId', isEqualTo: _uid)
+          .snapshots()
+          .map((s) => s.docs.map((d) => Note.fromMap(d.data())).toList());
+    } catch (e) {
+      debugPrint('getNotesStream error: $e');
+      rethrow;
+    }
   }
 
   Future<void> save(Note note) async {
-    note.userId = _uid;
-    if (note.id.isEmpty) {
-      final doc = _db.collection('notes').doc();
-      note.id = doc.id;
+    try {
+      note.userId = _uid;
+      if (note.id.isEmpty) {
+        final doc = _db.collection('notes').doc();
+        note.id = doc.id;
+      }
+      await _db.collection('notes').doc(note.id).set(note.toMap());
+    } catch (e) {
+      debugPrint('save note error: $e');
+      rethrow;
     }
-    await _db.collection('notes').doc(note.id).set(note.toMap());
   }
 
   Future<void> delete(String id) async {
-    await _db.collection('notes').doc(id).delete();
+    try {
+      await _db.collection('notes').doc(id).delete();
+    } catch (e) {
+      debugPrint('delete note error: $e');
+      rethrow;
+    }
   }
 }

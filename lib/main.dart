@@ -7,14 +7,19 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:glass_keep/l10n/app_localizations.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:glass_keep/data.dart';
 import 'package:glass_keep/screens.dart';
 import 'package:glass_keep/auth_screen.dart';
+import 'package:glass_keep/constants.dart';
 import 'firebase_options.dart';
 
 void main() async {
   runZonedGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
+    
+    // Load environment variables from .env file
+    await dotenv.load(fileName: '.env');
     
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
@@ -58,7 +63,7 @@ class GlassKeepApp extends StatelessWidget {
       theme: ThemeData(
         brightness: Brightness.dark,
         useMaterial3: true,
-        scaffoldBackgroundColor: const Color(0xFF0A0A14),
+        scaffoldBackgroundColor: AppColors.background,
         colorSchemeSeed: CupertinoColors.activeBlue,
         cupertinoOverrideTheme: const CupertinoThemeData(
           brightness: Brightness.dark,

@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:glass_keep/glass_effect.dart';
 import 'package:glass_keep/l10n/app_localizations.dart';
+import 'package:glass_keep/constants.dart';
 
 class VisionGlassCard extends StatefulWidget {
   final Widget child;
