@@ -240,9 +240,9 @@ class BreathingGlow extends StatelessWidget {
     if (animationProvider == null) return const SizedBox.shrink();
 
     return AnimatedBuilder(
-      animation: animationProvider.animation,
+      animation: animationProvider.animationController,
       builder: (context, child) {
-        final value = animationProvider.animation.value;
+        final value = animationProvider.animationController.value;
         final breathe = (1.0 + 0.1 * math.sin(value * 2 * math.pi)) / 1.1;
 
         return Stack(
