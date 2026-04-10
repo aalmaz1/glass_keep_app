@@ -1,4 +1,5 @@
 {
+  "@@locale": "en",
   "newNote": "New Note",
   "save": "Save",
   "logout": "Logout",
@@ -19,5 +20,7 @@
   "password": "Password",
   "dontHaveAccount": "Don't have an account? Sign up",
   "alreadyHaveAccount": "Already have an account? Sign in",
-  "secureCloudSync": "Secure cloud sync"
+  "secureCloudSync": "Secure cloud sync",
+  "language": "Language",
+  "settings": "Settings"
 }

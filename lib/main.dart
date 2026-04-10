@@ -51,12 +51,17 @@ void main() async {
 }
 
 /// Global provider for sharing a single AnimationController across all glass effects
+/// and managing app locale state
 class GlassAnimationProvider extends InheritedWidget {
   final AnimationController animationController;
+  final Locale locale;
+  final Function(Locale) onLocaleChanged;
 
   const GlassAnimationProvider({
     super.key,
     required this.animationController,
+    required this.locale,
+    required this.onLocaleChanged,
     required super.child,
   });
 
@@ -65,7 +70,8 @@ class GlassAnimationProvider extends InheritedWidget {
   }
 
   @override
-  bool updateShouldNotify(GlassAnimationProvider oldWidget) => false;
+  bool updateShouldNotify(GlassAnimationProvider oldWidget) =>
+      oldWidget.locale != locale;
 }
 
 class GlassKeepApp extends StatefulWidget {
@@ -80,6 +86,11 @@ class _GlassKeepAppState extends State<GlassKeepApp>
   late Stream<User?> _authStream;
   late Future<StorageService> _storageFuture;
   late AnimationController _glassAnimationController;
+  Locale _locale = const Locale('en');
+
+  void _changeLocale(Locale newLocale) {
+    setState(() => _locale = newLocale);
+  }
 
   @override
   void initState() {
@@ -105,9 +116,12 @@ class _GlassKeepAppState extends State<GlassKeepApp>
   Widget build(BuildContext context) {
     return GlassAnimationProvider(
       animationController: _glassAnimationController,
+      locale: _locale,
+      onLocaleChanged: _changeLocale,
       child: MaterialApp(
         title: 'Glass Keep',
         debugShowCheckedModeBanner: false,
+        locale: _locale,
         theme: ThemeData(
           brightness: Brightness.dark,
           useMaterial3: true,
@@ -148,10 +162,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
         ],
-        supportedLocales: const [
-          Locale('en'),
-          Locale('ru'),
-        ],
+        supportedLocales: AppLocalizations.supportedLocales,
         home: StreamBuilder<User?>(
           stream: _authStream,
           builder: (context, snapshot) {

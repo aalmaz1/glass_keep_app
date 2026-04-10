@@ -76,4 +76,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get secureCloudSync => 'Secure Cloud Sync';
+
+  @override
+  String get language => 'Language';
+
+  @override
+  String get settings => 'Settings';
 }
