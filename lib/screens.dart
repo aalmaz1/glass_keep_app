@@ -329,9 +329,22 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
               ),
             ),
             const SizedBox(height: 8),
-            _LanguageOption(locale: const Locale('en'), flag: '🇺🇸', name: 'English', currentLocale: provider.locale, onTap: provider.onLocaleChanged),
-            _LanguageOption(locale: const Locale('ru'), flag: '🇷🇺', name: 'Русский', currentLocale: provider.locale, onTap: provider.onLocaleChanged),
-            _LanguageOption(locale: const Locale('ko'), flag: '🇰🇷', name: '한국어', currentLocale: provider.locale, onTap: provider.onLocaleChanged),
+            _LanguageOption(locale: const Locale('en'), flag: '🇺🇸', name: 'English', currentLocale: provider.locale, onTap: (locale) {
+              Navigator.pop(context);
+              // Access the state directly through the provider's widget tree
+              final state = context.findAncestorStateOfType<_GlassKeepAppState>();
+              state?._changeLocale(locale);
+            }),
+            _LanguageOption(locale: const Locale('ru'), flag: '🇷🇺', name: 'Русский', currentLocale: provider.locale, onTap: (locale) {
+              Navigator.pop(context);
+              final state = context.findAncestorStateOfType<_GlassKeepAppState>();
+              state?._changeLocale(locale);
+            }),
+            _LanguageOption(locale: const Locale('ko'), flag: '🇰🇷', name: '한국어', currentLocale: provider.locale, onTap: (locale) {
+              Navigator.pop(context);
+              final state = context.findAncestorStateOfType<_GlassKeepAppState>();
+              state?._changeLocale(locale);
+            }),
             const SizedBox(height: 20),
           ],
         ),
