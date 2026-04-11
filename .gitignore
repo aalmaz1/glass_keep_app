@@ -1,31 +1,48 @@
-```yaml
-# Configuration and workflow files
-.github/
+# Compiled and build artifacts
+*.pyc
+__pycache__/
+*.o
+*.obj
+*.class
+*.exe
+*.dll
+*.so
+*.a
+*.out
 
 # Dependencies
 node_modules/
-.dart_tool/
-.build/
-.pub/
-pubspec.lock
-
-# Logs
-*.log
-**/logs
-**/*.log
-
-# Environment variables
+venv/
+.venv/
 .env
 .env.local
 .env.*
-!.env.example
 
-# OS generated files
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+*.swo
+
+# Editors
+.vscode/
+.idea/
+
+# Coverage
+coverage/
+htmlcov/
+.coverage
+
+# Build directories
+dist/
+build/
+target/
+.gradle/
+
+# Python cache
+.mypy_cache/
+.pytest_cache/
+
+# System files
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
-```
