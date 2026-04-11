@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:glass_keep/main.dart';
-import 'package:perlin_noise/perlin_noise.dart';
+import 'package:noise/noise.dart';
 
 /// Liquid glass distortion painter using Perlin noise
 /// Generates wavy distortion effect similar to macOS glass morphism
