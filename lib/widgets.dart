@@ -1,116 +1,54 @@
 import 'package:flutter/material.dart';
-import 'dart:ui' as ui show ImageFilter;
 
-// Vision Background Widget - gradient background for app
-class VisionBackground extends StatelessWidget {
-  const VisionBackground({Key? key}) : super(key: key);
+class PremiumGlassmorphismWidget extends StatelessWidget {
+  final String title;
+  
+  const PremiumGlassmorphismWidget({Key? key, required this.title}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
+          colors: [
+            Colors.black.withOpacity(0.8), // dark background
+            Colors.black87,
+          ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            const Color(0xFF0A0E27),
-            const Color(0xFF1A1F3A),
-          ],
         ),
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black26,
+            blurRadius: 10,
+            offset: Offset(0, 5),
+          ),
+        ],
       ),
-    );
-  }
-}
-
-// Glass Card Widget - glassmorphism component
-class VisionGlassCard extends StatelessWidget {
-  final Widget child;
-  final EdgeInsets padding;
-  final bool useDistortion;
-
-  const VisionGlassCard({
-    Key? key,
-    required this.child,
-    this.padding = const EdgeInsets.all(16),
-    this.useDistortion = true,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: padding,
-      decoration: BoxDecoration(
-        color: const Color(0xFFFFFFFF).withAlpha(25),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: const Color(0xFFFFFFFF).withAlpha(50),
-          width: 1.5,
-        ),
-      ),
-      child: useDistortion
-          ? BackdropFilter(
-              filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-              child: child,
-            )
-          : child,
-    );
-  }
-}
-
-// Glass Search Bar Widget
-class GlassSearchBar extends StatelessWidget {
-  final TextEditingController controller;
-  final Function(String)? onChanged;
-
-  const GlassSearchBar({
-    Key? key,
-    required this.controller,
-    this.onChanged,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return TextField(
-      controller: controller,
-      onChanged: onChanged,
-      style: const TextStyle(color: Colors.white),
-      decoration: InputDecoration(
-        hintText: 'Search notes...',
-        hintStyle: TextStyle(color: Colors.white.withAlpha(128)),
-        prefixIcon: const Icon(Icons.search, color: Colors.white54),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.white.withAlpha(50)),
-        ),
-        filled: true,
-        fillColor: const Color(0xFFFFFFFF).withAlpha(25),
-      ),
-    );
-  }
-}
-
-// Label Chip Widget
-class LabelChip extends StatelessWidget {
-  final String label;
-
-  const LabelChip({Key? key, required this.label}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.blue.withAlpha(50),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.blue.withAlpha(100),
-        ),
-      ),
-      child: Text(
-        label,
-        style: const TextStyle(
-          fontSize: 12,
-          color: Colors.white,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(15),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.1), // glass effect
+              border: Border.all(
+                color: Colors.white.withOpacity(0.2),
+                width: 1,
+              ),
+              borderRadius: BorderRadius.circular(15),
+            ),
+            padding: EdgeInsets.all(20),
+            child: Text(
+              title,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
         ),
       ),
     );
