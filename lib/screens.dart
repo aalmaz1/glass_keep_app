@@ -185,7 +185,6 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
                             ),
                             child: const Icon(
                               CupertinoIcons.ellipsis_vertical,
-                              color: AppColors.secondaryText,
                               size: 22,
                             ),
                           ),
@@ -211,7 +210,6 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
                       return const SliverFillRemaining(
                         child: Center(
                           child: CupertinoActivityIndicator(
-                            color: AppColors.accentBlue,
                             radius: 15,
                           ),
                         ),
@@ -226,7 +224,7 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
                         child: Center(
                           child: Text(
                             l10n.noNotes,
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: AppColors.secondaryText,
                               fontSize: 17,
                             ),
@@ -1004,7 +1002,7 @@ class _TrashScreenState extends State<TrashScreen> {
                       final archivedNotes = snapshot.data!.where((n) => n.isArchived).toList();
 
                       if (archivedNotes.isEmpty) {
-                        return Center(child: Text(l10n.trashEmptyHint, style: const TextStyle(color: AppColors.secondaryText, fontSize: 17)));
+                        return Center(child: Text(l10n.trashEmptyHint, style: TextStyle(color: AppColors.secondaryText, fontSize: 17)));
                       }
 
                       return ListView.builder(
