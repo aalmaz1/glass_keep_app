@@ -10,7 +10,7 @@ class AppColors {
 
   // Text colors
   static const Color primaryText = Colors.white;
-  static Color get secondaryText => Colors.white.withOpacity(0.7);
+  static Color get secondaryText => Color(0xFFFFFFFF).withValues(alpha: 0.7);
   static const Color tertiaryText = Color(0xFF86868B);
   
   // Glass morphism - Light theme
