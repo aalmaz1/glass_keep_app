@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:ui';
+import 'dart:ui' hide ImageFilter;
+import 'dart:ui' as ui show ImageFilter;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -352,19 +353,16 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
             const SizedBox(height: 8),
             _LanguageOption(locale: const Locale('en'), flag: '🇺🇸', name: 'English', currentLocale: provider.locale, onTap: (locale) {
               Navigator.pop(context);
-              // Access the state directly through the provider's widget tree
-              final state = context.findAncestorStateOfType<_GlassKeepAppState>();
-              state?._changeLocale(locale);
+              // Use the provider's onLocaleChanged callback instead of accessing state directly
+              provider.onLocaleChanged(locale);
             }),
             _LanguageOption(locale: const Locale('ru'), flag: '🇷🇺', name: 'Русский', currentLocale: provider.locale, onTap: (locale) {
               Navigator.pop(context);
-              final state = context.findAncestorStateOfType<_GlassKeepAppState>();
-              state?._changeLocale(locale);
+              provider.onLocaleChanged(locale);
             }),
             _LanguageOption(locale: const Locale('ko'), flag: '🇰🇷', name: '한국어', currentLocale: provider.locale, onTap: (locale) {
               Navigator.pop(context);
-              final state = context.findAncestorStateOfType<_GlassKeepAppState>();
-              state?._changeLocale(locale);
+              provider.onLocaleChanged(locale);
             }),
             const SizedBox(height: 20),
           ],
@@ -758,7 +756,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
         child: ClipRRect(
           borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+            filter: ui.ImageFilter.blur(sigmaX: 20, sigmaY: 20),
             child: Stack(
               children: [
                 Positioned(
@@ -1006,7 +1004,7 @@ class _TrashScreenState extends State<TrashScreen> {
                       final archivedNotes = snapshot.data!.where((n) => n.isArchived).toList();
 
                       if (archivedNotes.isEmpty) {
-                        return Center(child: Text(l10n.trashEmpty, style: const TextStyle(color: AppColors.secondaryText, fontSize: 17)));
+                        return Center(child: Text(l10n.trashEmptyHint, style: const TextStyle(color: AppColors.secondaryText, fontSize: 17)));
                       }
 
                       return ListView.builder(
