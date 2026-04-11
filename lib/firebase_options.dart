@@ -33,34 +33,40 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: '',
-    appId: '',
+    apiKey: 'AIzaSyBsrhKx5xHIi167LjVaMJ_HK3W-bBAdpyw',
+    appId: '1:585955210188:web:5f741583ef4e89ed192369',
     messagingSenderId: '585955210188',
     projectId: 'glasskeep-2a8e5',
     storageBucket: 'glasskeep-2a8e5.firebasestorage.app',
+    authDomain: 'glasskeep-2a8e5.firebaseapp.com',
+    measurementId: 'G-GZE669316H',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: '',
-    appId: '',
+    apiKey: 'AIzaSyBsrhKx5xHIi167LjVaMJ_HK3W-bBAdpyw',
+    appId: '1:585955210188:web:5f741583ef4e89ed192369',
     messagingSenderId: '585955210188',
     projectId: 'glasskeep-2a8e5',
     storageBucket: 'glasskeep-2a8e5.firebasestorage.app',
-    iosBundleId: '',
+    authDomain: 'glasskeep-2a8e5.firebaseapp.com',
+    iosBundleId: 'com.glasskeep.app',
+    measurementId: 'G-GZE669316H',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: '',
-    appId: '',
+    apiKey: 'AIzaSyBsrhKx5xHIi167LjVaMJ_HK3W-bBAdpyw',
+    appId: '1:585955210188:web:5f741583ef4e89ed192369',
     messagingSenderId: '585955210188',
     projectId: 'glasskeep-2a8e5',
     storageBucket: 'glasskeep-2a8e5.firebasestorage.app',
-    iosBundleId: '',
+    authDomain: 'glasskeep-2a8e5.firebaseapp.com',
+    iosBundleId: 'com.glasskeep.app',
+    measurementId: 'G-GZE669316H',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: '',
-    appId: '',
+    apiKey: 'AIzaSyBsrhKx5xHIi167LjVaMJ_HK3W-bBAdpyw',
+    appId: '1:585955210188:web:5f741583ef4e89ed192369',
     messagingSenderId: '585955210188',
     projectId: 'glasskeep-2a8e5',
     authDomain: 'glasskeep-2a8e5.firebaseapp.com',
