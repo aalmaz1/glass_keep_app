@@ -342,7 +342,7 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
               child: Row(
                 children: [
-                  const Icon(CupertinoIcons.globe, color: AppColors.accentBlue, size: 22),
+                  Icon(CupertinoIcons.globe, color: AppColors.accentBlue, size: 22),
                   const SizedBox(width: 12),
                   Text(l10n.language, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white)),
                 ],
@@ -789,7 +789,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                               ),
                               CupertinoButton(
                                 padding: EdgeInsets.zero,
-                                child: const Icon(CupertinoIcons.trash, color: AppColors.accentRed, size: 22),
+                                child: Icon(widget.note.isPinned ? CupertinoIcons.pin_fill : CupertinoIcons.pin, color: AppColors.accentBlue, size: 22),
                                 onPressed: () {
                                   if (widget.note.id.isNotEmpty) widget.storage.delete(widget.note.id);
                                   Navigator.pop(context);
@@ -923,7 +923,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                   }),
                   if (_rem != null) ...[
                     const SizedBox(width: 8),
-                    Expanded(child: Text(DateFormat('dd.MM HH:mm').format(_rem!), style: const TextStyle(fontSize: 12, color: AppColors.accentBlue, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)),
+                    Expanded(child: Text(DateFormat('dd.MM HH:mm').format(_rem!), style: TextStyle(fontSize: 12, color: AppColors.accentBlue, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)),
                   ],
                 ],
               ),
@@ -996,7 +996,7 @@ class _TrashScreenState extends State<TrashScreen> {
                     stream: _notesStream,
                     builder: (context, snapshot) {
                       if (!snapshot.hasData) {
-                        return const Center(child: CupertinoActivityIndicator(color: AppColors.accentBlue));
+                        return Center(child: CupertinoActivityIndicator(color: AppColors.accentBlue));
                       }
 
                       final archivedNotes = snapshot.data!.where((n) => n.isArchived).toList();
@@ -1068,7 +1068,7 @@ class _TrashNoteCard extends StatelessWidget {
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     CupertinoIcons.arrow_counterclockwise,
                     color: AppColors.accentBlue,
                     size: 20,
@@ -1077,7 +1077,7 @@ class _TrashNoteCard extends StatelessWidget {
                   tooltip: 'Restore',
                 ),
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     CupertinoIcons.trash,
                     color: AppColors.accentRed,
                     size: 20,
