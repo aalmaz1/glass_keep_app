@@ -239,9 +239,9 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
                     final crossAxisCount = ((size.width - 2 * paddingH + ResponsiveDimensions.gridGap) / (ResponsiveDimensions.cardMinWidth + ResponsiveDimensions.gridGap)).floor().clamp(1, 6);
 
                     return SliverPadding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: paddingH,
-                        vertical: 18,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: ResponsiveDimensions.gridPadding,
+                        vertical: ResponsiveDimensions.gridPadding,
                       ),
                       sliver: SliverMasonryGrid.count(
                         crossAxisCount: crossAxisCount,
