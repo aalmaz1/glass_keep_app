@@ -22,22 +22,25 @@ venv/
 *.log
 *.tmp
 *.swp
-*.swo
 
 # Editors
 .vscode/
 .idea/
+*.swp
+*.swo
 
 # Build directories
 dist/
 build/
 target/
 .gradle/
+
+# Python specific
 .mypy_cache/
 .pytest_cache/
+.coverage
 coverage/
 htmlcov/
-*.coverage
 
 # System files
 .DS_Store
