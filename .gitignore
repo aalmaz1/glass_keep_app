@@ -1,27 +1,12 @@
 ```
-# Dependencies
-.pub/
-.buildlog
-.flutter-plugins
-.flutter-plugins-dependencies
-.packages
-
-# Generated plugin code
-.config/
-generated/
-
-# Coverage
-coverage/
-
-# Temporary files
+# Dart/Flutter build artifacts
+*.dart_tool/
+*.build/
+*.cache/
+*.deps/
+*.manifest
+*.lock
 *.tmp
-*.temp
-*.log
-
-# Environment
-.env
-.env.local
-.env.*
 
 # IDE files
 .idea/
@@ -29,7 +14,20 @@ coverage/
 *.swp
 *.swo
 
-# OS generated files
-.DS_Store
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
+*.env.*
+
+# Coverage
+coverage/
+*.coverage
+
+# Temporary files
+*.tmp
 Thumbs.db
+.DS_Store
 ```

@@ -10,7 +10,7 @@ class AppColors {
 
   // Text colors
   static const Color primaryText = Colors.white;
-  static const Color secondaryText = Color(0xB3FFFFFF); // 70% opacity white
+  static const Color secondaryText = Color.fromRGBO(255, 255, 255, 0.7); // 70% opacity white
   static const Color tertiaryText = Color(0xFF86868B);
   
   // Glass morphism - Light theme

@@ -116,11 +116,10 @@ class _ShineLayer extends StatelessWidget {
           borderRadius: BorderRadius.circular(borderRadius),
           boxShadow: [
             BoxShadow(
-              color: Colors.white.withOpacity(0.05),
+              color: Color.fromRGBO(255, 255, 255, 0.05),
               blurRadius: 1,
               spreadRadius: 0,
               offset: const Offset(1, 1),
-              inset: true,
             ),
           ],
         ),
