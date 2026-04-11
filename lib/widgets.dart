@@ -74,13 +74,11 @@ class VisionGlassCard extends StatelessWidget {
           child: Stack(
             children: [
               // Layer 2: Backdrop blur effect with saturation (Optimized)
-              BackdropFilter(
-                filter: ui.ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-                child: Container(
-                  decoration: BoxDecoration(
-                    colorFilter: ColorFilter.matrix(_createSaturationMatrix(1.3)),
-                  ),
-                  child: const SizedBox.expand(),
+              ColorFiltered(
+                colorFilter: ColorFilter.matrix(_createSaturationMatrix(1.3)),
+                child: BackdropFilter(
+                  filter: ui.ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+                  child: Container(),
                 ),
               ),
 
