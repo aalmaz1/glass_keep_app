@@ -9,10 +9,10 @@ import 'package:glass_keep/main.dart';
 
 /// Optimized Vision Glass Card with perfect glassmorphism effect
 /// Layer structure:
-///   1. Outer soft shadow
-///   2. BackdropFilter with blur
-///   3. Gradient tint layer
-///   4. Thin border for edge glow
+///   1. Multi-layer soft shadows for luxury depth
+///   2. BackdropFilter with blur + saturation
+///   3. Gradient tint layer with internal glow
+///   4. Gradient border for premium edge glow
 ///   5. Optional distortion effect
 class VisionGlassCard extends StatelessWidget {
   final Widget child;
@@ -37,13 +37,35 @@ class VisionGlassCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(borderRadius),
-          // Layer 1: Outer soft shadow for Luxury Look
+          // Layer 1: Multi-layer shadows for luxury depth
           boxShadow: [
+            // Deep ambient shadow
             BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              blurRadius: 32,
+              color: Colors.black.withOpacity(0.3),
+              blurRadius: 50,
+              offset: const Offset(0, 25),
+              spreadRadius: -10,
+            ),
+            // Mid-tone shadow for volume
+            BoxShadow(
+              color: Colors.black.withOpacity(0.15),
+              blurRadius: 30,
               offset: const Offset(0, 12),
               spreadRadius: -4,
+            ),
+            // Sharp contact shadow
+            BoxShadow(
+              color: Colors.black.withOpacity(0.4),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
+              spreadRadius: -2,
+            ),
+            // Subtle glow highlight
+            BoxShadow(
+              color: Colors.white.withOpacity(0.03),
+              blurRadius: 20,
+              offset: const Offset(0, -5),
+              spreadRadius: 2,
             ),
           ],
         ),
@@ -51,26 +73,37 @@ class VisionGlassCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(borderRadius),
           child: Stack(
             children: [
-              // Layer 2: Backdrop blur effect (Optimized)
+              // Layer 2: Backdrop blur effect with saturation (Optimized)
               BackdropFilter(
-                filter: ui.ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+                filter: ui.ImageFilter.blur(sigmaX: blur, sigmaY: blur)
+                    .compose(ui.ImageFilter.matrix(
+                  _createSaturationMatrix(1.3),
+                )),
                 child: const SizedBox.expand(),
               ),
 
-              // Layer 3 & 4: Obsidian Gradient tint + thin border for edge glow
+              // Layer 3: Premium gradient tint with internal glow
               Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      AppColors.obsidianLight.withOpacity(0.6),
-                      AppColors.obsidianDark.withOpacity(0.3),
+                      AppColors.obsidianLight.withOpacity(0.5),
+                      AppColors.obsidianDark.withOpacity(0.25),
+                      Colors.transparent,
                     ],
+                    stops: const [0.0, 0.4, 1.0],
                   ),
-                  border: Border.all(
-                    color: Colors.white.withOpacity(0.15),
-                    width: 0.8,
+                ),
+              ),
+
+              // Layer 4: Gradient border for premium edge glow
+              Positioned.fill(
+                child: CustomPaint(
+                  painter: _GradientBorderPainter(
+                    borderRadius: borderRadius,
+                    borderWidth: 1.2,
                   ),
                 ),
               ),
@@ -86,8 +119,8 @@ class VisionGlassCard extends StatelessWidget {
                   ),
                 ),
 
-              // Layer 5: Inset shine effect (Internal Glow)
-              _ShineLayer(borderRadius: borderRadius),
+              // Layer 5: Enhanced inset shine effect (Internal Glow)
+              _EnhancedShineLayer(borderRadius: borderRadius),
 
               // Content
               Padding(
@@ -99,6 +132,17 @@ class VisionGlassCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// Create saturation matrix for backdrop filter
+  ui.ColorFilter _createSaturationMatrix(double saturation) {
+    final s = saturation;
+    return ui.ColorFilter.matrix([
+      (0.213 + 0.787 * s), (0.715 - 0.715 * s), (0.072 - 0.072 * s), 0, 0,
+      (0.213 - 0.213 * s), (0.715 + 0.285 * s), (0.072 - 0.072 * s), 0, 0,
+      (0.213 - 0.213 * s), (0.715 - 0.715 * s), (0.072 + 0.928 * s), 0, 0,
+      0, 0, 0, 1, 0,
+    ]);
   }
 }
 
@@ -126,6 +170,96 @@ class _ShineLayer extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Enhanced inset shine effect with gradient for premium look
+class _EnhancedShineLayer extends StatelessWidget {
+  final double borderRadius;
+
+  const _EnhancedShineLayer({required this.borderRadius});
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned.fill(
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(borderRadius),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.white.withOpacity(0.08),
+              Colors.white.withOpacity(0.02),
+              Colors.transparent,
+              Colors.transparent,
+            ],
+            stops: const [0.0, 0.2, 0.4, 1.0],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Gradient border painter for premium edge glow effect
+class _GradientBorderPainter extends CustomPainter {
+  final double borderRadius;
+  final double borderWidth;
+
+  _GradientBorderPainter({
+    required this.borderRadius,
+    required this.borderWidth,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Rect.fromLTWH(0, 0, size.width, size.height);
+    final rrect = RRect.fromRectAndRadius(rect, Radius.circular(borderRadius));
+    
+    // Create gradient stroke path
+    final path = Path()..addRRect(rrect);
+    
+    // Draw gradient border using multiple strokes for premium effect
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = borderWidth
+      ..strokeCap = StrokeCap.round;
+
+    // Top-left highlight (brightest)
+    final gradient = SweepGradient(
+      startAngle: -0.75 * 3.14159,
+      endAngle: 0.25 * 3.14159,
+      colors: [
+        Colors.white.withOpacity(0.4),
+        Colors.white.withOpacity(0.15),
+        Colors.white.withOpacity(0.05),
+        Colors.transparent,
+      ],
+      stops: const [0.0, 0.3, 0.6, 1.0],
+      transform: const GradientRotation(-0.75 * 3.14159),
+    );
+
+    final shaderPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = borderWidth
+      ..shader = gradient.createShader(rect);
+
+    canvas.drawRRect(rrect, shaderPaint);
+
+    // Additional subtle inner glow
+    final innerGlowPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 0.5
+      ..color = Colors.white.withOpacity(0.1)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2);
+
+    canvas.drawRRect(rrect.deflate(borderWidth / 2), innerGlowPaint);
+  }
+
+  @override
+  bool shouldRepaint(_GradientBorderPainter oldDelegate) =>
+      oldDelegate.borderRadius != borderRadius ||
+      oldDelegate.borderWidth != borderWidth;
 }
 
 class GlassSearchBar extends StatelessWidget {
@@ -248,6 +382,7 @@ class BreathingGlow extends StatelessWidget {
 
         return Stack(
           children: [
+            // Primary top-right blue orb
             Positioned(
               top: -100,
               right: -50,
@@ -257,6 +392,7 @@ class BreathingGlow extends StatelessWidget {
                 size: 500 * breathe,
               ),
             ),
+            // Secondary bottom-left purple orb
             Positioned(
               bottom: -50,
               left: -100,
@@ -264,6 +400,26 @@ class BreathingGlow extends StatelessWidget {
                 color: AppColors.accentPurple,
                 opacity: 0.04 * breathe,
                 size: 400 * breathe,
+              ),
+            ),
+            // Additional accent green orb for depth
+            Positioned(
+              top: 200,
+              left: -80,
+              child: _GlowOrb(
+                color: AppColors.accentGreen,
+                opacity: 0.03 * breathe,
+                size: 300 * breathe,
+              ),
+            ),
+            // Subtle orange accent for warmth
+            Positioned(
+              bottom: 150,
+              right: -60,
+              child: _GlowOrb(
+                color: AppColors.accentOrange,
+                opacity: 0.025 * breathe,
+                size: 250 * breathe,
               ),
             ),
           ],
@@ -323,10 +479,14 @@ class _NoisePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..color = Colors.white;
     final random = math.Random(42); // Seeded for consistency
-    for (int i = 0; i < 1000; i++) {
+    // Increased point count for smoother noise distribution
+    final pointCount = (size.width * size.height / 50).clamp(2000, 8000).toInt();
+    for (int i = 0; i < pointCount; i++) {
       final x = random.nextDouble() * size.width;
       final y = random.nextDouble() * size.height;
-      canvas.drawRect(Rect.fromLTWH(x, y, 1, 1), paint);
+      // Use smaller points with varying opacity for more natural look
+      paint.color = Colors.white.withOpacity(random.nextDouble() * 0.3 + 0.1);
+      canvas.drawRect(Rect.fromLTWH(x, y, 0.8, 0.8), paint);
     }
   }
 
