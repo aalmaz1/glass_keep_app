@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -26,7 +25,6 @@ class NotesScreen extends StatefulWidget {
 
 class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStateMixin {
   String _search = '';
-  final bool _showArchived = false;
   late TextEditingController _searchController;
   late Stream<List<Note>> _notesStream;
   late AnimationController _fabAnimationController;
@@ -139,7 +137,7 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
     return notes;
   }
 
-  /// Clear filter cache when notes change significantly
+  /// Clear filter cache when notes change significantly (kept for API compatibility)
   void _clearFilterCache() {
     _filteredNotes = null;
     _lastSourceNotes = null;
@@ -180,9 +178,9 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
                           child: Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.1),
+                              color: Color(0xFFFFFFFF).withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.white.withOpacity(0.15)),
+                              border: Border.all(color: Color(0xFFFFFFFF).withValues(alpha: 0.15)),
                             ),
                             child: const Icon(
                               CupertinoIcons.ellipsis_vertical,

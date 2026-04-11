@@ -1,10 +1,10 @@
 import 'dart:math' as math;
-import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:glass_keep/glass_effect.dart';
 import 'package:glass_keep/l10n/app_localizations.dart';
 import 'package:glass_keep/constants.dart';
+import 'package:glass_keep/main.dart';
 
 /// Optimized Vision Glass Card with perfect glassmorphism effect
 /// Layer structure:
@@ -481,7 +481,7 @@ class _GlassIconButtonState extends State<GlassIconButton>
       CurvedAnimation(
         parent: _controller,
         curve: Curves.easeOutCubic,
-        reverseCurve: Curves.spring,
+        reverseCurve: Curves.bounceOut,
       ),
     );
   }
