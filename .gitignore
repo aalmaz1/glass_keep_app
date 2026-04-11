@@ -25,6 +25,8 @@ venv/
 # Editors
 .vscode/
 .idea/
+*.swp
+*.swo
 
 # Build directories
 dist/
@@ -32,10 +34,12 @@ build/
 target/
 .gradle/
 
-# Coverage
+# Python specific
+.mypy_cache/
+.pytest_cache/
+.coverage
 coverage/
 htmlcov/
-.coverage
 
 # Python cache
 .mypy_cache/
