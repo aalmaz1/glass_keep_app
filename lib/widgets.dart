@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:glass_keep/glass_effect.dart';
@@ -52,7 +53,7 @@ class VisionGlassCard extends StatelessWidget {
             children: [
               // Layer 2: Backdrop blur effect (Optimized)
               BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+                filter: ui.ImageFilter.blur(sigmaX: blur, sigmaY: blur),
                 child: const SizedBox.expand(),
               ),
 
