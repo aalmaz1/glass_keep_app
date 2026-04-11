@@ -211,19 +211,20 @@ class ObsidianBackground extends StatelessWidget {
     return RepaintBoundary(
       child: Container(
         decoration: const BoxDecoration(
-          gradient: RadialGradient(
-            center: Alignment.center,
-            radius: 1.2,
-            colors: [
-              AppColors.obsidianLight,
-              AppColors.obsidianDark,
-            ],
-          ),
+          color: AppColors.obsidianDark,
         ),
         child: const Stack(
           children: [
-            Positioned.fill(child: BreathingGlow()),
-            Positioned.fill(child: MicroNoise(opacity: 0.02)),
+            Positioned.fill(
+              child: RepaintBoundary(
+                child: BreathingGlow(),
+              ),
+            ),
+            Positioned.fill(
+              child: RepaintBoundary(
+                child: MicroNoise(opacity: 0.02),
+              ),
+            ),
           ],
         ),
       ),
