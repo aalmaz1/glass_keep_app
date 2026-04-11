@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:glass_keep/main.dart';
-import 'package:noise/noise.dart';
+import 'package:fast_noise/fast_noise.dart';
 
 /// Liquid glass distortion painter using Perlin noise
 /// Generates wavy distortion effect similar to macOS glass morphism
 /// Optimized for minimal noise calculations
 class GlassDistortionPainter extends CustomPainter {
-  static final Perlin _noise = Perlin();
+  static final _noise = PerlinNoise();
   // Reduced grid resolution for better performance on all devices
   static const int _gridResolution = 8;
   // Cache for noise values to reduce redundant calculations
@@ -95,7 +95,7 @@ class GlassDistortionPainter extends CustomPainter {
     // Single octave of noise for performance
     final sampleX = (x * scale + time * 0.25) / _gridResolution;
     final sampleY = (y * scale) / _gridResolution;
-    return _noise.noise2D(sampleX, sampleY) * strength;
+    return _noise.getNoise2(sampleX, sampleY) * strength;
   }
 
   @override
