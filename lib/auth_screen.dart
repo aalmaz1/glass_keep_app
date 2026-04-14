@@ -120,7 +120,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     const Icon(
                       Icons.blur_on,
                       size: 80,
-                      color: Color(0xFFBBDEFB), // Colors.blueAccent.shade100 approximation
+                      color: AppColors.accentBlue,
                     ),
                     const SizedBox(height: 24),
 
@@ -148,6 +148,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     Form(
                       key: _formKey,
                       child: VisionGlassCard(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         child: Column(
                           children: [
                             // Email input
@@ -244,12 +245,12 @@ class _AuthScreenState extends State<AuthScreen> {
                       child: _isLoading
                           ? const Center(
                               child: CircularProgressIndicator(
-                                color: Colors.blueAccent,
+                                color: AppColors.accentBlue,
                               ),
                             )
                           : ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blueAccent,
+                                backgroundColor: AppColors.accentBlue,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(16),
                                 ),

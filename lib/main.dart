@@ -11,6 +11,7 @@ import 'package:glass_keep/data.dart';
 import 'package:glass_keep/screens.dart';
 import 'package:glass_keep/auth_screen.dart';
 import 'package:glass_keep/constants.dart';
+import 'package:glass_keep/widgets.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -175,19 +176,23 @@ class _GlassKeepAppState extends State<GlassKeepApp>
             }
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Scaffold(
-                backgroundColor: AppColors.obsidianDark,
-                body: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _LoadingLogo(),
-                      SizedBox(height: 24),
-                      CupertinoActivityIndicator(
-                        color: AppColors.accentBlue,
-                        radius: 14,
+                body: Stack(
+                  children: [
+                    VisionBackground(),
+                    Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          _LoadingLogo(),
+                          SizedBox(height: 24),
+                          CupertinoActivityIndicator(
+                            color: AppColors.accentBlue,
+                            radius: 14,
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               );
             }
@@ -207,11 +212,15 @@ class _GlassKeepAppState extends State<GlassKeepApp>
                     return NotesScreen(storage: storeSnapshot.data!);
                   }
                   return const Scaffold(
-                    backgroundColor: AppColors.obsidianDark,
-                    body: Center(
-                      child: CupertinoActivityIndicator(
-                        color: AppColors.accentBlue,
-                      ),
+                    body: Stack(
+                      children: [
+                        VisionBackground(),
+                        Center(
+                          child: CupertinoActivityIndicator(
+                            color: AppColors.accentBlue,
+                          ),
+                        ),
+                      ],
                     ),
                   );
                 },

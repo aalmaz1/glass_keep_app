@@ -265,25 +265,24 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        margin: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.obsidianDark.withValues(alpha: 0.95),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 12),
-            Container(width: 36, height: 5, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2.5))),
-            const SizedBox(height: 20),
-            _MenuItem(icon: CupertinoIcons.paintbrush, label: 'Фон', onTap: () { Navigator.pop(context); _openBackgroundSettings(context); }),
-            _MenuItem(icon: CupertinoIcons.globe, label: l10n.language, onTap: () { Navigator.pop(context); _showLanguagePicker(context); }),
-            _MenuItem(icon: CupertinoIcons.trash, label: l10n.trash, onTap: () { Navigator.pop(context); _openTrash(context); }),
-            _MenuItem(icon: CupertinoIcons.arrow_right_square, label: l10n.logout, onTap: () { Navigator.pop(context); _logout(); }, isDestructive: true),
-            const SizedBox(height: 20),
-          ],
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: VisionGlassCard(
+          borderRadius: 24,
+          color: AppColors.obsidianDark.withValues(alpha: 0.9),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 12),
+              Container(width: 36, height: 5, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2.5))),
+              const SizedBox(height: 20),
+              _MenuItem(icon: CupertinoIcons.paintbrush, label: 'Appearance', onTap: () { Navigator.pop(context); _openBackgroundSettings(context); }),
+              _MenuItem(icon: CupertinoIcons.globe, label: l10n.language, onTap: () { Navigator.pop(context); _showLanguagePicker(context); }),
+              _MenuItem(icon: CupertinoIcons.trash, label: l10n.trash, onTap: () { Navigator.pop(context); _openTrash(context); }),
+              _MenuItem(icon: CupertinoIcons.arrow_right_square, label: l10n.logout, onTap: () { Navigator.pop(context); _logout(); }, isDestructive: true),
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
     );
@@ -312,41 +311,43 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        margin: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.obsidianDark.withValues(alpha: 0.95),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 12),
-            Container(width: 36, height: 5, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2.5))),
-            const SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-              child: const Row(
-                children: [
-                  Icon(CupertinoIcons.globe, color: AppColors.accentBlue, size: 22),
-                  SizedBox(width: 12),
-                  Text('Language', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white)),
-                ],
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: VisionGlassCard(
+          borderRadius: 24,
+          color: AppColors.obsidianDark.withValues(alpha: 0.9),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 12),
+              Container(width: 36, height: 5, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2.5))),
+              const SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                child: const Row(
+                  children: [
+                    Icon(CupertinoIcons.globe, color: AppColors.accentBlue, size: 22),
+                    SizedBox(width: 12),
+                    Text('Language', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white)),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            _LanguageOption(locale: const Locale('en'), flag: '🇺🇸', name: 'English', currentLocale: provider.locale, onTap: (locale) {
-              provider.onLocaleChanged(locale);
-            }),
-            _LanguageOption(locale: const Locale('ru'), flag: '🇷🇺', name: 'Русский', currentLocale: provider.locale, onTap: (locale) {
-              provider.onLocaleChanged(locale);
-            }),
-            _LanguageOption(locale: const Locale('ko'), flag: '🇰🇷', name: '한국어', currentLocale: provider.locale, onTap: (locale) {
-              provider.onLocaleChanged(locale);
-            }),
-            const SizedBox(height: 20),
-          ],
+              const SizedBox(height: 8),
+              _LanguageOption(locale: const Locale('en'), flag: '🇺🇸', name: 'English', currentLocale: provider.locale, onTap: (locale) {
+                provider.onLocaleChanged(locale);
+                Navigator.pop(context);
+              }),
+              _LanguageOption(locale: const Locale('ru'), flag: '🇷🇺', name: 'Русский', currentLocale: provider.locale, onTap: (locale) {
+                provider.onLocaleChanged(locale);
+                Navigator.pop(context);
+              }),
+              _LanguageOption(locale: const Locale('ko'), flag: '🇰🇷', name: '한국어', currentLocale: provider.locale, onTap: (locale) {
+                provider.onLocaleChanged(locale);
+                Navigator.pop(context);
+              }),
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
     );
