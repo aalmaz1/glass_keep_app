@@ -710,7 +710,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
 
   void _save() {
     if (_t.text.trim().isEmpty && _c.text.trim().isEmpty && _img == null) return;
-    
+
     final updatedNote = widget.note.copyWith(
       title: _t.text.trim(),
       content: _c.text.trim(),

@@ -111,7 +111,7 @@ class Note {
 class StorageService {
   final _db = FirebaseFirestore.instance;
   final _auth = FirebaseAuth.instance;
-  
+
   // Cached stream for notes to avoid multiple subscriptions
   Stream<List<Note>>? _notesStream;
   // Cache for the latest notes data
@@ -149,16 +149,16 @@ class StorageService {
               final data = d.data();
               final noteId = data['id'] ?? '';
               final updatedAt = data['updatedAt'] ?? 0;
-              
+
               // Try to find existing note in cache
               final existingNote = oldNotes.where(
                 (n) => n.id == noteId && n.updatedAt.millisecondsSinceEpoch == updatedAt,
               ).firstOrNull;
-              
+
               if (existingNote != null) {
                 return existingNote;
               }
-              
+
               return Note.fromMap(data);
             }).toList();
             _notesCache = List.unmodifiable(notes);
@@ -170,10 +170,10 @@ class StorageService {
     _notesStream = stream.asBroadcastStream();
     return _notesStream!;
   }
-  
+
   /// Get cached notes if available
   List<Note>? get cachedNotes => _notesCache;
-  
+
   /// Clear the cache - useful for logout scenarios
   void clearCache() {
     _notesStream = null;

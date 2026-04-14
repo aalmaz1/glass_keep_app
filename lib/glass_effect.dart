@@ -10,7 +10,7 @@ class GlassDistortionPainter extends CustomPainter {
   static final _noise = PerlinNoise();
   // Slightly increased grid resolution for smoother high-end distortion
   static const int _gridResolution = 12;
-  
+
   // Cache for noise values to reduce redundant calculations
   static final Map<int, double> _noiseCache = {};
 
@@ -146,7 +146,7 @@ class GlassDistortionEffect extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final animationProvider = GlassAnimationProvider.of(context);
-    
+
     // Fallback to static if provider not available
     if (animationProvider == null) {
       return child;
