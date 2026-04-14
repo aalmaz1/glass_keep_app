@@ -103,9 +103,13 @@ class GlassDistortionPainter extends CustomPainter {
       canvas.drawPath(path, paint);
     }
 
-    // Clear old cache entries when generation changes significantly
-    if (_noiseCache.length > 1000) {
-      _noiseCache.clear();
+    // Clear old cache entries when generation changes significantly to prevent memory bloat
+    if (_noiseCache.length > 500) {
+      // Remove half of the cache entries to maintain some continuity
+      final keys = _noiseCache.keys.toList();
+      for (int i = 0; i < keys.length / 2; i++) {
+        _noiseCache.remove(keys[i]);
+      }
     }
   }
 

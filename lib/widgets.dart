@@ -9,7 +9,7 @@ import 'package:glass_keep/main.dart';
 class PremiumGlassmorphismWidget extends StatelessWidget {
   final String title;
   
-  const PremiumGlassmorphismWidget({Key? key, required this.title}) : super(key: key);
+  const PremiumGlassmorphismWidget({super.key, required this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -24,8 +24,8 @@ class PremiumGlassmorphismWidget extends StatelessWidget {
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          const BoxShadow(
+        boxShadow: const [
+          BoxShadow(
             color: Colors.black26,
             blurRadius: 10,
             offset: Offset(0, 5),
@@ -112,15 +112,22 @@ class VisionGlassCard extends StatelessWidget {
         boxShadow: [
           // Large soft shadow for depth
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.45),
-            blurRadius: 30,
+            color: Colors.black.withValues(alpha: 0.5),
+            blurRadius: 40,
             offset: const Offset(0, 20),
+            spreadRadius: -10,
+          ),
+          // Medium shadow
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           ),
           // Tight contact shadow
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.26),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 5,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -146,13 +153,14 @@ class VisionGlassCard extends StatelessWidget {
 class _SpecularBorderPainter extends CustomPainter {
   final double borderRadius;
 
-  _SpecularBorderPainter({required this.borderRadius});
+  const _SpecularBorderPainter({required this.borderRadius});
 
   @override
   void paint(Canvas canvas, Size size) {
     final rect = Offset.zero & size;
     final rrect = RRect.fromRectAndRadius(rect, Radius.circular(borderRadius));
     
+    // Multi-layer specular border
     final paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.2
@@ -160,11 +168,13 @@ class _SpecularBorderPainter extends CustomPainter {
         Offset.zero,
         Offset(size.width, size.height),
         [
-          Colors.white.withValues(alpha: 0.25),
+          Colors.white.withValues(alpha: 0.4),
           Colors.white.withValues(alpha: 0.05),
-          Colors.white.withValues(alpha: 0.15),
+          Colors.white.withValues(alpha: 0.2),
+          Colors.white.withValues(alpha: 0.05),
+          Colors.white.withValues(alpha: 0.3),
         ],
-        [0.0, 0.5, 1.0],
+        [0.0, 0.2, 0.5, 0.8, 1.0],
       );
 
     canvas.drawRRect(rrect, paint);
@@ -196,7 +206,7 @@ class VisionBackground extends StatelessWidget {
                   children: [
                     // Drifting aurora blobs
                     _AuroraBlob(
-                      color: AppColors.accentBlue.withValues(alpha: 0.12),
+                      color: AppColors.accentBlue.withValues(alpha: 0.15),
                       size: 600,
                       alignment: Alignment.topLeft,
                       offset: Offset(
@@ -205,7 +215,7 @@ class VisionBackground extends StatelessWidget {
                       ),
                     ),
                     _AuroraBlob(
-                      color: AppColors.accentPurple.withValues(alpha: 0.08),
+                      color: AppColors.accentPurple.withValues(alpha: 0.12),
                       size: 700,
                       alignment: Alignment.bottomRight,
                       offset: Offset(
@@ -214,7 +224,7 @@ class VisionBackground extends StatelessWidget {
                       ),
                     ),
                     _AuroraBlob(
-                      color: AppColors.accentBlue.withValues(alpha: 0.05),
+                      color: AppColors.accentBlue.withValues(alpha: 0.08),
                       size: 500,
                       alignment: Alignment.centerLeft,
                       offset: Offset(
@@ -228,13 +238,13 @@ class VisionBackground extends StatelessWidget {
             )
           else
             // Fallback for static background
-            Stack(
+            const Stack(
               children: [
                 Positioned(
                   top: -100,
                   right: -100,
                   child: _AuroraBlob(
-                    color: AppColors.accentPurple.withValues(alpha: 0.1),
+                    color: Color(0x1A6C5CE7), // AppColors.accentPurple with alpha 0.1
                     size: 300,
                   ),
                 ),
@@ -242,7 +252,7 @@ class VisionBackground extends StatelessWidget {
                   bottom: 50,
                   left: -50,
                   child: _AuroraBlob(
-                    color: AppColors.accentBlue.withValues(alpha: 0.1),
+                    color: Color(0x1A0984E3), // AppColors.accentBlue with alpha 0.1
                     size: 200,
                   ),
                 ),
@@ -251,8 +261,10 @@ class VisionBackground extends StatelessWidget {
           
           // Noise texture overlay for tactile feel
           Positioned.fill(
-            child: CustomPaint(
-              painter: _NoisePainter(),
+            child: RepaintBoundary(
+              child: CustomPaint(
+                painter: const _NoisePainter(),
+              ),
             ),
           ),
         ],
@@ -287,13 +299,13 @@ class _AuroraBlob extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             gradient: RadialGradient(
-              colors: [color, Colors.transparent],
-              stops: const [0.3, 1.0],
+              colors: [
+                color,
+                color.withValues(alpha: color.alpha * 0.5),
+                color.withValues(alpha: 0.0),
+              ],
+              stops: const [0.0, 0.4, 1.0],
             ),
-          ),
-          child: BackdropFilter(
-            filter: ui.ImageFilter.blur(sigmaX: 80, sigmaY: 80),
-            child: Container(color: Colors.transparent),
           ),
         ),
       ),
@@ -303,10 +315,12 @@ class _AuroraBlob extends StatelessWidget {
 
 /// Painter that adds a subtle film grain noise texture
 class _NoisePainter extends CustomPainter {
+  const _NoisePainter();
+
   @override
   void paint(Canvas canvas, Size size) {
     final random = math.Random(42);
-    final paint = Paint()..color = Colors.white.withValues(alpha: 0.015);
+    final paint = Paint()..color = Colors.white.withValues(alpha: 0.012);
     
     // Draw sparse noise dots
     for (int i = 0; i < 1500; i++) {

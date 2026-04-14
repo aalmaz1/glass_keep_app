@@ -174,41 +174,15 @@ class _GlassKeepAppState extends State<GlassKeepApp>
               );
             }
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return Scaffold(
+              return const Scaffold(
                 backgroundColor: AppColors.obsidianDark,
                 body: Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Container(
-                        width: 60,
-                        height: 60,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              AppColors.accentBlue.withValues(alpha: 0.8),
-                              AppColors.accentPurple.withValues(alpha: 0.8),
-                            ],
-                          ),
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.accentBlue.withValues(alpha: 0.3),
-                              blurRadius: 20,
-                              offset: const Offset(0, 10),
-                            ),
-                          ],
-                        ),
-                        child: const Icon(
-                          CupertinoIcons.doc_text,
-                          size: 30,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      const CupertinoActivityIndicator(
+                      _LoadingLogo(),
+                      SizedBox(height: 24),
+                      CupertinoActivityIndicator(
                         color: AppColors.accentBlue,
                         radius: 14,
                       ),
@@ -246,6 +220,41 @@ class _GlassKeepAppState extends State<GlassKeepApp>
             return const AuthScreen();
           },
         ),
+      ),
+    );
+  }
+}
+
+class _LoadingLogo extends StatelessWidget {
+  const _LoadingLogo();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 60,
+      height: 60,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.accentBlue.withValues(alpha: 0.8),
+            AppColors.accentPurple.withValues(alpha: 0.8),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.accentBlue.withValues(alpha: 0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: const Icon(
+        CupertinoIcons.doc_text,
+        size: 30,
+        color: Colors.white,
       ),
     );
   }
