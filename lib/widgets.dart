@@ -1,8 +1,10 @@
 import 'dart:ui' as ui;
+import 'dart:math' as math;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:glass_keep/constants.dart';
 import 'package:glass_keep/glass_effect.dart';
+import 'package:glass_keep/main.dart';
 
 class PremiumGlassmorphismWidget extends StatelessWidget {
   final String title;
@@ -82,98 +84,240 @@ class VisionGlassCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget content = Container(
-      padding: padding,
-      decoration: BoxDecoration(
-        color: color ?? AppColors.glassLight,
-        borderRadius: BorderRadius.circular(borderRadius),
-        border: border ?? Border.all(
-          color: Colors.white.withValues(alpha: 0.1),
-          width: 0.5,
+    Widget mainContent = Stack(
+      children: [
+        // Specular border highlights
+        Positioned.fill(
+          child: CustomPaint(
+            painter: _SpecularBorderPainter(borderRadius: borderRadius),
+          ),
         ),
-      ),
-      child: child,
+        Padding(
+          padding: padding ?? EdgeInsets.zero,
+          child: child,
+        ),
+      ],
     );
 
     if (useDistortion) {
-      content = GlassDistortionEffect(
+      mainContent = GlassDistortionEffect(
         borderRadius: borderRadius,
-        child: content,
+        child: mainContent,
       );
     }
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(borderRadius),
-      child: BackdropFilter(
-        filter: ui.ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-        child: content,
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(borderRadius),
+        boxShadow: [
+          // Large soft shadow for depth
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.45),
+            blurRadius: 30,
+            offset: const Offset(0, 20),
+          ),
+          // Tight contact shadow
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.26),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(borderRadius),
+        child: BackdropFilter(
+          filter: ui.ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+          child: Container(
+            decoration: BoxDecoration(
+              color: color ?? AppColors.glassLight,
+              borderRadius: BorderRadius.circular(borderRadius),
+              border: border,
+            ),
+            child: mainContent,
+          ),
+        ),
       ),
     );
   }
 }
 
-/// Background with subtle gradient and blurred accent circles
+/// Painter for specular border highlights on glass cards
+class _SpecularBorderPainter extends CustomPainter {
+  final double borderRadius;
+
+  _SpecularBorderPainter({required this.borderRadius});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Offset.zero & size;
+    final rrect = RRect.fromRectAndRadius(rect, Radius.circular(borderRadius));
+    
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.2
+      ..shader = ui.Gradient.linear(
+        Offset.zero,
+        Offset(size.width, size.height),
+        [
+          Colors.white.withValues(alpha: 0.25),
+          Colors.white.withValues(alpha: 0.05),
+          Colors.white.withValues(alpha: 0.15),
+        ],
+        [0.0, 0.5, 1.0],
+      );
+
+    canvas.drawRRect(rrect, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _SpecularBorderPainter oldDelegate) => 
+      oldDelegate.borderRadius != borderRadius;
+}
+
+/// Premium animated background with moving aurora blobs and noise texture
 class VisionBackground extends StatelessWidget {
   const VisionBackground({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final animationProvider = GlassAnimationProvider.of(context);
+    final animation = animationProvider?.animationController;
+
     return Container(
       color: AppColors.background,
       child: Stack(
         children: [
-          // Gradient Background
-          Positioned.fill(
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: RadialGradient(
-                  center: Alignment.topLeft,
-                  radius: 1.5,
-                  colors: [
-                    AppColors.accentBlue.withValues(alpha: 0.15),
-                    Colors.transparent,
+          if (animation != null)
+            AnimatedBuilder(
+              animation: animation,
+              builder: (context, child) {
+                return Stack(
+                  children: [
+                    // Drifting aurora blobs
+                    _AuroraBlob(
+                      color: AppColors.accentBlue.withValues(alpha: 0.12),
+                      size: 600,
+                      alignment: Alignment.topLeft,
+                      offset: Offset(
+                        math.cos(animation.value * 2 * math.pi) * 120 - 100,
+                        math.sin(animation.value * 2 * math.pi) * 120 - 100,
+                      ),
+                    ),
+                    _AuroraBlob(
+                      color: AppColors.accentPurple.withValues(alpha: 0.08),
+                      size: 700,
+                      alignment: Alignment.bottomRight,
+                      offset: Offset(
+                        math.sin(animation.value * 2 * math.pi) * 150 + 100,
+                        math.cos(animation.value * 2 * math.pi) * 150 + 100,
+                      ),
+                    ),
+                    _AuroraBlob(
+                      color: AppColors.accentBlue.withValues(alpha: 0.05),
+                      size: 500,
+                      alignment: Alignment.centerLeft,
+                      offset: Offset(
+                        math.cos(animation.value * 2 * math.pi + math.pi/2) * 200,
+                        math.sin(animation.value * 2 * math.pi + math.pi/2) * 100,
+                      ),
+                    ),
                   ],
+                );
+              },
+            )
+          else
+            // Fallback for static background
+            Stack(
+              children: [
+                Positioned(
+                  top: -100,
+                  right: -100,
+                  child: _AuroraBlob(
+                    color: AppColors.accentPurple.withValues(alpha: 0.1),
+                    size: 300,
+                  ),
                 ),
-              ),
+                Positioned(
+                  bottom: 50,
+                  left: -50,
+                  child: _AuroraBlob(
+                    color: AppColors.accentBlue.withValues(alpha: 0.1),
+                    size: 200,
+                  ),
+                ),
+              ],
             ),
-          ),
-          // Accent circles
-          Positioned(
-            top: -100,
-            right: -100,
-            child: Container(
-              width: 300,
-              height: 300,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.accentPurple.withValues(alpha: 0.1),
-              ),
-              child: BackdropFilter(
-                filter: ui.ImageFilter.blur(sigmaX: 50, sigmaY: 50),
-                child: Container(color: Colors.transparent),
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: 50,
-            left: -50,
-            child: Container(
-              width: 200,
-              height: 200,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.accentBlue.withValues(alpha: 0.1),
-              ),
-              child: BackdropFilter(
-                filter: ui.ImageFilter.blur(sigmaX: 40, sigmaY: 40),
-                child: Container(color: Colors.transparent),
-              ),
+          
+          // Noise texture overlay for tactile feel
+          Positioned.fill(
+            child: CustomPaint(
+              painter: _NoisePainter(),
             ),
           ),
         ],
       ),
     );
   }
+}
+
+/// A blurred drifting color blob for the aurora effect
+class _AuroraBlob extends StatelessWidget {
+  final Color color;
+  final double size;
+  final Offset offset;
+  final Alignment alignment;
+
+  const _AuroraBlob({
+    required this.color,
+    required this.size,
+    this.offset = Offset.zero,
+    this.alignment = Alignment.center,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: alignment,
+      child: Transform.translate(
+        offset: offset,
+        child: Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: RadialGradient(
+              colors: [color, Colors.transparent],
+              stops: const [0.3, 1.0],
+            ),
+          ),
+          child: BackdropFilter(
+            filter: ui.ImageFilter.blur(sigmaX: 80, sigmaY: 80),
+            child: Container(color: Colors.transparent),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Painter that adds a subtle film grain noise texture
+class _NoisePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final random = math.Random(42);
+    final paint = Paint()..color = Colors.white.withValues(alpha: 0.015);
+    
+    // Draw sparse noise dots
+    for (int i = 0; i < 1500; i++) {
+      final x = random.nextDouble() * size.width;
+      final y = random.nextDouble() * size.height;
+      canvas.drawRect(Rect.fromLTWH(x, y, 1, 1), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 /// Glass search bar component

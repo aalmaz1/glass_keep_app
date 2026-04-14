@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:glass_keep/main.dart';
 import 'package:fast_noise/fast_noise.dart';
@@ -20,8 +21,8 @@ class GlassDistortionPainter extends CustomPainter {
 
   GlassDistortionPainter({
     required this.time,
-    this.strength = 2.0,
-    this.scale = 0.015,
+    this.strength = 1.5,
+    this.scale = 0.012,
   });
 
   @override
@@ -34,10 +35,12 @@ class GlassDistortionPainter extends CustomPainter {
     final cellWidth = size.width / _gridResolution;
     final cellHeight = size.height / _gridResolution;
 
+    // Shimmering effect by varying opacity based on time
+    final shimmer = (math.sin(time * 1.5) + 1) / 2 * 0.03;
     final paint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.08)
+      ..color = Colors.white.withValues(alpha: 0.05 + shimmer)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.3;
+      ..strokeWidth = 0.2;
 
     // Cache key prefix based on time to invalidate old values
     final timeHash = (time * 100).toInt();
@@ -47,7 +50,7 @@ class GlassDistortionPainter extends CustomPainter {
       _cacheGeneration++;
     }
 
-    // Draw horizontal waves only (skip vertical for performance)
+    // Draw horizontal waves
     for (int y = 0; y <= _gridResolution; y++) {
       final path = Path();
       bool isFirstPoint = true;
@@ -62,7 +65,33 @@ class GlassDistortionPainter extends CustomPainter {
         );
 
         final px = x * cellWidth + noiseVal;
-        final py = y * cellHeight;
+        final py = y * cellHeight + (math.sin(time + x) * 0.5);
+
+        if (isFirstPoint) {
+          path.moveTo(px, py);
+          isFirstPoint = false;
+        } else {
+          path.lineTo(px, py);
+        }
+      }
+      canvas.drawPath(path, paint);
+    }
+
+    // Draw vertical waves (added for 'Obsidian Vision' premium feel)
+    for (int x = 0; x <= _gridResolution; x++) {
+      final path = Path();
+      bool isFirstPoint = true;
+
+      for (int y = 0; y <= _gridResolution; y++) {
+        final cacheKey = (_cacheGeneration * 20000 + x * 100 + y);
+        final noiseVal = _getNoiseOffsetCached(
+          y.toDouble(),
+          x.toDouble(),
+          cacheKey,
+        );
+
+        final px = x * cellWidth + (math.cos(time + y) * 0.5);
+        final py = y * cellHeight + noiseVal;
 
         if (isFirstPoint) {
           path.moveTo(px, py);
@@ -75,7 +104,7 @@ class GlassDistortionPainter extends CustomPainter {
     }
 
     // Clear old cache entries when generation changes significantly
-    if (_noiseCache.length > 500) {
+    if (_noiseCache.length > 1000) {
       _noiseCache.clear();
     }
   }
@@ -118,8 +147,8 @@ class GlassDistortionEffect extends StatelessWidget {
     super.key,
     required this.child,
     this.borderRadius = 20,
-    this.distortionStrength = 2.0,
-    this.distortionScale = 0.015,
+    this.distortionStrength = 1.5,
+    this.distortionScale = 0.012,
   });
 
   @override
