@@ -87,7 +87,7 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
           const begin = Offset(1.0, 0.0);
           const end = Offset.zero;
           const curve = Curves.easeOutCubic;
-          var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+          final tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
           return SlideTransition(position: animation.drive(tween), child: child);
         },
       ),
@@ -327,11 +327,11 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
             const SizedBox(height: 20),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-              child: Row(
+              child: const Row(
                 children: [
-                  const Icon(CupertinoIcons.globe, color: AppColors.accentBlue, size: 22),
-                  const SizedBox(width: 12),
-                  Text(l10n.language, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white)),
+                  Icon(CupertinoIcons.globe, color: AppColors.accentBlue, size: 22),
+                  SizedBox(width: 12),
+                  Text('Language', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white)),
                 ],
               ),
             ),
