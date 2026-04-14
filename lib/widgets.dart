@@ -55,7 +55,7 @@ class VisionGlassCard extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(borderRadius),
         boxShadow: [
-          // Deep premium shadows for depth
+          // Multi-layered deep premium shadows for physical depth
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.5),
             blurRadius: 50,
@@ -72,6 +72,11 @@ class VisionGlassCard extends StatelessWidget {
             color: Colors.black.withValues(alpha: 0.15),
             blurRadius: 8,
             offset: const Offset(0, 4),
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 2,
+            offset: const Offset(0, 1),
           ),
         ],
       ),
@@ -104,7 +109,7 @@ class _SpecularBorderPainter extends CustomPainter {
     final rect = Offset.zero & size;
     final rrect = RRect.fromRectAndRadius(rect, Radius.circular(borderRadius));
     
-    // Primary specular border with complex gradient
+    // Primary specular border with complex gradient simulating light catch
     final paint1 = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5
@@ -112,28 +117,28 @@ class _SpecularBorderPainter extends CustomPainter {
         Offset.zero,
         Offset(size.width, size.height),
         [
-          Colors.white.withValues(alpha: 0.5),
-          Colors.white.withValues(alpha: 0.05),
-          Colors.white.withValues(alpha: 0.3),
-          Colors.white.withValues(alpha: 0.05),
+          Colors.white.withValues(alpha: 0.6),
+          Colors.white.withValues(alpha: 0.1),
           Colors.white.withValues(alpha: 0.4),
+          Colors.white.withValues(alpha: 0.05),
+          Colors.white.withValues(alpha: 0.5),
         ],
-        [0.0, 0.2, 0.5, 0.8, 1.0],
+        [0.0, 0.25, 0.5, 0.75, 1.0],
       );
 
-    // Secondary subtle highlight for added depth
+    // Secondary subtle highlight for added depth on the opposite edge
     final paint2 = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.5
+      ..strokeWidth = 0.8
       ..shader = ui.Gradient.linear(
         Offset(size.width, 0),
         Offset(0, size.height),
         [
           Colors.white.withValues(alpha: 0.0),
-          Colors.white.withValues(alpha: 0.2),
+          Colors.white.withValues(alpha: 0.25),
           Colors.white.withValues(alpha: 0.0),
         ],
-        [0.0, 0.3, 1.0],
+        [0.0, 0.5, 1.0],
       );
 
     canvas.drawRRect(rrect, paint1);
@@ -166,30 +171,39 @@ class VisionBackground extends StatelessWidget {
                   children: [
                     // Drifting aurora blobs optimized with RadialGradient
                     _AuroraBlob(
-                      color: AppColors.accentBlue.withValues(alpha: 0.15),
-                      size: 600,
+                      color: AppColors.accentBlue.withValues(alpha: 0.2),
+                      size: 800,
                       alignment: Alignment.topLeft,
                       offset: Offset(
-                        math.cos(animation.value * 2 * math.pi) * 120 - 100,
-                        math.sin(animation.value * 2 * math.pi) * 120 - 100,
+                        math.cos(animation.value * 2 * math.pi) * 150 - 150,
+                        math.sin(animation.value * 2 * math.pi) * 150 - 150,
                       ),
                     ),
                     _AuroraBlob(
-                      color: AppColors.accentPurple.withValues(alpha: 0.12),
-                      size: 700,
+                      color: AppColors.accentPurple.withValues(alpha: 0.15),
+                      size: 900,
                       alignment: Alignment.bottomRight,
                       offset: Offset(
-                        math.sin(animation.value * 2 * math.pi) * 150 + 100,
-                        math.cos(animation.value * 2 * math.pi) * 150 + 100,
+                        math.sin(animation.value * 2 * math.pi) * 200 + 150,
+                        math.cos(animation.value * 2 * math.pi) * 200 + 150,
                       ),
                     ),
                     _AuroraBlob(
-                      color: AppColors.accentBlue.withValues(alpha: 0.08),
-                      size: 500,
+                      color: AppColors.accentBlue.withValues(alpha: 0.1),
+                      size: 600,
                       alignment: Alignment.centerLeft,
                       offset: Offset(
-                        math.cos(animation.value * 2 * math.pi + math.pi/2) * 200,
-                        math.sin(animation.value * 2 * math.pi + math.pi/2) * 100,
+                        math.cos(animation.value * 2 * math.pi + math.pi / 2) * 250,
+                        math.sin(animation.value * 2 * math.pi + math.pi / 2) * 150,
+                      ),
+                    ),
+                    _AuroraBlob(
+                      color: AppColors.accentPurple.withValues(alpha: 0.08),
+                      size: 700,
+                      alignment: Alignment.topRight,
+                      offset: Offset(
+                        math.sin(animation.value * 2 * math.pi + math.pi / 4) * 200,
+                        math.cos(animation.value * 2 * math.pi + math.pi / 4) * 200,
                       ),
                     ),
                   ],
@@ -197,31 +211,30 @@ class VisionBackground extends StatelessWidget {
               },
             )
           else
-            // Fallback for static background
             const Stack(
               children: [
                 Positioned(
-                  top: -100,
-                  right: -100,
+                  top: -150,
+                  right: -150,
                   child: _AuroraBlob(
-                    color: Color(0x1A6C5CE7), // AppColors.accentPurple with alpha 0.1
-                    size: 300,
+                    color: Color(0x1A6C5CE7),
+                    size: 500,
                   ),
                 ),
                 Positioned(
                   bottom: 50,
-                  left: -50,
+                  left: -100,
                   child: _AuroraBlob(
-                    color: Color(0x1A0984E3), // AppColors.accentBlue with alpha 0.1
-                    size: 200,
+                    color: Color(0x1A0984E3),
+                    size: 400,
                   ),
                 ),
               ],
             ),
           
           // Noise texture overlay for tactile feel, wrapped in RepaintBoundary for performance
-          Positioned.fill(
-            child: const RepaintBoundary(
+          const Positioned.fill(
+            child: RepaintBoundary(
               child: CustomPaint(
                 painter: _NoisePainter(),
               ),
@@ -241,6 +254,7 @@ class _AuroraBlob extends StatelessWidget {
   final Alignment alignment;
 
   const _AuroraBlob({
+    super.key,
     required this.color,
     required this.size,
     this.offset = Offset.zero,
@@ -261,10 +275,10 @@ class _AuroraBlob extends StatelessWidget {
             gradient: RadialGradient(
               colors: [
                 color,
-                color.withValues(alpha: color.alpha * 0.4),
+                color.withValues(alpha: color.alpha * 0.5),
                 color.withValues(alpha: 0.0),
               ],
-              stops: const [0.0, 0.3, 1.0],
+              stops: const [0.0, 0.4, 1.0],
             ),
           ),
         ),
@@ -280,12 +294,13 @@ class _NoisePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final random = math.Random(42);
-    final paint = Paint()..color = Colors.white.withValues(alpha: 0.012);
     
-    // Draw sparse noise dots
-    for (int i = 0; i < 1500; i++) {
+    // Use slightly more dots and varied opacities for a more premium grain look
+    for (int i = 0; i < 2500; i++) {
       final x = random.nextDouble() * size.width;
       final y = random.nextDouble() * size.height;
+      final opacity = random.nextDouble() * 0.015 + 0.005;
+      final paint = Paint()..color = Colors.white.withValues(alpha: opacity);
       canvas.drawRect(Rect.fromLTWH(x, y, 1, 1), paint);
     }
   }

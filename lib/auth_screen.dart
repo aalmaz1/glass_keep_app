@@ -117,10 +117,10 @@ class _AuthScreenState extends State<AuthScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     // Logo
-                    Icon(
+                    const Icon(
                       Icons.blur_on,
                       size: 80,
-                      color: Colors.blueAccent.shade100,
+                      color: Color(0xFFBBDEFB), // Colors.blueAccent.shade100 approximation
                     ),
                     const SizedBox(height: 24),
                     

@@ -3,6 +3,7 @@ name: Flutter CI and Deploy
 on:
   push:
     branches: ["main"]
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -19,6 +20,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
+          cache: true
 
       - name: Enable Web
         run: flutter config --enable-web
@@ -26,14 +28,18 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Check format
+        run: flutter format --set-exit-if-changed .
+
       - name: Analyze project source
         run: flutter analyze --no-fatal-infos --no-fatal-warnings
 
       - name: Build Web
-        run: flutter build web --release --base-href="/${{ github.event.repository.name }}/"
+        run: flutter build web --release --web-renderer canvaskit --base-href="/${{ github.event.repository.name }}/"
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./build/web
+          force_orphan: true
