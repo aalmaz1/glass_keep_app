@@ -26,7 +26,7 @@ void main() async {
             defaultTargetPlatform == TargetPlatform.linux ||
             defaultTargetPlatform == TargetPlatform.macOS)) {
       await windowManager.ensureInitialized();
-      WindowOptions windowOptions = const WindowOptions(
+      const WindowOptions windowOptions = WindowOptions(
         size: Size(1200, 800),
         minimumSize: Size(400, 600),
         center: true,
