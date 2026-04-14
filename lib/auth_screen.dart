@@ -14,7 +14,7 @@ class _AuthScreenState extends State<AuthScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  
+
   bool _isLoading = false;
   bool _isLogin = true;
   String? _errorMessage;
@@ -50,7 +50,7 @@ class _AuthScreenState extends State<AuthScreen> {
           password: password,
         );
       }
-      
+
       if (!mounted) return;
       // Navigation handled by StreamBuilder in main.dart
     } on FirebaseAuthException catch (e) {
@@ -67,7 +67,7 @@ class _AuthScreenState extends State<AuthScreen> {
   /// Handle Firebase authentication errors
   void _handleAuthError(FirebaseAuthException e) {
     String message;
-    
+
     switch (e.code) {
       case 'user-not-found':
         message = 'No account found with this email address.';
@@ -93,14 +93,14 @@ class _AuthScreenState extends State<AuthScreen> {
       default:
         message = e.message ?? 'Authentication failed. Please try again.';
     }
-    
+
     setState(() => _errorMessage = message);
   }
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    
+
     return Scaffold(
       backgroundColor: AppColors.obsidianDark,
       body: Stack(
@@ -123,7 +123,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       color: Color(0xFFBBDEFB), // Colors.blueAccent.shade100 approximation
                     ),
                     const SizedBox(height: 24),
-                    
+
                     // Title
                     const Text(
                       'Glass Keep',
@@ -143,7 +143,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       ),
                     ),
                     const SizedBox(height: 48),
-                    
+
                     // Form
                     Form(
                       key: _formKey,
@@ -179,7 +179,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               onFieldSubmitted: (_) => _submit(),
                             ),
                             const Divider(color: Colors.white12, height: 0),
-                            
+
                             // Password input
                             TextFormField(
                               controller: _passwordController,
@@ -213,7 +213,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    
+
                     // Error message
                     if (_errorMessage != null) ...[
                       Container(
@@ -236,7 +236,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       ),
                       const SizedBox(height: 16),
                     ],
-                    
+
                     // Submit button
                     SizedBox(
                       width: double.infinity,
@@ -266,7 +266,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             ),
                     ),
                     const SizedBox(height: 16),
-                    
+
                     // Toggle login/signup
                     TextButton(
                       onPressed: _isLoading

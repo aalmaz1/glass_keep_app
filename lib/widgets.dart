@@ -108,7 +108,7 @@ class _SpecularBorderPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final rect = Offset.zero & size;
     final rrect = RRect.fromRectAndRadius(rect, Radius.circular(borderRadius));
-    
+
     // Primary specular border with complex gradient simulating light catch
     final paint1 = Paint()
       ..style = PaintingStyle.stroke
@@ -146,7 +146,7 @@ class _SpecularBorderPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _SpecularBorderPainter oldDelegate) => 
+  bool shouldRepaint(covariant _SpecularBorderPainter oldDelegate) =>
       oldDelegate.borderRadius != borderRadius;
 }
 
@@ -231,7 +231,7 @@ class VisionBackground extends StatelessWidget {
                 ),
               ],
             ),
-          
+
           // Noise texture overlay for tactile feel, wrapped in RepaintBoundary for performance
           const Positioned.fill(
             child: RepaintBoundary(
@@ -294,7 +294,7 @@ class _NoisePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final random = math.Random(42);
-    
+
     // Use slightly more dots and varied opacities for a more premium grain look
     for (int i = 0; i < 2500; i++) {
       final x = random.nextDouble() * size.width;
