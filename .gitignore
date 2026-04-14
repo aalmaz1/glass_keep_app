@@ -1,30 +1,58 @@
-# Flutter/Dart
-.dart_tool/
-.packages
-.pub-cache/
-.pub/
-build/
+--- .gitignore (原始)
+# Compiled and build artifacts
+*.pyc
+__pycache__/
+*.o
+*.obj
+*.class
+*.dll
+*.so
+*.a
+*.out
 
-# Android-specific
-android/**/generated/
-android/app/src/main/res/values/strings.xml
-android/local.properties
-
-# iOS/macOS-specific
-ios/Flutter/Generated.xcconfig
-ios/Flutter/flutter_export_environment.sh
-macos/Flutter/ephemeral/
-
-# Web-specific
-web/index.html.patch
-
-# Project-specific
+# Dependencies
+node_modules/
+venv/
+.venv/
 .env
-.env.example
+.env.local
+*.env.*
+
+# Logs and temp files
 *.log
+*.tmp
+*.swp
 
 # Editors
 .vscode/
 .idea/
+
+# Build directories
+dist/
+build/
+target/
+.gradle/
+
+# Coverage
+coverage/
+htmlcov/
+.coverage
+
+# Python cache
+.mypy_cache/
+.pytest_cache/
+
++++ .gitignore (修改后)
+```
+# Dependencies
+.dart_tool/
+.build/
+# Logs and temp files
+*.log
+*.tmp
 *.swp
-*.swo
+# Environment
+.env
+.env.local
+*.env.*
+```
