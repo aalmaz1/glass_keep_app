@@ -159,7 +159,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               decoration: InputDecoration(
                                 hintText: 'Email',
                                 hintStyle: TextStyle(
-                                  color: Colors.white.withOpacity(0.3),
+                                  color: Colors.white.withValues(alpha: 0.3),
                                 ),
                                 border: InputBorder.none,
                                 icon: const Icon(
@@ -189,7 +189,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               decoration: InputDecoration(
                                 hintText: 'Password',
                                 hintStyle: TextStyle(
-                                  color: Colors.white.withOpacity(0.3),
+                                  color: Colors.white.withValues(alpha: 0.3),
                                 ),
                                 border: InputBorder.none,
                                 icon: const Icon(
@@ -219,10 +219,10 @@ class _AuthScreenState extends State<AuthScreen> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.red.withOpacity(0.2),
+                          color: Colors.red.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: Colors.red.withOpacity(0.5),
+                            color: Colors.red.withValues(alpha: 0.5),
                           ),
                         ),
                         child: Text(
