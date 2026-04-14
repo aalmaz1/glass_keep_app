@@ -119,12 +119,14 @@ class StorageService {
   // Track if persistence is enabled
   static bool _initialized = false;
 
+  StorageService._();
+
   static Future<StorageService> init() async {
     if (!_initialized) {
       FirebaseFirestore.instance.settings = const Settings(persistenceEnabled: true);
       _initialized = true;
     }
-    return StorageService();
+    return StorageService._();
   }
 
   String get _uid => _auth.currentUser?.uid ?? 'anonymous';
@@ -165,15 +167,7 @@ class StorageService {
         });
 
     // Convert to broadcast stream to allow multiple listeners without recreating
-    _notesStream = stream.asBroadcastStream(
-      onListen: (subscription) {
-        // Handle first listener
-      },
-      onCancel: (subscription) {
-        // Keep the stream alive for potential reconnections
-        // Cache is cleared only on explicit clearCache() call
-      },
-    );
+    _notesStream = stream.asBroadcastStream();
     return _notesStream!;
   }
   

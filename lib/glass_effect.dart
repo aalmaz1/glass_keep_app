@@ -10,10 +10,11 @@ class GlassDistortionPainter extends CustomPainter {
   static final _noise = PerlinNoise();
   // Reduced grid resolution for better performance on all devices
   static const int _gridResolution = 8;
+  
   // Cache for noise values to reduce redundant calculations
+  // Using a more efficient cache management
   static final Map<int, double> _noiseCache = {};
-  // Cache generation to invalidate old entries
-  static int _cacheGeneration = 0;
+  static int _lastCacheClearFrame = 0;
 
   final double time;
   final double strength;
@@ -42,13 +43,12 @@ class GlassDistortionPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 0.2;
 
-    // Cache key prefix based on time to invalidate old values
-    final timeHash = (time * 100).toInt();
-
-    // Increment cache generation periodically to allow old entries to be cleared
-    if (timeHash % 10 == 0) {
-      _cacheGeneration++;
+    // Optimized cache clearing: clear fully only when it gets too large, but not every frame
+    if (_noiseCache.length > 1000) {
+      _noiseCache.clear();
     }
+
+    final int timeHash = (time * 10).toInt();
 
     // Draw horizontal waves
     for (int y = 0; y <= _gridResolution; y++) {
@@ -56,8 +56,8 @@ class GlassDistortionPainter extends CustomPainter {
       bool isFirstPoint = true;
 
       for (int x = 0; x <= _gridResolution; x++) {
-        // Use cached noise or calculate new
-        final cacheKey = (_cacheGeneration * 10000 + y * 100 + x);
+        // More stable cache key
+        final cacheKey = (timeHash << 16) | (y << 8) | x;
         final noiseVal = _getNoiseOffsetCached(
           x.toDouble(),
           y.toDouble(),
@@ -83,7 +83,7 @@ class GlassDistortionPainter extends CustomPainter {
       bool isFirstPoint = true;
 
       for (int y = 0; y <= _gridResolution; y++) {
-        final cacheKey = (_cacheGeneration * 20000 + x * 100 + y);
+        final cacheKey = (timeHash << 16) | (x << 8) | y | 0x8000;
         final noiseVal = _getNoiseOffsetCached(
           y.toDouble(),
           x.toDouble(),
@@ -102,21 +102,13 @@ class GlassDistortionPainter extends CustomPainter {
       }
       canvas.drawPath(path, paint);
     }
-
-    // Clear old cache entries when generation changes significantly to prevent memory bloat
-    if (_noiseCache.length > 500) {
-      // Remove half of the cache entries to maintain some continuity
-      final keys = _noiseCache.keys.toList();
-      for (int i = 0; i < keys.length / 2; i++) {
-        _noiseCache.remove(keys[i]);
-      }
-    }
   }
 
   /// Get cached noise value or calculate new one
   double _getNoiseOffsetCached(double x, double y, int cacheKey) {
-    if (_noiseCache.containsKey(cacheKey)) {
-      return _noiseCache[cacheKey]!;
+    final cached = _noiseCache[cacheKey];
+    if (cached != null) {
+      return cached;
     }
     final value = _getNoiseOffset(x, y);
     _noiseCache[cacheKey] = value;
@@ -168,16 +160,18 @@ class GlassDistortionEffect extends StatelessWidget {
       animation: animationProvider.animationController,
       builder: (context, child) => Stack(
         children: [
-          // Distortion layer
+          // Distortion layer - wrapped in RepaintBoundary to isolate distortion drawing
           ClipRRect(
             borderRadius: BorderRadius.circular(borderRadius),
-            child: CustomPaint(
-              painter: GlassDistortionPainter(
-                time: animationProvider.animationController.value * 8,
-                strength: distortionStrength,
-                scale: distortionScale,
+            child: RepaintBoundary(
+              child: CustomPaint(
+                painter: GlassDistortionPainter(
+                  time: animationProvider.animationController.value * 8,
+                  strength: distortionStrength,
+                  scale: distortionScale,
+                ),
+                child: const SizedBox.expand(),
               ),
-              child: const SizedBox.expand(),
             ),
           ),
           // Content layer

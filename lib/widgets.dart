@@ -6,61 +6,6 @@ import 'package:glass_keep/constants.dart';
 import 'package:glass_keep/glass_effect.dart';
 import 'package:glass_keep/main.dart';
 
-class PremiumGlassmorphismWidget extends StatelessWidget {
-  final String title;
-  
-  const PremiumGlassmorphismWidget({super.key, required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Colors.black.withValues(alpha: 0.8), // dark background
-            Colors.black87,
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black26,
-            blurRadius: 10,
-            offset: Offset(0, 5),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(15),
-        child: BackdropFilter(
-          filter: ui.ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.1), // glass effect
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.2),
-                width: 1,
-              ),
-              borderRadius: BorderRadius.circular(15),
-            ),
-            padding: const EdgeInsets.all(20),
-            child: Text(
-              title,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 /// A premium glass morphism card that uses BackdropFilter and optional distortion
 class VisionGlassCard extends StatelessWidget {
   final Widget child;
@@ -110,24 +55,23 @@ class VisionGlassCard extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(borderRadius),
         boxShadow: [
-          // Large soft shadow for depth
+          // Deep premium shadows for depth
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.5),
-            blurRadius: 40,
-            offset: const Offset(0, 20),
-            spreadRadius: -10,
+            blurRadius: 50,
+            offset: const Offset(0, 25),
+            spreadRadius: -15,
           ),
-          // Medium shadow
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+            blurRadius: 25,
+            offset: const Offset(0, 12),
+            spreadRadius: -5,
           ),
-          // Tight contact shadow
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
-            blurRadius: 5,
-            offset: const Offset(0, 2),
+            color: Colors.black.withValues(alpha: 0.15),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -149,7 +93,7 @@ class VisionGlassCard extends StatelessWidget {
   }
 }
 
-/// Painter for specular border highlights on glass cards
+/// Painter for specular border highlights on glass cards with enhanced dual-layer gradient
 class _SpecularBorderPainter extends CustomPainter {
   final double borderRadius;
 
@@ -160,24 +104,40 @@ class _SpecularBorderPainter extends CustomPainter {
     final rect = Offset.zero & size;
     final rrect = RRect.fromRectAndRadius(rect, Radius.circular(borderRadius));
     
-    // Multi-layer specular border
-    final paint = Paint()
+    // Primary specular border with complex gradient
+    final paint1 = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.2
+      ..strokeWidth = 1.5
       ..shader = ui.Gradient.linear(
         Offset.zero,
         Offset(size.width, size.height),
         [
-          Colors.white.withValues(alpha: 0.4),
-          Colors.white.withValues(alpha: 0.05),
-          Colors.white.withValues(alpha: 0.2),
+          Colors.white.withValues(alpha: 0.5),
           Colors.white.withValues(alpha: 0.05),
           Colors.white.withValues(alpha: 0.3),
+          Colors.white.withValues(alpha: 0.05),
+          Colors.white.withValues(alpha: 0.4),
         ],
         [0.0, 0.2, 0.5, 0.8, 1.0],
       );
 
-    canvas.drawRRect(rrect, paint);
+    // Secondary subtle highlight for added depth
+    final paint2 = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 0.5
+      ..shader = ui.Gradient.linear(
+        Offset(size.width, 0),
+        Offset(0, size.height),
+        [
+          Colors.white.withValues(alpha: 0.0),
+          Colors.white.withValues(alpha: 0.2),
+          Colors.white.withValues(alpha: 0.0),
+        ],
+        [0.0, 0.3, 1.0],
+      );
+
+    canvas.drawRRect(rrect, paint1);
+    canvas.drawRRect(rrect, paint2);
   }
 
   @override
@@ -204,7 +164,7 @@ class VisionBackground extends StatelessWidget {
               builder: (context, child) {
                 return Stack(
                   children: [
-                    // Drifting aurora blobs
+                    // Drifting aurora blobs optimized with RadialGradient
                     _AuroraBlob(
                       color: AppColors.accentBlue.withValues(alpha: 0.15),
                       size: 600,
@@ -259,11 +219,11 @@ class VisionBackground extends StatelessWidget {
               ],
             ),
           
-          // Noise texture overlay for tactile feel
+          // Noise texture overlay for tactile feel, wrapped in RepaintBoundary for performance
           Positioned.fill(
-            child: RepaintBoundary(
+            child: const RepaintBoundary(
               child: CustomPaint(
-                painter: const _NoisePainter(),
+                painter: _NoisePainter(),
               ),
             ),
           ),
@@ -273,7 +233,7 @@ class VisionBackground extends StatelessWidget {
   }
 }
 
-/// A blurred drifting color blob for the aurora effect
+/// A blurred drifting color blob for the aurora effect using optimized RadialGradient
 class _AuroraBlob extends StatelessWidget {
   final Color color;
   final double size;
@@ -301,10 +261,10 @@ class _AuroraBlob extends StatelessWidget {
             gradient: RadialGradient(
               colors: [
                 color,
-                color.withValues(alpha: color.alpha * 0.5),
+                color.withValues(alpha: color.alpha * 0.4),
                 color.withValues(alpha: 0.0),
               ],
-              stops: const [0.0, 0.4, 1.0],
+              stops: const [0.0, 0.3, 1.0],
             ),
           ),
         ),
