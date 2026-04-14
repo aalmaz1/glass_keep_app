@@ -149,10 +149,9 @@ class StorageService {
               final updatedAt = data['updatedAt'] ?? 0;
               
               // Try to find existing note in cache
-              final existingNote = oldNotes.cast<Note?>().firstWhere(
-                (n) => n?.id == noteId && n?.updatedAt.millisecondsSinceEpoch == updatedAt,
-                orElse: () => null,
-              );
+              final existingNote = oldNotes.where(
+                (n) => n.id == noteId && n.updatedAt.millisecondsSinceEpoch == updatedAt,
+              ).firstOrNull;
               
               if (existingNote != null) {
                 return existingNote;

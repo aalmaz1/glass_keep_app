@@ -28,7 +28,6 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
   String _search = '';
   late TextEditingController _searchController;
   late Stream<List<Note>> _notesStream;
-  late AnimationController _fabAnimationController;
   List<Note>? _filteredNotes;
   String _lastSearch = '';
   List<Note>? _lastSourceNotes;
@@ -44,18 +43,12 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
     _searchController = TextEditingController();
     // Initialize stream once in initState
     _notesStream = widget.storage.getNotesStream();
-    _fabAnimationController = AnimationController(
-      duration: const Duration(milliseconds: 600),
-      vsync: this,
-    );
-    _fabAnimationController.forward();
   }
 
   @override
   void dispose() {
     _searchDebounceTimer?.cancel();
     _searchController.dispose();
-    _fabAnimationController.dispose();
     super.dispose();
   }
 
@@ -376,7 +369,7 @@ class _MenuItem extends StatelessWidget {
   final VoidCallback onTap;
   final bool isDestructive;
 
-  const _MenuItem({required this.icon, required this.label, required this.onTap, this.isDestructive = false});
+  const _MenuItem({super.key, required this.icon, required this.label, required this.onTap, this.isDestructive = false});
 
   @override
   Widget build(BuildContext context) {
@@ -405,6 +398,7 @@ class _LanguageOption extends StatelessWidget {
   final Function(Locale) onTap;
 
   const _LanguageOption({
+    super.key,
     required this.locale,
     required this.flag,
     required this.name,
@@ -460,7 +454,7 @@ class _LanguageOption extends StatelessWidget {
 }
 
 class _NewNoteButton extends StatelessWidget {
-  const _NewNoteButton();
+  const _NewNoteButton({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -542,7 +536,6 @@ class NoteCard extends StatefulWidget {
 
 class _NoteCardState extends State<NoteCard> with AutomaticKeepAliveClientMixin {
   Uint8List? _decodedImage;
-  String? _lastImageBase64;
   bool _isHovered = false;
 
   @override
@@ -564,7 +557,6 @@ class _NoteCardState extends State<NoteCard> with AutomaticKeepAliveClientMixin 
   }
 
   void _updateImage() {
-    _lastImageBase64 = widget.note.imageBase64;
     _decodedImage = widget.note.cachedImage;
   }
 
@@ -587,6 +579,7 @@ class _NoteCardState extends State<NoteCard> with AutomaticKeepAliveClientMixin 
               note: widget.note,
               decodedImage: _decodedImage,
               onTap: widget.onTap,
+              isHovered: _isHovered,
             ),
           ),
         ),
@@ -600,17 +593,20 @@ class _NoteCardContent extends StatelessWidget {
   final Note note;
   final Uint8List? decodedImage;
   final VoidCallback onTap;
+  final bool isHovered;
 
   const _NoteCardContent({
     required this.note,
     required this.decodedImage,
     required this.onTap,
+    required this.isHovered,
   });
 
   @override
   Widget build(BuildContext context) {
     return VisionGlassCard(
       padding: EdgeInsets.zero,
+      useDistortion: isHovered,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(20),
@@ -789,7 +785,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                               ),
                               CupertinoButton(
                                 padding: EdgeInsets.zero,
-                                child: Icon(widget.note.isPinned ? CupertinoIcons.pin_fill : CupertinoIcons.pin, color: AppColors.accentBlue, size: 22),
+                                child: const Icon(CupertinoIcons.trash, color: AppColors.accentRed, size: 22),
                                 onPressed: () {
                                   if (widget.note.id.isNotEmpty) widget.storage.delete(widget.note.id);
                                   Navigator.pop(context);
@@ -1043,6 +1039,7 @@ class _TrashNoteCard extends StatelessWidget {
   final VoidCallback onDelete;
 
   const _TrashNoteCard({
+    super.key,
     required this.note,
     required this.onRestore,
     required this.onDelete,
@@ -1052,6 +1049,7 @@ class _TrashNoteCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return RepaintBoundary(
       child: VisionGlassCard(
+        useDistortion: false,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
