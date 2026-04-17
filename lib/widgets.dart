@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 import 'package:glass_keep/constants.dart';
 import 'package:glass_keep/glass_effect.dart';
 import 'package:glass_keep/main.dart';
