@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:glass_keep/widgets.dart';
 import 'package:glass_keep/constants.dart' show AppColors, AppUtils;
@@ -50,167 +52,154 @@ class _AuthScreenState extends State<AuthScreen> {
           password: password,
         );
       }
-
-      if (!mounted) return;
-      // Navigation handled by StreamBuilder in main.dart
     } on FirebaseAuthException catch (e) {
-      _handleAuthError(e);
+      setState(() {
+        _errorMessage = e.message ?? 'An error occurred during authentication';
+      });
     } catch (e) {
-      setState(() => _errorMessage = 'An unexpected error occurred: $e');
+      setState(() {
+        _errorMessage = 'An unexpected error occurred';
+      });
     } finally {
       if (mounted) {
-        setState(() => _isLoading = false);
+        setState(() {
+          _isLoading = false;
+        });
       }
     }
   }
 
-  /// Handle Firebase authentication errors
-  void _handleAuthError(FirebaseAuthException e) {
-    String message;
-
-    switch (e.code) {
-      case 'user-not-found':
-        message = 'No account found with this email address.';
-        break;
-      case 'wrong-password':
-        message = 'Incorrect password. Please try again.';
-        break;
-      case 'email-already-in-use':
-        message = 'An account with this email already exists.';
-        break;
-      case 'weak-password':
-        message = 'Password is too weak. Use at least 6 characters.';
-        break;
-      case 'invalid-email':
-        message = 'Invalid email address.';
-        break;
-      case 'operation-not-allowed':
-        message = 'This operation is not allowed. Please contact support.';
-        break;
-      case 'too-many-requests':
-        message = 'Too many login attempts. Please try again later.';
-        break;
-      default:
-        message = e.message ?? 'Authentication failed. Please try again.';
-    }
-
-    setState(() => _errorMessage = message);
-  }
-
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-
     return Scaffold(
-      backgroundColor: AppColors.obsidianDark,
+      backgroundColor: Colors.transparent,
       body: Stack(
         children: [
-          const Positioned.fill(child: VisionBackground()),
+          const VisionBackground(),
           Center(
             child: SingleChildScrollView(
-              padding: EdgeInsets.all(
-                size.width > 600 ? 48 : 24,
-              ),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 400),
+              padding: const EdgeInsets.all(24.0),
+              child: VisionGlassCard(
+                borderRadius: 24,
+                padding: const EdgeInsets.all(32),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Logo
-                    const Icon(
-                      Icons.blur_on,
-                      size: 80,
-                      color: AppColors.accentBlue,
+                    // App Logo or Icon
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: AppColors.accentBlue.withValues(alpha: 0.2),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.lock_person_rounded,
+                        color: AppColors.accentBlue,
+                        size: 48,
+                      ),
                     ),
                     const SizedBox(height: 24),
-
-                    // Title
-                    const Text(
-                      'Glass Keep',
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
+                    Text(
+                      _isLogin ? 'Welcome Back' : 'Create Account',
+                      style: const TextStyle(
                         color: Colors.white,
-                        letterSpacing: 1.5,
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: -0.5,
                       ),
                     ),
                     const SizedBox(height: 8),
-                    const Text(
-                      'Secure Cloud Notes',
+                    Text(
+                      _isLogin 
+                        ? 'Sign in to sync your notes' 
+                        : 'Join us to keep your thoughts safe',
                       style: TextStyle(
-                        color: Colors.white54,
-                        fontSize: 14,
+                        color: Colors.white.withValues(alpha: 0.6),
+                        fontSize: 15,
                       ),
                     ),
-                    const SizedBox(height: 48),
+                    const SizedBox(height: 32),
 
-                    // Form
                     Form(
                       key: _formKey,
-                      child: VisionGlassCard(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        child: Column(
-                          children: [
-                            // Email input
-                            TextFormField(
-                              controller: _emailController,
-                              style: const TextStyle(color: Colors.white),
-                              keyboardType: TextInputType.emailAddress,
-                              enabled: !_isLoading,
-                              decoration: InputDecoration(
-                                hintText: 'Email',
-                                hintStyle: TextStyle(
-                                  color: Colors.white.withValues(alpha: 0.3),
-                                ),
-                                border: InputBorder.none,
-                                icon: const Icon(
-                                  Icons.email_outlined,
-                                  color: Colors.white38,
-                                ),
+                      child: Column(
+                        children: [
+                          // Email field
+                          TextFormField(
+                            controller: _emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            style: const TextStyle(color: Colors.white),
+                            decoration: InputDecoration(
+                              labelText: 'Email',
+                              labelStyle: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
+                              prefixIcon: Icon(Icons.email_outlined, color: Colors.white.withValues(alpha: 0.5)),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
                               ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Email is required';
-                                }
-                                if (!AppUtils.isValidEmail(value.trim())) {
-                                  return 'Please enter a valid email';
-                                }
-                                return null;
-                              },
-                              onFieldSubmitted: (_) => _submit(),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: const BorderSide(color: AppColors.accentBlue, width: 1.5),
+                              ),
+                              errorBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide(color: Colors.red.withValues(alpha: 0.5)),
+                              ),
+                              focusedErrorBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: const BorderSide(color: Colors.red, width: 1.5),
+                              ),
                             ),
-                            const Divider(color: Colors.white12, height: 0),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Email is required';
+                              }
+                              if (!AppUtils.isValidEmail(value)) {
+                                return 'Enter a valid email';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 20),
 
-                            // Password input
-                            TextFormField(
-                              controller: _passwordController,
-                              style: const TextStyle(color: Colors.white),
-                              obscureText: true,
-                              enabled: !_isLoading,
-                              decoration: InputDecoration(
-                                hintText: 'Password',
-                                hintStyle: TextStyle(
-                                  color: Colors.white.withValues(alpha: 0.3),
-                                ),
-                                border: InputBorder.none,
-                                icon: const Icon(
-                                  Icons.lock_outline,
-                                  color: Colors.white38,
-                                ),
+                          // Password field
+                          TextFormField(
+                            controller: _passwordController,
+                            obscureText: true,
+                            style: const TextStyle(color: Colors.white),
+                            decoration: InputDecoration(
+                              labelText: 'Password',
+                              labelStyle: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
+                              prefixIcon: Icon(Icons.lock_outline_rounded, color: Colors.white.withValues(alpha: 0.5)),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
                               ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Password is required';
-                                }
-                                if (!AppUtils.isValidPassword(value)) {
-                                  return 'Password must be at least 6 characters';
-                                }
-                                return null;
-                              },
-                              onFieldSubmitted: (_) => _submit(),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: const BorderSide(color: AppColors.accentBlue, width: 1.5),
+                              ),
+                              errorBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide(color: Colors.red.withValues(alpha: 0.5)),
+                              ),
+                              focusedErrorBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: const BorderSide(color: Colors.red, width: 1.5),
+                              ),
                             ),
-                          ],
-                        ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Password is required';
+                              }
+                              if (!AppUtils.isValidPassword(value)) {
+                                return 'Password must be at least 6 characters';
+                              }
+                              return null;
+                            },
+                            onFieldSubmitted: (_) => _submit(),
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -249,37 +238,37 @@ class _AuthScreenState extends State<AuthScreen> {
                               ),
                             )
                           : ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.accentBlue,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.accentBlue,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
+                              onPressed: () {
+                                HapticFeedback.mediumImpact();
+                                _submit();
+                              },
+                              child: Text(
+                                _isLogin ? 'Login' : 'Create Account',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
-                            onPressed: () {
-                              HapticFeedback.mediumImpact();
-                              _submit();
-                            },
-                            child: Text(
-                              _isLogin ? 'Login' : 'Create Account',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          ),
-                          const SizedBox(height: 16),
+                    ),
+                    const SizedBox(height: 16),
 
-                          // Toggle login/signup
-                          TextButton(
-                          onPressed: _isLoading
+                    // Toggle login/signup
+                    TextButton(
+                      onPressed: _isLoading
                           ? null
                           : () {
-                            HapticFeedback.lightImpact();
-                            setState(() => _isLogin = !_isLogin);
-                          },
-                          child: Text(
+                              HapticFeedback.lightImpact();
+                              setState(() => _isLogin = !_isLogin);
+                            },
+                      child: Text(
                         _isLogin
                             ? "Don't have an account? Sign up"
                             : 'Already have an account? Login',

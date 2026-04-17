@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 import 'dart:ui' hide ImageFilter;
 import 'dart:ui' as ui show ImageFilter;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -24,13 +26,13 @@ class NotesScreen extends StatefulWidget {
   State<NotesScreen> createState() => _NotesScreenState();
 }
 
-class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStateMixin {
+class _NotesScreenState extends State<NotesScreen> {
   String _search = '';
   late TextEditingController _searchController;
   late Stream<List<Note>> _notesStream;
   List<Note>? _filteredNotes;
   String _lastSearch = '';
-  List<Note>? _lastSourceNotes;
+  List<Note>? _lastSourceNotes = null;
   // Debounce timer for search
   Timer? _searchDebounceTimer;
   // Background state
