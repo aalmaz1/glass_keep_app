@@ -60,3 +60,7 @@
 
 # Web related
 /web/stack_trace_mapper.js
+
+# Environment variables
+.env
+.env.*
