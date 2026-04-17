@@ -81,7 +81,7 @@ class _AuthScreenState extends State<AuthScreen> {
           const VisionBackground(),
           Center(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24.0),
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 80),
               child: VisionGlassCard(
                 borderRadius: 24,
                 padding: const EdgeInsets.all(32),
@@ -90,15 +90,27 @@ class _AuthScreenState extends State<AuthScreen> {
                   children: [
                     // App Logo or Icon
                     Container(
-                      padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: AppColors.accentBlue.withOpacity(0.2),
                         shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.accentBlue.withOpacity(0.2),
+                            blurRadius: 20,
+                            spreadRadius: 2,
+                          ),
+                        ],
                       ),
-                      child: const Icon(
-                        Icons.lock_person_rounded,
-                        color: AppColors.accentBlue,
-                        size: 48,
+                      child: VisionGlassCard(
+                        borderRadius: 50,
+                        useDistortion: true,
+                        blur: 25,
+                        color: AppColors.accentBlue.withOpacity(0.2),
+                        padding: const EdgeInsets.all(20),
+                        child: const Icon(
+                          Icons.lock_person_rounded,
+                          color: Colors.white,
+                          size: 48,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -134,11 +146,11 @@ class _AuthScreenState extends State<AuthScreen> {
                             style: const TextStyle(color: Colors.white),
                             decoration: InputDecoration(
                               labelText: 'Email',
-                              labelStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
-                              prefixIcon: Icon(Icons.email_outlined, color: Colors.white.withOpacity(0.5)),
+                              labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
+                              prefixIcon: Icon(Icons.email_outlined, color: Colors.white.withOpacity(0.8)),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+                                borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
@@ -172,11 +184,11 @@ class _AuthScreenState extends State<AuthScreen> {
                             style: const TextStyle(color: Colors.white),
                             decoration: InputDecoration(
                               labelText: 'Password',
-                              labelStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
-                              prefixIcon: Icon(Icons.lock_outline_rounded, color: Colors.white.withOpacity(0.5)),
+                              labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
+                              prefixIcon: Icon(Icons.lock_outline_rounded, color: Colors.white.withOpacity(0.8)),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+                                borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
