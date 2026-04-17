@@ -1,58 +1,62 @@
---- .gitignore (原始)
-# Compiled and build artifacts
-*.pyc
-__pycache__/
-*.o
-*.obj
+# Miscellaneous
 *.class
-*.dll
-*.so
-*.a
-*.out
-
-# Dependencies
-node_modules/
-venv/
-.venv/
-.env
-.env.local
-*.env.*
-
-# Logs and temp files
 *.log
-*.tmp
+*.pyc
 *.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
 
-# Editors
-.vscode/
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
 .idea/
 
-# Build directories
-dist/
-build/
-target/
-.gradle/
+# The .vscode/ directory contains settings for Visual Studio Code
+.vscode/
 
-# Coverage
-coverage/
-htmlcov/
-.coverage
-
-# Python cache
-.mypy_cache/
-.pytest_cache/
-
-+++ .gitignore (修改后)
-```
-# Dependencies
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
 .dart_tool/
-.build/
-# Logs and temp files
-*.log
-*.tmp
-*.swp
-# Environment
-.env
-.env.local
-*.env.*
-```
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+/build/
+
+# Android related
+**/android/app/src/main/res/generated/
+**/android/gen/
+**/android/out/
+
+# iOS related
+**/ios/Flutter/App.framework
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/Flutter/flutter_tools_bundle_resources.sh
+**/ios/ServiceDefinitions.json
+**/ios/Runner/GeneratedPluginRegistrant.[mh]
+
+# Symbolication related
+/app.*.symbols
+
+# Bndl related
+/*.release.bundle
+
+# Windows related
+/windows/flutter/ephemeral/
+
+# Linux related
+/linux/flutter/ephemeral/
+
+# macOS related
+/macos/flutter/ephemeral/
+
+# Web related
+/web/stack_trace_mapper.js
