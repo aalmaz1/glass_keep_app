@@ -45,11 +45,13 @@ class _AuthScreenState extends State<AuthScreen> {
           email: email,
           password: password,
         );
+        if (!mounted) return;
       } else {
         await FirebaseAuth.instance.createUserWithEmailAndPassword(
           email: email,
           password: password,
         );
+        if (!mounted) return;
       }
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
