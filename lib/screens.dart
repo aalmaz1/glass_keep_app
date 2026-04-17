@@ -1,12 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
-import 'dart:ui' hide ImageFilter;
-import 'dart:ui' as ui show ImageFilter;
+import 'dart:ui' as ui;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -32,7 +30,7 @@ class _NotesScreenState extends State<NotesScreen> {
   late Stream<List<Note>> _notesStream;
   List<Note>? _filteredNotes;
   String _lastSearch = '';
-  List<Note>? _lastSourceNotes = null;
+  List<Note>? _lastSourceNotes;
   // Debounce timer for search
   Timer? _searchDebounceTimer;
   // Background state
@@ -307,7 +305,6 @@ class _NotesScreenState extends State<NotesScreen> {
   }
 
   void _showLanguagePicker(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     final provider = GlassAnimationProvider.of(context);
     if (provider == null) return;
 
@@ -331,7 +328,7 @@ class _NotesScreenState extends State<NotesScreen> {
                   children: [
                     Icon(CupertinoIcons.globe, color: AppColors.accentBlue, size: 22),
                     SizedBox(width: 12),
-                    Text('Language', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white)),
+                    Text('Language', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white)),
                   ],
                 ),
               ),
