@@ -106,9 +106,9 @@ class _AuthScreenState extends State<AuthScreen> {
                         blur: 25,
                         color: AppColors.accentBlue.withOpacity(0.2),
                         padding: const EdgeInsets.all(20),
-                        child: const Icon(
-                          Icons.lock_person_rounded,
-                          color: Colors.white,
+                        child: Icon(
+                          Icons.blur_on,
+                          color: AppColors.accentBlue.withOpacity(0.9),
                           size: 48,
                         ),
                       ),
@@ -147,7 +147,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             decoration: InputDecoration(
                               labelText: 'Email',
                               labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
-                              prefixIcon: Icon(Icons.email_outlined, color: Colors.white.withOpacity(0.8)),
+                              prefixIcon: Icon(Icons.email_outlined, color: Colors.white.withOpacity(0.9)),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
                                 borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
@@ -185,7 +185,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             decoration: InputDecoration(
                               labelText: 'Password',
                               labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
-                              prefixIcon: Icon(Icons.lock_outline_rounded, color: Colors.white.withOpacity(0.8)),
+                              prefixIcon: Icon(Icons.lock_outline_rounded, color: Colors.white.withOpacity(0.9)),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
                                 borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
@@ -288,6 +288,15 @@ class _AuthScreenState extends State<AuthScreen> {
                             ? "Don't have an account? Sign up"
                             : 'Already have an account? Login',
                         style: const TextStyle(color: Colors.white54),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      'Obsidian Vision Premium v2',
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.5),
+                        fontSize: 12,
+                        letterSpacing: 1.2,
                       ),
                     ),
                   ],
