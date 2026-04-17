@@ -102,7 +102,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
   Locale _locale = const Locale('en');
 
   final ValueNotifier<Offset> _pointerPosition =
-      ValueNotifier<Offset>(Offset.zero);
+      ValueNotifier<Offset>(const Offset(-1000, -1000));
   final ValueNotifier<Offset> _tilt = ValueNotifier<Offset>(Offset.zero);
   StreamSubscription? _accelerometerSubscription;
 
@@ -150,9 +150,9 @@ class _GlassKeepAppState extends State<GlassKeepApp>
   }
 
   void _initSensors() {
-    if (!kIsWeb &&
-        (defaultTargetPlatform == TargetPlatform.android ||
-            defaultTargetPlatform == TargetPlatform.iOS)) {
+    if (defaultTargetPlatform == TargetPlatform.android ||
+        defaultTargetPlatform == TargetPlatform.iOS ||
+        kIsWeb) {
       _accelerometerSubscription =
           accelerometerEventStream().listen((AccelerometerEvent event) {
         // Low-pass filter for smooth movement
@@ -302,6 +302,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
           },
         ),
       ),
+    ),
     );
   }
 }
