@@ -68,7 +68,7 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
   }
 
   void _openNote(BuildContext context, Note note) {
-    HapticFeedback.mediumImpact();
+    HapticFeedback.lightImpact();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -365,7 +365,10 @@ class _MenuItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: () {
+        HapticFeedback.mediumImpact();
+        onTap();
+      },
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
@@ -453,6 +456,7 @@ class _NewNoteButton extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
+        HapticFeedback.mediumImpact();
         final storage = _getStorageService(context);
         final n = Note(
           id: '',

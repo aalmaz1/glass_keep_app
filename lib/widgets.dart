@@ -2,6 +2,7 @@ import 'dart:ui' as ui;
 import 'dart:math' as math;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:glass_keep/constants.dart';
 import 'package:glass_keep/glass_effect.dart';
 import 'package:glass_keep/main.dart';
@@ -29,93 +30,140 @@ class VisionGlassCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget mainContent = Stack(
-      children: [
-        // Specular border highlights
-        Positioned.fill(
-          child: CustomPaint(
-            painter: _SpecularBorderPainter(borderRadius: borderRadius),
-          ),
-        ),
-        Padding(
-          padding: padding ?? EdgeInsets.zero,
-          child: child,
-        ),
-      ],
-    );
+    final animationProvider = GlassAnimationProvider.of(context);
 
-    if (useDistortion) {
-      mainContent = GlassDistortionEffect(
-        borderRadius: borderRadius,
-        child: mainContent,
-      );
-    }
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth == double.infinity ? 300.0 : constraints.maxWidth;
+        final height = constraints.maxHeight == double.infinity ? 300.0 : constraints.maxHeight;
 
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(borderRadius),
-        boxShadow: [
-          // Multi-layered deep premium shadows for physical depth
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.5),
-            blurRadius: 50,
-            offset: const Offset(0, 25),
-            spreadRadius: -15,
-          ),
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
-            blurRadius: 25,
-            offset: const Offset(0, 12),
-            spreadRadius: -5,
-          ),
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.15),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 2,
-            offset: const Offset(0, 1),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(borderRadius),
-        child: BackdropFilter(
-          filter: ui.ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-          child: Container(
-            decoration: BoxDecoration(
-              color: color ?? AppColors.glassLight,
-              borderRadius: BorderRadius.circular(borderRadius),
-              border: border,
+        Widget mainContent = Stack(
+          children: [
+            // Specular border highlights
+            Positioned.fill(
+              child: ValueListenableBuilder<Offset>(
+                valueListenable: animationProvider?.tilt ?? ValueNotifier(Offset.zero),
+                builder: (context, currentTilt, _) {
+                  return CustomPaint(
+                    painter: _SpecularBorderPainter(
+                      borderRadius: borderRadius,
+                      tilt: currentTilt,
+                    ),
+                  );
+                },
+              ),
             ),
+            Padding(
+              padding: padding ?? EdgeInsets.zero,
+              child: child,
+            ),
+          ],
+        );
+
+        if (useDistortion) {
+          mainContent = GlassDistortionEffect(
+            borderRadius: borderRadius,
             child: mainContent,
+          );
+        }
+
+        final aberrationProgram = animationProvider?.aberrationProgram;
+        ui.ImageFilter blurFilter = ui.ImageFilter.blur(sigmaX: blur, sigmaY: blur);
+
+        if (aberrationProgram != null) {
+          try {
+            final shader = aberrationProgram.fragmentShader();
+            shader.setFloat(0, width);
+            shader.setFloat(1, height);
+            shader.setFloat(2, 0.5); // Strength
+
+            blurFilter = ui.ImageFilter.compose(
+              outer: ui.ImageFilter.fromShader(shader),
+              inner: blurFilter,
+            );
+          } catch (e) {
+            debugPrint('Shader error: $e');
+          }
+        }
+
+        return Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(borderRadius),
+            boxShadow: [
+              // Multi-layered deep premium shadows for physical depth
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.5),
+                blurRadius: 50,
+                offset: const Offset(0, 25),
+                spreadRadius: -15,
+              ),
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.3),
+                blurRadius: 25,
+                offset: const Offset(0, 12),
+                spreadRadius: -5,
+              ),
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.15),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 2,
+                offset: const Offset(0, 1),
+              ),
+            ],
           ),
-        ),
-      ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(borderRadius),
+            child: BackdropFilter(
+              filter: blurFilter,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: color ?? AppColors.glassLight,
+                  borderRadius: BorderRadius.circular(borderRadius),
+                  border: border,
+                ),
+                child: mainContent,
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
 
 /// Painter for specular border highlights on glass cards with enhanced dual-layer gradient
+/// and gyroscope-based dynamic lighting
 class _SpecularBorderPainter extends CustomPainter {
   final double borderRadius;
+  final Offset tilt;
 
-  const _SpecularBorderPainter({required this.borderRadius});
+  const _SpecularBorderPainter({
+    required this.borderRadius,
+    this.tilt = Offset.zero,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
     final rect = Offset.zero & size;
     final rrect = RRect.fromRectAndRadius(rect, Radius.circular(borderRadius));
 
+    // Calculate light source offset based on device tilt for dynamic lighting
+    final lightOffset = Offset(
+      size.width * (0.5 + tilt.dx * 0.5),
+      size.height * (0.5 + tilt.dy * 0.5),
+    );
+
     // Primary specular border with complex gradient simulating light catch
     final paint1 = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5
       ..shader = ui.Gradient.linear(
-        Offset.zero,
-        Offset(size.width, size.height),
+        Offset.zero + Offset(tilt.dx * 20, tilt.dy * 20),
+        Offset(size.width, size.height) + Offset(tilt.dx * 20, tilt.dy * 20),
         [
           Colors.white.withValues(alpha: 0.6),
           Colors.white.withValues(alpha: 0.1),
@@ -131,8 +179,8 @@ class _SpecularBorderPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 0.8
       ..shader = ui.Gradient.linear(
-        Offset(size.width, 0),
-        Offset(0, size.height),
+        Offset(size.width, 0) - Offset(tilt.dx * 30, tilt.dy * 30),
+        Offset(0, size.height) - Offset(tilt.dx * 30, tilt.dy * 30),
         [
           Colors.white.withValues(alpha: 0.0),
           Colors.white.withValues(alpha: 0.25),
@@ -147,7 +195,7 @@ class _SpecularBorderPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _SpecularBorderPainter oldDelegate) =>
-      oldDelegate.borderRadius != borderRadius;
+      oldDelegate.borderRadius != borderRadius || oldDelegate.tilt != tilt;
 }
 
 /// Premium animated background with moving aurora blobs and noise texture
@@ -174,7 +222,8 @@ class VisionBackground extends StatelessWidget {
                       color: AppColors.accentBlue.withValues(alpha: 0.2),
                       size: 800,
                       alignment: Alignment.topLeft,
-                      offset: Offset(
+                      depth: 0.05,
+                      baseOffset: Offset(
                         math.cos(animation.value * 2 * math.pi) * 150 - 150,
                         math.sin(animation.value * 2 * math.pi) * 150 - 150,
                       ),
@@ -183,7 +232,8 @@ class VisionBackground extends StatelessWidget {
                       color: AppColors.accentPurple.withValues(alpha: 0.15),
                       size: 900,
                       alignment: Alignment.bottomRight,
-                      offset: Offset(
+                      depth: 0.08,
+                      baseOffset: Offset(
                         math.sin(animation.value * 2 * math.pi) * 200 + 150,
                         math.cos(animation.value * 2 * math.pi) * 200 + 150,
                       ),
@@ -192,7 +242,8 @@ class VisionBackground extends StatelessWidget {
                       color: AppColors.accentBlue.withValues(alpha: 0.1),
                       size: 600,
                       alignment: Alignment.centerLeft,
-                      offset: Offset(
+                      depth: 0.03,
+                      baseOffset: Offset(
                         math.cos(animation.value * 2 * math.pi + math.pi / 2) * 250,
                         math.sin(animation.value * 2 * math.pi + math.pi / 2) * 150,
                       ),
@@ -201,7 +252,8 @@ class VisionBackground extends StatelessWidget {
                       color: AppColors.accentPurple.withValues(alpha: 0.08),
                       size: 700,
                       alignment: Alignment.topRight,
-                      offset: Offset(
+                      depth: 0.1,
+                      baseOffset: Offset(
                         math.sin(animation.value * 2 * math.pi + math.pi / 4) * 200,
                         math.cos(animation.value * 2 * math.pi + math.pi / 4) * 200,
                       ),
@@ -219,6 +271,7 @@ class VisionBackground extends StatelessWidget {
                   child: _AuroraBlob(
                     color: Color(0x1A6C5CE7),
                     size: 500,
+                    baseOffset: Offset.zero,
                   ),
                 ),
                 Positioned(
@@ -227,16 +280,22 @@ class VisionBackground extends StatelessWidget {
                   child: _AuroraBlob(
                     color: Color(0x1A0984E3),
                     size: 400,
+                    baseOffset: Offset.zero,
                   ),
                 ),
               ],
             ),
 
           // Noise texture overlay for tactile feel, wrapped in RepaintBoundary for performance
-          const Positioned.fill(
-            child: RepaintBoundary(
-              child: CustomPaint(
-                painter: _NoisePainter(),
+          Positioned.fill(
+            child: IgnorePointer(
+              child: RepaintBoundary(
+                child: CustomPaint(
+                  painter: _ShaderNoisePainter(
+                    program: animationProvider?.grainProgram,
+                    time: animation?.value ?? 0,
+                  ),
+                ),
               ),
             ),
           ),
@@ -247,66 +306,138 @@ class VisionBackground extends StatelessWidget {
 }
 
 /// A blurred drifting color blob for the aurora effect using optimized RadialGradient
+/// with parallax and pointer interaction
 class _AuroraBlob extends StatelessWidget {
   final Color color;
   final double size;
-  final Offset offset;
+  final Offset baseOffset;
   final Alignment alignment;
+  final double depth;
 
   const _AuroraBlob({
     super.key,
     required this.color,
     required this.size,
-    this.offset = Offset.zero,
+    required this.baseOffset,
     this.alignment = Alignment.center,
+    this.depth = 0.05,
   });
 
   @override
   Widget build(BuildContext context) {
+    final animationProvider = GlassAnimationProvider.of(context);
+
     return Align(
       alignment: alignment,
-      child: Transform.translate(
-        offset: offset,
-        child: Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: RadialGradient(
-              colors: [
-                color,
-                color.withValues(alpha: color.alpha * 0.5),
-                color.withValues(alpha: 0.0),
-              ],
-              stops: const [0.0, 0.4, 1.0],
+      child: ValueListenableBuilder2<Offset, Offset>(
+        first: animationProvider?.pointerPosition ?? ValueNotifier(Offset.zero),
+        second: animationProvider?.tilt ?? ValueNotifier(Offset.zero),
+        builder: (context, pointerPos, tilt, _) {
+          // Calculate interaction offset (repulsion)
+          Offset interactionOffset = Offset.zero;
+          if (pointerPos != Offset.zero) {
+            // This is a bit tricky because pointerPos is in global coordinates
+            // For simplicity, we'll assume the center of the screen is the reference
+            final screenSize = MediaQuery.of(context).size;
+            final center = Offset(screenSize.width / 2, screenSize.height / 2);
+            final relPos = pointerPos - center;
+
+            // Simple repulsion based on distance to pointer
+            // In a real app, we'd calculate distance to blob center
+            interactionOffset = relPos * -0.05;
+          }
+
+          // Calculate parallax offset based on tilt and depth
+          final parallaxOffset = tilt * (depth * 500);
+
+          return Transform.translate(
+            offset: baseOffset + parallaxOffset + interactionOffset,
+            child: Container(
+              width: size,
+              height: size,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    color,
+                    color.withValues(alpha: color.alpha * 0.5),
+                    color.withValues(alpha: 0.0),
+                  ],
+                  stops: const [0.0, 0.4, 1.0],
+                ),
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
 }
 
-/// Painter that adds a subtle film grain noise texture
-class _NoisePainter extends CustomPainter {
-  const _NoisePainter();
+/// Helper for listening to two ValueNotifiers
+class ValueListenableBuilder2<A, B> extends StatelessWidget {
+  final ValueListenable<A> first;
+  final ValueListenable<B> second;
+  final Widget Function(BuildContext, A, B, Widget?) builder;
+  final Widget? child;
+
+  const ValueListenableBuilder2({
+    super.key,
+    required this.first,
+    required this.second,
+    required this.builder,
+    this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<A>(
+      valueListenable: first,
+      builder: (context, a, _) {
+        return ValueListenableBuilder<B>(
+          valueListenable: second,
+          builder: (context, b, _) {
+            return builder(context, a, b, child);
+          },
+        );
+      },
+    );
+  }
+}
+
+/// Painter that uses a fragment shader for animated film grain noise texture
+class _ShaderNoisePainter extends CustomPainter {
+  final ui.FragmentProgram? program;
+  final double time;
+
+  const _ShaderNoisePainter({this.program, required this.time});
 
   @override
   void paint(Canvas canvas, Size size) {
-    final random = math.Random(42);
-
-    // Use slightly more dots and varied opacities for a more premium grain look
-    for (int i = 0; i < 2500; i++) {
-      final x = random.nextDouble() * size.width;
-      final y = random.nextDouble() * size.height;
-      final opacity = random.nextDouble() * 0.015 + 0.005;
-      final paint = Paint()..color = Colors.white.withValues(alpha: opacity);
-      canvas.drawRect(Rect.fromLTWH(x, y, 1, 1), paint);
+    if (program == null) {
+      // Fallback to simpler grain if shader not loaded
+      final random = math.Random(42);
+      for (int i = 0; i < 1000; i++) {
+        final x = random.nextDouble() * size.width;
+        final y = random.nextDouble() * size.height;
+        final paint = Paint()..color = Colors.white.withValues(alpha: 0.01);
+        canvas.drawRect(Rect.fromLTWH(x, y, 1, 1), paint);
+      }
+      return;
     }
+
+    final shader = program!.fragmentShader();
+    shader.setFloat(0, size.width);
+    shader.setFloat(1, size.height);
+    shader.setFloat(2, time);
+
+    final paint = Paint()..shader = shader;
+    canvas.drawRect(Offset.zero & size, paint);
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _ShaderNoisePainter oldDelegate) =>
+      oldDelegate.time != time || oldDelegate.program != program;
 }
 
 /// Glass search bar component
@@ -330,7 +461,10 @@ class GlassSearchBar extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       child: TextField(
         controller: controller,
-        onChanged: onChanged,
+        onChanged: (value) {
+          HapticFeedback.selectionClick();
+          onChanged(value);
+        },
         style: const TextStyle(color: Colors.white, fontSize: 16),
         decoration: InputDecoration(
           icon: Icon(
@@ -396,7 +530,10 @@ class GlassButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: () {
+        HapticFeedback.lightImpact();
+        onTap();
+      },
       child: VisionGlassCard(
         borderRadius: borderRadius,
         useDistortion: false,
