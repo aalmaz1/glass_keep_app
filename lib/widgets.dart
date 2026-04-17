@@ -3,7 +3,6 @@ import 'dart:math' as math;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/foundation.dart';
 import 'package:glass_keep/constants.dart';
 import 'package:glass_keep/glass_effect.dart';
 import 'package:glass_keep/main.dart';
@@ -151,12 +150,6 @@ class _SpecularBorderPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final rect = Offset.zero & size;
     final rrect = RRect.fromRectAndRadius(rect, Radius.circular(borderRadius));
-
-    // Calculate light source offset based on device tilt for dynamic lighting
-    final lightOffset = Offset(
-      size.width * (0.5 + tilt.dx * 0.5),
-      size.height * (0.5 + tilt.dy * 0.5),
-    );
 
     // Primary specular border with complex gradient simulating light catch
     final paint1 = Paint()
@@ -361,7 +354,7 @@ class _AuroraBlob extends StatelessWidget {
                 gradient: RadialGradient(
                   colors: [
                     color,
-                    color.withValues(alpha: color.alpha * 0.5),
+                    color.withValues(alpha: color.a * 0.5),
                     color.withValues(alpha: 0.0),
                   ],
                   stops: const [0.0, 0.4, 1.0],
