@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:glass_keep/l10n/app_localizations.dart';
 import 'package:window_manager/window_manager.dart';
@@ -23,6 +24,16 @@ void main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+
+    if (kIsWeb) {
+      try {
+        await FirebaseFirestore.instance.enablePersistence(
+          const PersistenceSettings(synchronizeTabs: true),
+        );
+      } catch (e) {
+        debugPrint('Firestore persistence error: $e');
+      }
+    }
 
     if (!kIsWeb &&
         (defaultTargetPlatform == TargetPlatform.windows ||

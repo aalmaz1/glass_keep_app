@@ -69,26 +69,31 @@ class VisionGlassCard extends StatelessWidget {
         }
 
         final aberrationProgram = animationProvider?.aberrationProgram;
-        ui.ImageFilter blurFilter = ui.ImageFilter.blur(sigmaX: blur, sigmaY: blur);
+        final blurFilter = ui.ImageFilter.blur(sigmaX: blur, sigmaY: blur);
 
+        Widget cardContent = Container(
+          decoration: BoxDecoration(
+            color: color ?? AppColors.glassLight,
+            borderRadius: BorderRadius.circular(borderRadius),
+            border: border,
+          ),
+          child: mainContent,
+        );
+
+        // Apply chromatic aberration using ShaderMask if shader is available
         if (aberrationProgram != null) {
           try {
-            final shader = aberrationProgram.fragmentShader();
-            shader.setFloat(0, width);
-            shader.setFloat(1, height);
-            shader.setFloat(2, 0.5); // Strength
-
-            // Fallback for ImageFilter.fromShader (introduced in Flutter 3.16)
-            // Using dynamic to avoid compile-time error on older versions
-            try {
-              final shaderFilter = (ui.ImageFilter as dynamic).fromShader(shader);
-              blurFilter = ui.ImageFilter.compose(
-                outer: shaderFilter,
-                inner: blurFilter,
-              );
-            } catch (_) {
-              // Fallback to simple blur if fromShader is not available
-            }
+            cardContent = ShaderMask(
+              shaderCallback: (Rect bounds) {
+                final shader = aberrationProgram.fragmentShader();
+                shader.setFloat(0, bounds.width);
+                shader.setFloat(1, bounds.height);
+                shader.setFloat(2, 0.5); // Strength
+                return shader;
+              },
+              blendMode: BlendMode.srcIn,
+              child: cardContent,
+            );
           } catch (e) {
             debugPrint('Shader error: $e');
           }
@@ -127,14 +132,7 @@ class VisionGlassCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(borderRadius),
             child: BackdropFilter(
               filter: blurFilter,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: color ?? AppColors.glassLight,
-                  borderRadius: BorderRadius.circular(borderRadius),
-                  border: border,
-                ),
-                child: mainContent,
-              ),
+              child: cardContent,
             ),
           ),
         );
@@ -379,7 +377,7 @@ class _AuroraBlob extends StatelessWidget {
 class ValueListenableBuilder2<A, B> extends StatelessWidget {
   final ValueListenable<A> first;
   final ValueListenable<B> second;
-  final Widget Function(BuildContext, A, B, Widget?) builder;
+  final Widget Function(BuildContext context, A a, B b, Widget? child) builder;
   final Widget? child;
 
   const ValueListenableBuilder2({

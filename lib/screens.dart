@@ -65,6 +65,7 @@ class _NotesScreenState extends State<NotesScreen> {
   void _logout() async {
     widget.storage.clearCache();
     await FirebaseAuth.instance.signOut();
+    if (!mounted) return;
   }
 
   void _openNote(BuildContext context, Note note) {
@@ -899,8 +900,10 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                           maxHeight: 1200,
                           imageQuality: 85,
                         );
+                        if (!mounted) return;
                         if (image != null) {
                           final bytes = await image.readAsBytes();
+                          if (!mounted) return;
                           // Process in microtask to avoid blocking UI
                           await Future.microtask(() {
                             if (mounted) {
@@ -910,6 +913,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                               });
                             }
                           });
+                          if (!mounted) return;
                         }
                       } finally {
                         if (mounted) {
@@ -925,7 +929,8 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                     final d = await showDatePicker(context: context, initialDate: now, firstDate: now, lastDate: now.add(const Duration(days: 365)));
                     if (d == null || !mounted) return;
                     final t = await showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(now));
-                    if (t != null && mounted) setState(() => _rem = DateTime(d.year, d.month, d.day, t.hour, t.minute));
+                    if (!mounted) return;
+                    if (t != null) setState(() => _rem = DateTime(d.year, d.month, d.day, t.hour, t.minute));
                   }),
                   if (_rem != null) ...[
                     const SizedBox(width: 8),
