@@ -166,9 +166,9 @@ class _NotesScreenState extends State<NotesScreen> {
                           child: Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFFFFFFF).withValues(alpha: 0.1),
+                              color: const Color(0xFFFFFFFF).withOpacity(0.1),
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: const Color(0xFFFFFFFF).withValues(alpha: 0.15)),
+                              border: Border.all(color: const Color(0xFFFFFFFF).withOpacity(0.15)),
                             ),
                             child: const Icon(
                               CupertinoIcons.ellipsis_vertical,
@@ -270,7 +270,7 @@ class _NotesScreenState extends State<NotesScreen> {
         padding: const EdgeInsets.all(16.0),
         child: VisionGlassCard(
           borderRadius: 24,
-          color: AppColors.obsidianDark.withValues(alpha: 0.9),
+          color: AppColors.obsidianDark.withOpacity(0.9),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -315,20 +315,20 @@ class _NotesScreenState extends State<NotesScreen> {
         padding: const EdgeInsets.all(16.0),
         child: VisionGlassCard(
           borderRadius: 24,
-          color: AppColors.obsidianDark.withValues(alpha: 0.9),
+          color: AppColors.obsidianDark.withOpacity(0.9),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               const SizedBox(height: 12),
               Container(width: 36, height: 5, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2.5))),
               const SizedBox(height: 20),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                child: const Row(
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                child: Row(
                   children: [
                     Icon(CupertinoIcons.globe, color: AppColors.accentBlue, size: 22),
                     SizedBox(width: 12),
-                    Text('Language', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white)),
+                    Text('Language', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white)),
                   ],
                 ),
               ),
@@ -413,10 +413,10 @@ class _LanguageOption extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.accentBlue.withValues(alpha: 0.2) : Colors.transparent,
+          color: isSelected ? AppColors.accentBlue.withOpacity(0.2) : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? AppColors.accentBlue : Colors.white.withValues(alpha: 0.1),
+            color: isSelected ? AppColors.accentBlue : Colors.white.withOpacity(0.1),
             width: 1.5,
           ),
         ),
@@ -469,11 +469,11 @@ class _NewNoteButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
         decoration: BoxDecoration(
-          color: AppColors.accentBlue.withValues(alpha: 0.9),
+          color: AppColors.accentBlue.withOpacity(0.9),
           borderRadius: BorderRadius.circular(30),
           boxShadow: [
             BoxShadow(
-              color: AppColors.accentBlue.withValues(alpha: 0.3),
+              color: AppColors.accentBlue.withOpacity(0.3),
               blurRadius: 16,
               offset: const Offset(0, 6),
             ),
@@ -653,7 +653,7 @@ class _NoteCardContent extends StatelessWidget {
                     maxLines: 6,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.7),
+                      color: Colors.white.withOpacity(0.7),
                       fontSize: 14,
                       height: 1.3,
                     ),
@@ -738,9 +738,9 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
       child: Container(
         height: size.height * 0.85,
         decoration: BoxDecoration(
-          color: AppColors.obsidianDark.withValues(alpha: 0.9),
+          color: AppColors.obsidianDark.withOpacity(0.9),
           borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.15), width: 1),
+          border: Border.all(color: Colors.white.withOpacity(0.15), width: 1),
         ),
         child: ClipRRect(
           borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
@@ -750,7 +750,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
               children: [
                 Positioned(
                   top: 0, left: 0, right: 0, height: 1,
-                  child: Container(decoration: BoxDecoration(gradient: LinearGradient(colors: [Colors.transparent, Colors.white.withValues(alpha: 0.1), Colors.transparent]))),
+                  child: Container(decoration: BoxDecoration(gradient: LinearGradient(colors: [Colors.transparent, Colors.white.withOpacity(0.1), Colors.transparent]))),
                 ),
                 Scaffold(
                   resizeToAvoidBottomInset: false,
@@ -760,7 +760,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                     child: Column(
                       children: [
                         const SizedBox(height: 12),
-                        Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.tertiaryText.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
+                        Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.tertiaryText.withOpacity(0.3), borderRadius: BorderRadius.circular(2))),
                         const SizedBox(height: 4),
                         CupertinoNavigationBar(
                           backgroundColor: Colors.transparent,
@@ -776,7 +776,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                                   HapticFeedback.lightImpact();
                                   final updatedNote = widget.note.copyWith(isPinned: !widget.note.isPinned);
                                   widget.storage.save(updatedNote);
-                                  setState(() {});
+                                  if (mounted) setState(() {});
                                 },
                               ),
                               CupertinoButton(
@@ -809,9 +809,9 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                             decoration: BoxDecoration(
-                              color: AppColors.accentBlue.withValues(alpha: 0.9),
+                              color: AppColors.accentBlue.withOpacity(0.9),
                               borderRadius: BorderRadius.circular(30),
-                              boxShadow: [BoxShadow(color: AppColors.accentBlue.withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 4))],
+                              boxShadow: [BoxShadow(color: AppColors.accentBlue.withOpacity(0.3), blurRadius: 12, offset: const Offset(0, 4))],
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -864,18 +864,20 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                     ),
                     onPressed: () {
                       HapticFeedback.lightImpact();
-                      setState(() {
-                        _img = null;
-                        _decodedImage = null;
-                        widget.note.clearImageCache();
-                      });
+                      if (mounted) {
+                        setState(() {
+                          _img = null;
+                          _decodedImage = null;
+                          widget.note.clearImageCache();
+                        });
+                      }
                     },
                   ),
                 ),
               ],
             ),
-          TextField(controller: _t, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: -0.5), decoration: InputDecoration(hintText: l10n.title, hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)), border: InputBorder.none)),
-          TextField(controller: _c, maxLines: null, style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 18, height: 1.5), decoration: InputDecoration(hintText: l10n.note, hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)), border: InputBorder.none)),
+          TextField(controller: _t, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: -0.5), decoration: InputDecoration(hintText: l10n.title, hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)), border: InputBorder.none)),
+          TextField(controller: _c, maxLines: null, style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 18, height: 1.5), decoration: InputDecoration(hintText: l10n.note, hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)), border: InputBorder.none)),
           const SizedBox(height: 24),
           VisionGlassCard(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -889,7 +891,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                     icon: const Icon(CupertinoIcons.photo, color: Colors.white70),
                     onPressed: _isLoading ? null : () async {
                       HapticFeedback.lightImpact();
-                      setState(() => _isLoading = true);
+                      if (mounted) setState(() => _isLoading = true);
                       try {
                         final XFile? image = await _picker.pickImage(
                           source: ImageSource.gallery,
@@ -901,10 +903,12 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                           final bytes = await image.readAsBytes();
                           // Process in microtask to avoid blocking UI
                           await Future.microtask(() {
-                            setState(() {
-                              _img = base64Encode(bytes);
-                              _decodedImage = bytes;
-                            });
+                            if (mounted) {
+                              setState(() {
+                                _img = base64Encode(bytes);
+                                _decodedImage = bytes;
+                              });
+                            }
                           });
                         }
                       } finally {
@@ -919,9 +923,9 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                     HapticFeedback.lightImpact();
                     final now = DateTime.now();
                     final d = await showDatePicker(context: context, initialDate: now, firstDate: now, lastDate: now.add(const Duration(days: 365)));
-                    if (d == null || !context.mounted) return;
+                    if (d == null || !mounted) return;
                     final t = await showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(now));
-                    if (t != null && context.mounted) setState(() => _rem = DateTime(d.year, d.month, d.day, t.hour, t.minute));
+                    if (t != null && mounted) setState(() => _rem = DateTime(d.year, d.month, d.day, t.hour, t.minute));
                   }),
                   if (_rem != null) ...[
                     const SizedBox(width: 8),
@@ -932,7 +936,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
             ),
           ),
           const SizedBox(height: 20),
-          TextField(controller: _l, style: const TextStyle(color: Colors.white70, fontSize: 15), decoration: InputDecoration(hintText: l10n.labelsHint, hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)), border: InputBorder.none)),
+          TextField(controller: _l, style: const TextStyle(color: Colors.white70, fontSize: 15), decoration: InputDecoration(hintText: l10n.labelsHint, hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)), border: InputBorder.none)),
           const SizedBox(height: 100),
         ],
       ),
@@ -984,9 +988,9 @@ class _TrashScreenState extends State<TrashScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.1),
+                            color: Colors.white.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+                            border: Border.all(color: Colors.white.withOpacity(0.15)),
                           ),
                           child: const Icon(CupertinoIcons.back, color: Colors.white70, size: 22),
                         ),
@@ -1108,7 +1112,7 @@ class _TrashNoteCard extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
+                    color: Colors.white.withOpacity(0.7),
                     fontSize: 14,
                   ),
                 ),
