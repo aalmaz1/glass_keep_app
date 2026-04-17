@@ -249,31 +249,37 @@ class _AuthScreenState extends State<AuthScreen> {
                               ),
                             )
                           : ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.accentBlue,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                              ),
-                              onPressed: _submit,
-                              child: Text(
-                                _isLogin ? 'Login' : 'Create Account',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.accentBlue,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
                               ),
                             ),
-                    ),
-                    const SizedBox(height: 16),
+                            onPressed: () {
+                              HapticFeedback.mediumImpact();
+                              _submit();
+                            },
+                            child: Text(
+                              _isLogin ? 'Login' : 'Create Account',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          ),
+                          const SizedBox(height: 16),
 
-                    // Toggle login/signup
-                    TextButton(
-                      onPressed: _isLoading
+                          // Toggle login/signup
+                          TextButton(
+                          onPressed: _isLoading
                           ? null
-                          : () => setState(() => _isLogin = !_isLogin),
-                      child: Text(
+                          : () {
+                            HapticFeedback.lightImpact();
+                            setState(() => _isLogin = !_isLogin);
+                          },
+                          child: Text(
                         _isLogin
                             ? "Don't have an account? Sign up"
                             : 'Already have an account? Login',

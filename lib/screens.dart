@@ -236,6 +236,7 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
                           note: notes[i],
                           onTap: () => _openNote(context, notes[i]),
                           onArchive: () {
+                            HapticFeedback.mediumImpact();
                             final updatedNote = notes[i].copyWith(isArchived: !notes[i].isArchived);
                             widget.storage.save(updatedNote);
                           },
@@ -773,6 +774,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                                 padding: EdgeInsets.zero,
                                 child: Icon(widget.note.isPinned ? CupertinoIcons.pin_fill : CupertinoIcons.pin, color: AppColors.accentBlue, size: 22),
                                 onPressed: () {
+                                  HapticFeedback.lightImpact();
                                   final updatedNote = widget.note.copyWith(isPinned: !widget.note.isPinned);
                                   widget.storage.save(updatedNote);
                                   setState(() {});
@@ -782,6 +784,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                                 padding: EdgeInsets.zero,
                                 child: const Icon(CupertinoIcons.trash, color: AppColors.accentRed, size: 22),
                                 onPressed: () {
+                                  HapticFeedback.mediumImpact();
                                   if (widget.note.id.isNotEmpty) widget.storage.delete(widget.note.id);
                                   Navigator.pop(context);
                                 },
@@ -799,7 +802,11 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                         right: 24,
                         bottom: 24,
                         child: GestureDetector(
-                          onTap: () { _save(); Navigator.pop(context); },
+                          onTap: () {
+                            HapticFeedback.mediumImpact();
+                            _save();
+                            Navigator.pop(context);
+                          },
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                             decoration: BoxDecoration(
@@ -856,11 +863,14 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                       CupertinoIcons.xmark_circle_fill,
                       color: Colors.white70,
                     ),
-                    onPressed: () => setState(() {
-                      _img = null;
-                      _decodedImage = null;
-                      widget.note.clearImageCache();
-                    }),
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      setState(() {
+                        _img = null;
+                        _decodedImage = null;
+                        widget.note.clearImageCache();
+                      });
+                    },
                   ),
                 ),
               ],
@@ -879,6 +889,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                     constraints: const BoxConstraints(),
                     icon: const Icon(CupertinoIcons.photo, color: Colors.white70),
                     onPressed: _isLoading ? null : () async {
+                      HapticFeedback.lightImpact();
                       setState(() => _isLoading = true);
                       try {
                         final XFile? image = await _picker.pickImage(
@@ -906,6 +917,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                   ),
                   const VerticalDivider(color: Colors.white24, indent: 8, endIndent: 8),
                   IconButton(padding: EdgeInsets.zero, constraints: const BoxConstraints(), icon: const Icon(CupertinoIcons.alarm, color: Colors.white70), onPressed: () async {
+                    HapticFeedback.lightImpact();
                     final now = DateTime.now();
                     final d = await showDatePicker(context: context, initialDate: now, firstDate: now, lastDate: now.add(const Duration(days: 365)));
                     if (d == null || !context.mounted) return;
@@ -966,7 +978,10 @@ class _TrashScreenState extends State<TrashScreen> {
                   child: Row(
                     children: [
                       GestureDetector(
-                        onTap: () => Navigator.pop(context),
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          Navigator.pop(context);
+                        },
                         child: Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
@@ -1066,7 +1081,10 @@ class _TrashNoteCard extends StatelessWidget {
                     color: AppColors.accentBlue,
                     size: 20,
                   ),
-                  onPressed: onRestore,
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    onRestore();
+                  },
                   tooltip: 'Restore',
                 ),
                 IconButton(
@@ -1075,7 +1093,10 @@ class _TrashNoteCard extends StatelessWidget {
                     color: AppColors.accentRed,
                     size: 20,
                   ),
-                  onPressed: onDelete,
+                  onPressed: () {
+                    HapticFeedback.mediumImpact();
+                    onDelete();
+                  },
                   tooltip: 'Delete forever',
                 ),
               ],
