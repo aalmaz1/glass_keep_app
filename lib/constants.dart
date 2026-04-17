@@ -29,11 +29,11 @@ class AppColors {
   static const Color black24 = Color.fromARGB(61, 0, 0, 0);
 
   // Accent colors
-  static const Color accentBlue = Color(0xFF007AFF);
+  static const Color accentBlue = Color(0xFF1FA4FF);
   static const Color accentRed = Color(0xFFFF3B30);
   static const Color accentGreen = Color(0xFF34C759);
   static const Color accentOrange = Color(0xFFFF9500);
-  static const Color accentPurple = Color(0xFFAF52DE);
+  static const Color accentPurple = Color(0xFFC273FF);
 }
 
 /// Responsive dimensions helper

@@ -198,11 +198,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
       tilt: _tilt,
       grainProgram: _grainProgram,
       aberrationProgram: _aberrationProgram,
-      child: Listener(
-        onPointerMove: (event) {
-          _pointerPosition.value = event.position;
-        },
-        child: MaterialApp(
+      child: MaterialApp(
         title: 'Glass Keep',
         debugShowCheckedModeBanner: false,
         locale: _locale,
@@ -313,7 +309,6 @@ class _GlassKeepAppState extends State<GlassKeepApp>
           },
         ),
       ),
-    ),
     );
   }
 }

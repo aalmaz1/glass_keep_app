@@ -24,7 +24,7 @@ class VisionGlassCard extends StatelessWidget {
     this.borderRadius = 20,
     this.useDistortion = true,
     this.color,
-    this.blur = 20,
+    this.blur = 30,
     this.padding,
     this.border,
   });
@@ -165,11 +165,11 @@ class _SpecularBorderPainter extends CustomPainter {
         Offset.zero + Offset(tilt.dx * 20, tilt.dy * 20),
         Offset(size.width, size.height) + Offset(tilt.dx * 20, tilt.dy * 20),
         [
-          Colors.white.withOpacity(0.6),
+          Colors.white.withOpacity(0.9),
+          Colors.white.withOpacity(0.2),
+          Colors.white.withOpacity(0.7),
           Colors.white.withOpacity(0.1),
-          Colors.white.withOpacity(0.4),
-          Colors.white.withOpacity(0.05),
-          Colors.white.withOpacity(0.5),
+          Colors.white.withOpacity(0.8),
         ],
         const [0.0, 0.25, 0.5, 0.75, 1.0],
       );
@@ -183,7 +183,7 @@ class _SpecularBorderPainter extends CustomPainter {
         Offset(0, size.height) - Offset(tilt.dx * 30, tilt.dy * 30),
         [
           Colors.white.withOpacity(0.0),
-          Colors.white.withOpacity(0.25),
+          Colors.white.withOpacity(0.4),
           Colors.white.withOpacity(0.0),
         ],
         const [0.0, 0.5, 1.0],
@@ -207,99 +207,125 @@ class VisionBackground extends StatelessWidget {
     final animationProvider = GlassAnimationProvider.of(context);
     final animation = animationProvider?.animationController;
 
-    return Container(
-      color: AppColors.background,
-      child: Stack(
-        children: [
-          if (animation != null)
-            AnimatedBuilder(
-              animation: animation,
-              builder: (context, child) {
-                return Stack(
+    return MouseRegion(
+      onHover: (event) {
+        animationProvider?.pointerPosition.value = event.position;
+      },
+      child: Listener(
+        onPointerMove: (event) {
+          animationProvider?.pointerPosition.value = event.position;
+        },
+        child: Container(
+          color: AppColors.background,
+          child: Stack(
+            children: [
+              if (animation != null)
+                AnimatedBuilder(
+                  animation: animation,
+                  builder: (context, child) {
+                    return Stack(
+                      children: [
+                        // Drifting aurora blobs optimized with RadialGradient
+                        _AuroraBlob(
+                          color: AppColors.accentBlue.withOpacity(0.25),
+                          size: 800,
+                          alignment: Alignment.topLeft,
+                          depth: 0.05,
+                          baseOffset: Offset(
+                            math.cos(animation.value * 2 * math.pi) * 150 - 150,
+                            math.sin(animation.value * 2 * math.pi) * 150 - 150,
+                          ),
+                        ),
+                        _AuroraBlob(
+                          color: AppColors.accentPurple.withOpacity(0.2),
+                          size: 900,
+                          alignment: Alignment.bottomRight,
+                          depth: 0.08,
+                          baseOffset: Offset(
+                            math.sin(animation.value * 2 * math.pi) * 200 + 150,
+                            math.cos(animation.value * 2 * math.pi) * 200 + 150,
+                          ),
+                        ),
+                        _AuroraBlob(
+                          color: AppColors.accentBlue.withOpacity(0.15),
+                          size: 600,
+                          alignment: Alignment.centerLeft,
+                          depth: 0.03,
+                          baseOffset: Offset(
+                            math.cos(animation.value * 2 * math.pi + math.pi / 2) * 250,
+                            math.sin(animation.value * 2 * math.pi + math.pi / 2) * 150,
+                          ),
+                        ),
+                        _AuroraBlob(
+                          color: AppColors.accentPurple.withOpacity(0.12),
+                          size: 700,
+                          alignment: Alignment.topRight,
+                          depth: 0.1,
+                          baseOffset: Offset(
+                            math.sin(animation.value * 2 * math.pi + math.pi / 4) * 200,
+                            math.cos(animation.value * 2 * math.pi + math.pi / 4) * 200,
+                          ),
+                        ),
+                        
+                        // Noise texture overlay for tactile feel, moved inside AnimatedBuilder for animation
+                        Positioned.fill(
+                          child: IgnorePointer(
+                            child: CustomPaint(
+                              painter: _ShaderNoisePainter(
+                                program: animationProvider?.grainProgram,
+                                time: DateTime.now().millisecondsSinceEpoch / 1000.0,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                )
+              else
+                const Stack(
                   children: [
-                    // Drifting aurora blobs optimized with RadialGradient
-                    _AuroraBlob(
-                      color: AppColors.accentBlue.withOpacity(0.2),
-                      size: 800,
-                      alignment: Alignment.topLeft,
-                      depth: 0.05,
-                      baseOffset: Offset(
-                        math.cos(animation.value * 2 * math.pi) * 150 - 150,
-                        math.sin(animation.value * 2 * math.pi) * 150 - 150,
+                    Positioned(
+                      top: -150,
+                      right: -150,
+                      child: _AuroraBlob(
+                        color: Color(0x336C5CE7),
+                        size: 500,
+                        baseOffset: Offset.zero,
                       ),
                     ),
-                    _AuroraBlob(
-                      color: AppColors.accentPurple.withOpacity(0.15),
-                      size: 900,
-                      alignment: Alignment.bottomRight,
-                      depth: 0.08,
-                      baseOffset: Offset(
-                        math.sin(animation.value * 2 * math.pi) * 200 + 150,
-                        math.cos(animation.value * 2 * math.pi) * 200 + 150,
-                      ),
-                    ),
-                    _AuroraBlob(
-                      color: AppColors.accentBlue.withOpacity(0.1),
-                      size: 600,
-                      alignment: Alignment.centerLeft,
-                      depth: 0.03,
-                      baseOffset: Offset(
-                        math.cos(animation.value * 2 * math.pi + math.pi / 2) * 250,
-                        math.sin(animation.value * 2 * math.pi + math.pi / 2) * 150,
-                      ),
-                    ),
-                    _AuroraBlob(
-                      color: AppColors.accentPurple.withOpacity(0.08),
-                      size: 700,
-                      alignment: Alignment.topRight,
-                      depth: 0.1,
-                      baseOffset: Offset(
-                        math.sin(animation.value * 2 * math.pi + math.pi / 4) * 200,
-                        math.cos(animation.value * 2 * math.pi + math.pi / 4) * 200,
+                    Positioned(
+                      bottom: 50,
+                      left: -100,
+                      child: _AuroraBlob(
+                        color: Color(0x330984E3),
+                        size: 400,
+                        baseOffset: Offset.zero,
                       ),
                     ),
                   ],
-                );
-              },
-            )
-          else
-            const Stack(
-              children: [
-                Positioned(
-                  top: -150,
-                  right: -150,
-                  child: _AuroraBlob(
-                    color: Color(0x1A6C5CE7),
-                    size: 500,
-                    baseOffset: Offset.zero,
-                  ),
                 ),
-                Positioned(
-                  bottom: 50,
-                  left: -100,
-                  child: _AuroraBlob(
-                    color: Color(0x1A0984E3),
-                    size: 400,
-                    baseOffset: Offset.zero,
-                  ),
-                ),
-              ],
-            ),
-
-          // Noise texture overlay for tactile feel, wrapped in RepaintBoundary for performance
-          Positioned.fill(
-            child: IgnorePointer(
-              child: RepaintBoundary(
-                child: CustomPaint(
-                  painter: _ShaderNoisePainter(
-                    program: animationProvider?.grainProgram,
-                    time: animation?.value ?? 0,
+    
+              // Deployment verification text
+              const Positioned(
+                bottom: 20,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: Text(
+                    'Obsidian Vision Premium v2',
+                    style: TextStyle(
+                      color: Colors.white24,
+                      fontSize: 10,
+                      letterSpacing: 1.2,
+                      fontWeight: FontWeight.w300,
+                    ),
                   ),
                 ),
               ),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -342,8 +368,7 @@ class _AuroraBlob extends StatelessWidget {
             final relPos = pointerPos - center;
 
             // Simple repulsion based on distance to pointer
-            // In a real app, we'd calculate distance to blob center
-            interactionOffset = relPos * -0.05;
+            interactionOffset = relPos * -0.25;
           }
 
           // Calculate parallax offset based on tilt and depth
