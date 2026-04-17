@@ -90,7 +90,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: AppColors.accentBlue.withValues(alpha: 0.2),
+                        color: AppColors.accentBlue.withOpacity(0.2),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
@@ -115,7 +115,7 @@ class _AuthScreenState extends State<AuthScreen> {
                         ? 'Sign in to sync your notes' 
                         : 'Join us to keep your thoughts safe',
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.6),
+                        color: Colors.white.withOpacity(0.6),
                         fontSize: 15,
                       ),
                     ),
@@ -132,11 +132,11 @@ class _AuthScreenState extends State<AuthScreen> {
                             style: const TextStyle(color: Colors.white),
                             decoration: InputDecoration(
                               labelText: 'Email',
-                              labelStyle: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
-                              prefixIcon: Icon(Icons.email_outlined, color: Colors.white.withValues(alpha: 0.5)),
+                              labelStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+                              prefixIcon: Icon(Icons.email_outlined, color: Colors.white.withOpacity(0.5)),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+                                borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
@@ -144,7 +144,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               ),
                               errorBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: Colors.red.withValues(alpha: 0.5)),
+                                borderSide: BorderSide(color: Colors.red.withOpacity(0.5)),
                               ),
                               focusedErrorBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
@@ -170,11 +170,11 @@ class _AuthScreenState extends State<AuthScreen> {
                             style: const TextStyle(color: Colors.white),
                             decoration: InputDecoration(
                               labelText: 'Password',
-                              labelStyle: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
-                              prefixIcon: Icon(Icons.lock_outline_rounded, color: Colors.white.withValues(alpha: 0.5)),
+                              labelStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+                              prefixIcon: Icon(Icons.lock_outline_rounded, color: Colors.white.withOpacity(0.5)),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+                                borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
@@ -182,7 +182,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               ),
                               errorBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: Colors.red.withValues(alpha: 0.5)),
+                                borderSide: BorderSide(color: Colors.red.withOpacity(0.5)),
                               ),
                               focusedErrorBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
@@ -210,10 +210,10 @@ class _AuthScreenState extends State<AuthScreen> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.red.withValues(alpha: 0.2),
+                          color: Colors.red.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: Colors.red.withValues(alpha: 0.5),
+                            color: Colors.red.withOpacity(0.5),
                           ),
                         ),
                         child: Text(
