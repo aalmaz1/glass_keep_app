@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -13,6 +14,7 @@ import 'package:glass_keep/auth_screen.dart';
 import 'package:glass_keep/constants.dart';
 import 'package:glass_keep/widgets.dart';
 import 'firebase_options.dart';
+import 'package:sensors_plus/sensors_plus.dart';
 
 void main() async {
   runZonedGuarded(() async {
@@ -52,17 +54,25 @@ void main() async {
 }
 
 /// Global provider for sharing a single AnimationController across all glass effects
-/// and managing app locale state
+/// and managing app locale state, sensor data, and pointer positions
 class GlassAnimationProvider extends InheritedWidget {
   final AnimationController animationController;
   final Locale locale;
   final Function(Locale) onLocaleChanged;
+  final ValueNotifier<Offset> pointerPosition;
+  final ValueNotifier<Offset> tilt;
+  final ui.FragmentProgram? grainProgram;
+  final ui.FragmentProgram? aberrationProgram;
 
   const GlassAnimationProvider({
     super.key,
     required this.animationController,
     required this.locale,
     required this.onLocaleChanged,
+    required this.pointerPosition,
+    required this.tilt,
+    this.grainProgram,
+    this.aberrationProgram,
     required super.child,
   });
 
@@ -72,7 +82,9 @@ class GlassAnimationProvider extends InheritedWidget {
 
   @override
   bool updateShouldNotify(GlassAnimationProvider oldWidget) =>
-      oldWidget.locale != locale;
+      oldWidget.locale != locale ||
+      oldWidget.grainProgram != grainProgram ||
+      oldWidget.aberrationProgram != aberrationProgram;
 }
 
 class GlassKeepApp extends StatefulWidget {
@@ -88,6 +100,14 @@ class _GlassKeepAppState extends State<GlassKeepApp>
   late Future<StorageService> _storageFuture;
   late AnimationController _glassAnimationController;
   Locale _locale = const Locale('en');
+
+  final ValueNotifier<Offset> _pointerPosition =
+      ValueNotifier<Offset>(Offset.zero);
+  final ValueNotifier<Offset> _tilt = ValueNotifier<Offset>(Offset.zero);
+  StreamSubscription? _accelerometerSubscription;
+
+  ui.FragmentProgram? _grainProgram;
+  ui.FragmentProgram? _aberrationProgram;
 
   void _changeLocale(Locale newLocale) {
     setState(() => _locale = newLocale);
@@ -105,11 +125,55 @@ class _GlassKeepAppState extends State<GlassKeepApp>
       duration: const Duration(seconds: 8),
       vsync: this,
     )..repeat();
+
+    _initSensors();
+    _loadShaders();
+  }
+
+  Future<void> _loadShaders() async {
+    try {
+      final grainProgram = await ui.FragmentProgram.fromAsset(
+        'shaders/film_grain.frag',
+      );
+      final aberrationProgram = await ui.FragmentProgram.fromAsset(
+        'shaders/chromatic_aberration.frag',
+      );
+      if (mounted) {
+        setState(() {
+          _grainProgram = grainProgram;
+          _aberrationProgram = aberrationProgram;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading shaders: $e');
+    }
+  }
+
+  void _initSensors() {
+    if (!kIsWeb &&
+        (defaultTargetPlatform == TargetPlatform.android ||
+            defaultTargetPlatform == TargetPlatform.iOS)) {
+      _accelerometerSubscription =
+          accelerometerEventStream().listen((AccelerometerEvent event) {
+        // Low-pass filter for smooth movement
+        final newTilt = Offset(
+          event.x / 10.0, // Normalize to roughly -1.0 to 1.0
+          event.y / 10.0,
+        );
+        _tilt.value = Offset(
+          _tilt.value.dx * 0.9 + newTilt.dx * 0.1,
+          _tilt.value.dy * 0.9 + newTilt.dy * 0.1,
+        );
+      });
+    }
   }
 
   @override
   void dispose() {
     _glassAnimationController.dispose();
+    _accelerometerSubscription?.cancel();
+    _pointerPosition.dispose();
+    _tilt.dispose();
     super.dispose();
   }
 
@@ -119,7 +183,15 @@ class _GlassKeepAppState extends State<GlassKeepApp>
       animationController: _glassAnimationController,
       locale: _locale,
       onLocaleChanged: _changeLocale,
-      child: MaterialApp(
+      pointerPosition: _pointerPosition,
+      tilt: _tilt,
+      grainProgram: _grainProgram,
+      aberrationProgram: _aberrationProgram,
+      child: Listener(
+        onPointerMove: (event) {
+          _pointerPosition.value = event.position;
+        },
+        child: MaterialApp(
         title: 'Glass Keep',
         debugShowCheckedModeBanner: false,
         locale: _locale,
