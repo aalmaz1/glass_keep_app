@@ -104,11 +104,11 @@ class _AuthScreenState extends State<AuthScreen> {
                         borderRadius: 60,
                         useDistortion: true,
                         blur: 25,
-                        color: AppColors.accentBlue.withOpacity(0.2),
+                        color: AppColors.accentBlue.withOpacity(0.3),
                         padding: const EdgeInsets.all(20),
                         child: Icon(
                           Icons.blur_on,
-                          color: AppColors.accentBlue.withOpacity(0.9),
+                          color: AppColors.accentBlue,
                           size: 80,
                         ),
                       ),
@@ -147,7 +147,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             decoration: InputDecoration(
                               labelText: 'Email',
                               labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
-                              prefixIcon: Icon(Icons.email_outlined, color: Colors.white.withOpacity(0.9)),
+                              prefixIcon: const Icon(Icons.email, color: Colors.white),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
                                 borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
@@ -185,7 +185,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             decoration: InputDecoration(
                               labelText: 'Password',
                               labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
-                              prefixIcon: Icon(Icons.lock_outline, color: Colors.white.withOpacity(0.9)),
+                              prefixIcon: const Icon(Icons.lock, color: Colors.white),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
                                 borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
