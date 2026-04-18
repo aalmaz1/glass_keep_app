@@ -116,6 +116,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
       ValueNotifier<Offset>(const Offset(-1000, -1000));
   final ValueNotifier<Offset> _tilt = ValueNotifier<Offset>(Offset.zero);
   StreamSubscription? _accelerometerSubscription;
+  StreamSubscription? _gyroscopeSubscription;
 
   ui.FragmentProgram? _grainProgram;
   ui.FragmentProgram? _aberrationProgram;
@@ -168,12 +169,22 @@ class _GlassKeepAppState extends State<GlassKeepApp>
           accelerometerEventStream().listen((AccelerometerEvent event) {
         // Low-pass filter for smooth movement
         final newTilt = Offset(
-          event.x / 10.0, // Normalize to roughly -1.0 to 1.0
+          -event.x / 10.0, // Invert X for more natural tilt
           event.y / 10.0,
         );
         _tilt.value = Offset(
           _tilt.value.dx * 0.9 + newTilt.dx * 0.1,
           _tilt.value.dy * 0.9 + newTilt.dy * 0.1,
+        );
+      });
+
+      // Properly initialize gyroscope stream for Web and Mobile
+      _gyroscopeSubscription = gyroscopeEventStream().listen((GyroscopeEvent event) {
+        // Integrate gyroscope for immediate responsiveness
+        final kick = Offset(event.y * 0.015, event.x * 0.015);
+        _tilt.value = Offset(
+          (_tilt.value.dx + kick.dx).clamp(-1.5, 1.5),
+          (_tilt.value.dy + kick.dy).clamp(-1.5, 1.5),
         );
       });
     }
@@ -183,6 +194,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
   void dispose() {
     _glassAnimationController.dispose();
     _accelerometerSubscription?.cancel();
+    _gyroscopeSubscription?.cancel();
     _pointerPosition.dispose();
     _tilt.dispose();
     super.dispose();
@@ -198,116 +210,148 @@ class _GlassKeepAppState extends State<GlassKeepApp>
       tilt: _tilt,
       grainProgram: _grainProgram,
       aberrationProgram: _aberrationProgram,
-      child: MaterialApp(
-        title: 'Glass Keep',
-        debugShowCheckedModeBanner: false,
-        locale: _locale,
-        theme: ThemeData(
-          brightness: Brightness.dark,
-          useMaterial3: true,
-          scaffoldBackgroundColor: AppColors.obsidianDark,
-          colorSchemeSeed: AppColors.accentBlue,
-          fontFamily: '.SF Pro Display',
-          cupertinoOverrideTheme: const CupertinoThemeData(
-            brightness: Brightness.dark,
-            primaryColor: AppColors.accentBlue,
-          ),
-          appBarTheme: const AppBarTheme(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            centerTitle: true,
-            titleTextStyle: TextStyle(
-              color: Colors.white,
-              fontSize: 17,
-              fontWeight: FontWeight.w600,
-              letterSpacing: -0.4,
-            ),
-          ),
-          inputDecorationTheme: InputDecorationTheme(
-            filled: true,
-            fillColor: Colors.transparent,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 14,
-            ),
-          ),
-        ),
-        localizationsDelegates: const [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: StreamBuilder<User?>(
-          stream: _authStream,
-          builder: (context, snapshot) {
-            if (snapshot.hasError) {
-              return Scaffold(
-                body: Center(
-                  child: Text('Auth Error: ${snapshot.error}'),
+      child: Stack(
+        children: [
+          Listener(
+            behavior: HitTestBehavior.translucent,
+            onPointerHover: (event) {
+              _pointerPosition.value = event.position;
+            },
+            onPointerMove: (event) {
+              _pointerPosition.value = event.position;
+            },
+            child: MaterialApp(
+              title: 'Glass Keep',
+              debugShowCheckedModeBanner: false,
+              locale: _locale,
+              theme: ThemeData(
+                brightness: Brightness.dark,
+                useMaterial3: true,
+                scaffoldBackgroundColor: AppColors.obsidianDark,
+                colorSchemeSeed: AppColors.accentBlue,
+                fontFamily: '.SF Pro Display',
+                cupertinoOverrideTheme: const CupertinoThemeData(
+                  brightness: Brightness.dark,
+                  primaryColor: AppColors.accentBlue,
                 ),
-              );
-            }
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Scaffold(
-                body: Stack(
-                  children: [
-                    VisionBackground(),
-                    Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          _LoadingLogo(),
-                          SizedBox(height: 24),
-                          CupertinoActivityIndicator(
-                            color: AppColors.accentBlue,
-                            radius: 14,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                appBarTheme: const AppBarTheme(
+                  backgroundColor: Colors.transparent,
+                  elevation: 0,
+                  centerTitle: true,
+                  titleTextStyle: TextStyle(
+                    color: Colors.white,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: -0.4,
+                  ),
                 ),
-              );
-            }
-
-            if (snapshot.hasData) {
-              return FutureBuilder<StorageService>(
-                future: _storageFuture,
-                builder: (context, storeSnapshot) {
-                  if (storeSnapshot.hasError) {
+                inputDecorationTheme: InputDecorationTheme(
+                  filled: true,
+                  fillColor: Colors.transparent,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
+                ),
+              ),
+              localizationsDelegates: const [
+                AppLocalizations.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              supportedLocales: AppLocalizations.supportedLocales,
+              home: StreamBuilder<User?>(
+                stream: _authStream,
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
                     return Scaffold(
                       body: Center(
-                        child: Text('Storage Error: ${storeSnapshot.error}'),
+                        child: Text('Auth Error: ${snapshot.error}'),
                       ),
                     );
                   }
-                  if (storeSnapshot.hasData) {
-                    return NotesScreen(storage: storeSnapshot.data!);
-                  }
-                  return const Scaffold(
-                    body: Stack(
-                      children: [
-                        VisionBackground(),
-                        Center(
-                          child: CupertinoActivityIndicator(
-                            color: AppColors.accentBlue,
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Scaffold(
+                      body: Stack(
+                        children: [
+                          VisionBackground(),
+                          Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                _LoadingLogo(),
+                                SizedBox(height: 24),
+                                CupertinoActivityIndicator(
+                                  color: AppColors.accentBlue,
+                                  radius: 14,
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  );
+                        ],
+                      ),
+                    );
+                  }
+    
+                  if (snapshot.hasData) {
+                    return FutureBuilder<StorageService>(
+                      future: _storageFuture,
+                      builder: (context, storeSnapshot) {
+                        if (storeSnapshot.hasError) {
+                          return Scaffold(
+                            body: Center(
+                              child: Text('Storage Error: ${storeSnapshot.error}'),
+                            ),
+                          );
+                        }
+                        if (storeSnapshot.hasData) {
+                          return NotesScreen(storage: storeSnapshot.data!);
+                        }
+                        return const Scaffold(
+                          body: Stack(
+                            children: [
+                              VisionBackground(),
+                              Center(
+                                child: CupertinoActivityIndicator(
+                                  color: AppColors.accentBlue,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    );
+                  }
+                  return const AuthScreen();
                 },
-              );
-            }
-            return const AuthScreen();
-          },
-        ),
+              ),
+            ),
+          ),
+          // Deployment verification text - always at the bottom of the stack
+          const Positioned(
+            bottom: 20,
+            left: 0,
+            right: 0,
+            child: IgnorePointer(
+              child: Center(
+                child: Text(
+                  'Obsidian Vision Premium v2',
+                  style: TextStyle(
+                    color: Colors.white24,
+                    fontSize: 10,
+                    letterSpacing: 1.2,
+                    fontWeight: FontWeight.w300,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
