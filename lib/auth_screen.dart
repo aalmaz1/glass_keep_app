@@ -83,38 +83,17 @@ class _AuthScreenState extends State<AuthScreen> {
             child: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(24, 24, 24, 80),
               child: VisionGlassCard(
+                useDistortion: false,
                 borderRadius: 24,
                 padding: const EdgeInsets.all(32),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     // App Logo or Icon
-                    Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.accentBlue.withOpacity(0.2),
-                            blurRadius: 20,
-                            spreadRadius: 2,
-                          ),
-                        ],
-                      ),
-                      child: Hero(
-                        tag: 'app_logo',
-                        child: Container(
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color: AppColors.accentBlue.withOpacity(0.3),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.blur_on,
-                            color: Colors.white,
-                            size: 80,
-                          ),
-                        ),
-                      ),
+                    const Icon(
+                      Icons.blur_on,
+                      size: 80,
+                      color: AppColors.accentBlue,
                     ),
                     const SizedBox(height: 24),
                     Text(
@@ -295,9 +274,9 @@ class _AuthScreenState extends State<AuthScreen> {
                     ),
                     const SizedBox(height: 24),
                     const Text(
-                      'Obsidian Vision Premium v2 [STABLE]',
+                      'Obsidian Vision Premium v2 [STABLE-READY]',
                       style: TextStyle(
-                        color: Colors.white38,
+                        color: Colors.white54,
                         fontSize: 12,
                         letterSpacing: 1.2,
                       ),
