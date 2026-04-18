@@ -27,7 +27,7 @@ void main() async {
 
     if (kIsWeb) {
       try {
-        await FirebaseFirestore.instance.enablePersistence(
+        await FirebaseFirestore.instance.setPersistenceSettings(
           const PersistenceSettings(synchronizeTabs: true),
         );
       } catch (e) {
@@ -340,7 +340,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
             child: IgnorePointer(
               child: Center(
                 child: Text(
-                  'Obsidian Vision Premium v2',
+                  'Obsidian Vision Premium v2 [ACTIVE]',
                   style: TextStyle(
                     color: Colors.white38,
                     fontSize: 10,
