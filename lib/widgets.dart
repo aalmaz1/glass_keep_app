@@ -68,9 +68,8 @@ class VisionGlassCard extends StatelessWidget {
           );
         }
 
-        final aberrationProgram = animationProvider?.aberrationProgram;
         final blurFilter = ui.ImageFilter.blur(sigmaX: blur, sigmaY: blur);
-
+        
         Widget cardContent = Container(
           decoration: BoxDecoration(
             color: color ?? AppColors.glassLight,
@@ -79,25 +78,6 @@ class VisionGlassCard extends StatelessWidget {
           ),
           child: mainContent,
         );
-
-        // Apply chromatic aberration using ShaderMask if shader is available
-        if (aberrationProgram != null) {
-          try {
-            cardContent = ShaderMask(
-              shaderCallback: (Rect bounds) {
-                final shader = aberrationProgram.fragmentShader();
-                shader.setFloat(0, bounds.width);
-                shader.setFloat(1, bounds.height);
-                shader.setFloat(2, 0.5); // Strength
-                return shader;
-              },
-              blendMode: BlendMode.srcIn,
-              child: cardContent,
-            );
-          } catch (e) {
-            debugPrint('Shader error: $e');
-          }
-        }
 
         return Container(
           decoration: BoxDecoration(

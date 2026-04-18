@@ -73,7 +73,6 @@ class GlassAnimationProvider extends InheritedWidget {
   final ValueNotifier<Offset> pointerPosition;
   final ValueNotifier<Offset> tilt;
   final ui.FragmentProgram? grainProgram;
-  final ui.FragmentProgram? aberrationProgram;
 
   const GlassAnimationProvider({
     super.key,
@@ -83,7 +82,6 @@ class GlassAnimationProvider extends InheritedWidget {
     required this.pointerPosition,
     required this.tilt,
     this.grainProgram,
-    this.aberrationProgram,
     required super.child,
   });
 
@@ -94,8 +92,7 @@ class GlassAnimationProvider extends InheritedWidget {
   @override
   bool updateShouldNotify(GlassAnimationProvider oldWidget) =>
       oldWidget.locale != locale ||
-      oldWidget.grainProgram != grainProgram ||
-      oldWidget.aberrationProgram != aberrationProgram;
+      oldWidget.grainProgram != grainProgram;
 }
 
 class GlassKeepApp extends StatefulWidget {
@@ -119,7 +116,6 @@ class _GlassKeepAppState extends State<GlassKeepApp>
   StreamSubscription? _gyroscopeSubscription;
 
   ui.FragmentProgram? _grainProgram;
-  ui.FragmentProgram? _aberrationProgram;
 
   void _changeLocale(Locale newLocale) {
     setState(() => _locale = newLocale);
@@ -147,13 +143,9 @@ class _GlassKeepAppState extends State<GlassKeepApp>
       final grainProgram = await ui.FragmentProgram.fromAsset(
         'shaders/film_grain.frag',
       );
-      final aberrationProgram = await ui.FragmentProgram.fromAsset(
-        'shaders/chromatic_aberration.frag',
-      );
       if (mounted) {
         setState(() {
           _grainProgram = grainProgram;
-          _aberrationProgram = aberrationProgram;
         });
       }
     } catch (e) {
@@ -209,7 +201,6 @@ class _GlassKeepAppState extends State<GlassKeepApp>
       pointerPosition: _pointerPosition,
       tilt: _tilt,
       grainProgram: _grainProgram,
-      aberrationProgram: _aberrationProgram,
       child: Stack(
         children: [
           Listener(
@@ -340,7 +331,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
             child: IgnorePointer(
               child: Center(
                 child: Text(
-                  'Obsidian Vision Premium v2 [ACTIVE]',
+                  'Obsidian Vision Premium v2 [STABLE]',
                   style: TextStyle(
                     color: Colors.white38,
                     fontSize: 10,
