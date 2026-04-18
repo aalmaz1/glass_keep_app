@@ -27,8 +27,8 @@ void main() async {
 
     if (kIsWeb) {
       try {
-        await FirebaseFirestore.instance.setPersistenceSettings(
-          const PersistenceSettings(synchronizeTabs: true),
+        FirebaseFirestore.instance.settings = const Settings(
+          persistenceEnabled: true,
         );
       } catch (e) {
         debugPrint('Firestore persistence error: $e');
