@@ -100,16 +100,25 @@ class _AuthScreenState extends State<AuthScreen> {
                           ),
                         ],
                       ),
-                      child: VisionGlassCard(
-                        borderRadius: 60,
-                        useDistortion: true,
-                        blur: 25,
-                        color: AppColors.accentBlue.withOpacity(0.3),
-                        padding: const EdgeInsets.all(20),
-                        child: Icon(
-                          Icons.blur_on,
-                          color: AppColors.accentBlue,
-                          size: 80,
+                      child: Hero(
+                        tag: 'app_logo',
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: AppColors.accentBlue.withOpacity(0.1), // Fallback
+                            shape: BoxShape.circle,
+                          ),
+                          child: VisionGlassCard(
+                            borderRadius: 60,
+                            useDistortion: true,
+                            blur: 25,
+                            color: AppColors.accentBlue.withOpacity(0.3),
+                            padding: const EdgeInsets.all(20),
+                            child: const Icon(
+                              Icons.blur_on,
+                              color: Colors.white,
+                              size: 80,
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -291,10 +300,10 @@ class _AuthScreenState extends State<AuthScreen> {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    Text(
+                    const Text(
                       'Obsidian Vision Premium v2',
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.5),
+                        color: Colors.white38,
                         fontSize: 12,
                         letterSpacing: 1.2,
                       ),

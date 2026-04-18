@@ -342,7 +342,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
                 child: Text(
                   'Obsidian Vision Premium v2',
                   style: TextStyle(
-                    color: Colors.white24,
+                    color: Colors.white38,
                     fontSize: 10,
                     letterSpacing: 1.2,
                     fontWeight: FontWeight.w300,
@@ -362,31 +362,34 @@ class _LoadingLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 60,
-      height: 60,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppColors.accentBlue.withOpacity(0.8),
-            AppColors.accentPurple.withOpacity(0.8),
+    return Hero(
+      tag: 'app_logo',
+      child: Container(
+        width: 60,
+        height: 60,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppColors.accentBlue.withOpacity(0.8),
+              AppColors.accentPurple.withOpacity(0.8),
+            ],
+          ),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.accentBlue.withOpacity(0.3),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
           ],
         ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.accentBlue.withOpacity(0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: const Icon(
-        CupertinoIcons.doc_text,
-        size: 30,
-        color: Colors.white,
+        child: const Icon(
+          Icons.blur_on,
+          size: 30,
+          color: Colors.white,
+        ),
       ),
     );
   }

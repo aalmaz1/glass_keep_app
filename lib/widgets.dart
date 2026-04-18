@@ -470,7 +470,7 @@ class GlassSearchBar extends StatelessWidget {
         style: const TextStyle(color: Colors.white, fontSize: 16),
         decoration: InputDecoration(
           icon: Icon(
-            CupertinoIcons.search,
+            Icons.search,
             color: Colors.white.withOpacity(0.6),
             size: 20,
           ),
