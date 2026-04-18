@@ -123,7 +123,11 @@ class StorageService {
 
   static Future<StorageService> init() async {
     if (!_initialized) {
-      FirebaseFirestore.instance.settings = const Settings(persistenceEnabled: true);
+      try {
+        FirebaseFirestore.instance.settings = const Settings(persistenceEnabled: true);
+      } catch (e) {
+        debugPrint('Firestore settings already set: $e');
+      }
       _initialized = true;
     }
     return StorageService._();
