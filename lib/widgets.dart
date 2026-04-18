@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 import 'package:glass_keep/constants.dart';
-import 'package:glass_keep/glass_effect.dart';
 import 'package:glass_keep/main.dart';
 
 /// A premium glass morphism card that uses BackdropFilter and optional distortion
@@ -31,151 +30,54 @@ class VisionGlassCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final animationProvider = GlassAnimationProvider.of(context);
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final width = constraints.maxWidth == double.infinity ? 300.0 : constraints.maxWidth;
-        final height = constraints.maxHeight == double.infinity ? 300.0 : constraints.maxHeight;
-
-        Widget mainContent = Stack(
-          children: [
-            // Specular border highlights
-            Positioned.fill(
-              child: ValueListenableBuilder<Offset>(
-                valueListenable: animationProvider?.tilt ?? ValueNotifier(Offset.zero),
-                builder: (context, currentTilt, _) {
-                  return CustomPaint(
-                    painter: _SpecularBorderPainter(
-                      borderRadius: borderRadius,
-                      tilt: currentTilt,
-                    ),
-                  );
-                },
-              ),
-            ),
-            Padding(
-              padding: padding ?? EdgeInsets.zero,
-              child: child,
-            ),
-          ],
-        );
-
-        if (useDistortion) {
-          mainContent = GlassDistortionEffect(
-            borderRadius: borderRadius,
-            child: mainContent,
-          );
-        }
-
-        final blurFilter = ui.ImageFilter.blur(sigmaX: blur, sigmaY: blur);
-        
-        Widget cardContent = Container(
-          decoration: BoxDecoration(
-            color: color ?? AppColors.glassLight,
-            borderRadius: BorderRadius.circular(borderRadius),
-            border: border,
+    final blurFilter = ui.ImageFilter.blur(sigmaX: blur, sigmaY: blur);
+    
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(borderRadius),
+        boxShadow: [
+          // Multi-layered deep premium shadows for physical depth
+          BoxShadow(
+            color: Colors.black.withOpacity(0.5),
+            blurRadius: 50,
+            offset: const Offset(0, 25),
+            spreadRadius: -15,
           ),
-          child: mainContent,
-        );
-
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(borderRadius),
-            boxShadow: [
-              // Multi-layered deep premium shadows for physical depth
-              BoxShadow(
-                color: Colors.black.withOpacity(0.5),
-                blurRadius: 50,
-                offset: const Offset(0, 25),
-                spreadRadius: -15,
-              ),
-              BoxShadow(
-                color: Colors.black.withOpacity(0.3),
-                blurRadius: 25,
-                offset: const Offset(0, 12),
-                spreadRadius: -5,
-              ),
-              BoxShadow(
-                color: Colors.black.withOpacity(0.15),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              ),
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 2,
-                offset: const Offset(0, 1),
-              ),
-            ],
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            blurRadius: 25,
+            offset: const Offset(0, 12),
+            spreadRadius: -5,
           ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(borderRadius),
-            child: BackdropFilter(
-              filter: blurFilter,
-              child: cardContent,
+          BoxShadow(
+            color: Colors.black.withOpacity(0.15),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 2,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(borderRadius),
+        child: BackdropFilter(
+          filter: blurFilter,
+          child: Container(
+            padding: padding ?? EdgeInsets.zero,
+            decoration: BoxDecoration(
+              color: color ?? AppColors.glassLight,
+              borderRadius: BorderRadius.circular(borderRadius),
+              border: border ?? Border.all(color: Colors.white.withOpacity(0.1)),
             ),
+            child: child,
           ),
-        );
-      },
+        ),
+      ),
     );
   }
-}
-
-/// Painter for specular border highlights on glass cards with enhanced dual-layer gradient
-/// and gyroscope-based dynamic lighting
-class _SpecularBorderPainter extends CustomPainter {
-  final double borderRadius;
-  final Offset tilt;
-
-  const _SpecularBorderPainter({
-    required this.borderRadius,
-    this.tilt = Offset.zero,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final rect = Offset.zero & size;
-    final rrect = RRect.fromRectAndRadius(rect, Radius.circular(borderRadius));
-
-    // Primary specular border with complex gradient simulating light catch
-    final paint1 = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5
-      ..shader = ui.Gradient.linear(
-        Offset.zero + Offset(tilt.dx * 20, tilt.dy * 20),
-        Offset(size.width, size.height) + Offset(tilt.dx * 20, tilt.dy * 20),
-        [
-          Colors.white.withOpacity(0.9),
-          Colors.white.withOpacity(0.2),
-          Colors.white.withOpacity(0.7),
-          Colors.white.withOpacity(0.1),
-          Colors.white.withOpacity(0.8),
-        ],
-        const [0.0, 0.25, 0.5, 0.75, 1.0],
-      );
-
-    // Secondary subtle highlight for added depth on the opposite edge
-    final paint2 = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.8
-      ..shader = ui.Gradient.linear(
-        Offset(size.width, 0) - Offset(tilt.dx * 30, tilt.dy * 30),
-        Offset(0, size.height) - Offset(tilt.dx * 30, tilt.dy * 30),
-        [
-          Colors.white.withOpacity(0.0),
-          Colors.white.withOpacity(0.4),
-          Colors.white.withOpacity(0.0),
-        ],
-        const [0.0, 0.5, 1.0],
-      );
-
-    canvas.drawRRect(rrect, paint1);
-    canvas.drawRRect(rrect, paint2);
-  }
-
-  @override
-  bool shouldRepaint(covariant _SpecularBorderPainter oldDelegate) =>
-      oldDelegate.borderRadius != borderRadius || oldDelegate.tilt != tilt;
 }
 
 /// Premium animated background with moving aurora blobs and noise texture

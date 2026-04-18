@@ -295,7 +295,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     ),
                     const SizedBox(height: 24),
                     const Text(
-                      'Obsidian Vision Premium v2 [STABLE]',
+                      'Obsidian Vision Premium v2 [STABLE-FIX]',
                       style: TextStyle(
                         color: Colors.white38,
                         fontSize: 12,

@@ -331,7 +331,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
             child: IgnorePointer(
               child: Center(
                 child: Text(
-                  'Obsidian Vision Premium v2 [STABLE]',
+                  'Obsidian Vision Premium v2 [STABLE-FIX]',
                   style: TextStyle(
                     color: Colors.white38,
                     fontSize: 10,
