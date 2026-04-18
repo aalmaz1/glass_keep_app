@@ -101,7 +101,7 @@ class _AuthScreenState extends State<AuthScreen> {
                         ],
                       ),
                       child: VisionGlassCard(
-                        borderRadius: 50,
+                        borderRadius: 60,
                         useDistortion: true,
                         blur: 25,
                         color: AppColors.accentBlue.withOpacity(0.2),
@@ -109,7 +109,7 @@ class _AuthScreenState extends State<AuthScreen> {
                         child: Icon(
                           Icons.blur_on,
                           color: AppColors.accentBlue.withOpacity(0.9),
-                          size: 48,
+                          size: 80,
                         ),
                       ),
                     ),
@@ -185,7 +185,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             decoration: InputDecoration(
                               labelText: 'Password',
                               labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
-                              prefixIcon: Icon(Icons.lock_outline_rounded, color: Colors.white.withOpacity(0.9)),
+                              prefixIcon: Icon(Icons.lock_outline, color: Colors.white.withOpacity(0.9)),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
                                 borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
