@@ -103,21 +103,15 @@ class _AuthScreenState extends State<AuthScreen> {
                       child: Hero(
                         tag: 'app_logo',
                         child: Container(
+                          padding: const EdgeInsets.all(20),
                           decoration: BoxDecoration(
-                            color: AppColors.accentBlue.withOpacity(0.1), // Fallback
+                            color: AppColors.accentBlue.withOpacity(0.3),
                             shape: BoxShape.circle,
                           ),
-                          child: VisionGlassCard(
-                            borderRadius: 60,
-                            useDistortion: true,
-                            blur: 25,
-                            color: AppColors.accentBlue.withOpacity(0.3),
-                            padding: const EdgeInsets.all(20),
-                            child: const Icon(
-                              Icons.blur_on,
-                              color: Colors.white,
-                              size: 80,
-                            ),
+                          child: const Icon(
+                            Icons.blur_on,
+                            color: Colors.white,
+                            size: 80,
                           ),
                         ),
                       ),
@@ -156,7 +150,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             decoration: InputDecoration(
                               labelText: 'Email',
                               labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
-                              prefixIcon: const Icon(Icons.email, color: Colors.white),
+                              prefixIcon: const Icon(Icons.email, color: Colors.white, size: 24),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
                                 borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
@@ -194,7 +188,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             decoration: InputDecoration(
                               labelText: 'Password',
                               labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
-                              prefixIcon: const Icon(Icons.lock, color: Colors.white),
+                              prefixIcon: const Icon(Icons.lock, color: Colors.white, size: 24),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
                                 borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
@@ -301,7 +295,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     ),
                     const SizedBox(height: 24),
                     const Text(
-                      'Obsidian Vision Premium v2',
+                      'Obsidian Vision Premium v2 [ACTIVE]',
                       style: TextStyle(
                         color: Colors.white38,
                         fontSize: 12,
