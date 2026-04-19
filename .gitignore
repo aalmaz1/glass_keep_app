@@ -1,21 +1,62 @@
-```
-# Dependencies
-node_modules/
-
-# Logs and temp files
+# Miscellaneous
+*.class
 *.log
-*.tmp
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
 
-# Environment
-.env
-.env.local
-*.env.*
-
-# Editors
-.vscode/
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
 .idea/
 
-# Build outputs
-build/
-dist/
-```
+# The .vscode/ directory contains settings for Visual Studio Code
+.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+/build/
+
+# Android related
+**/android/app/src/main/res/generated/
+**/android/gen/
+**/android/out/
+
+# iOS related
+**/ios/Flutter/App.framework
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/Flutter/flutter_tools_bundle_resources.sh
+**/ios/ServiceDefinitions.json
+**/ios/Runner/GeneratedPluginRegistrant.[mh]
+
+# Symbolication related
+/app.*.symbols
+
+# Bndl related
+/*.release.bundle
+
+# Windows related
+/windows/flutter/ephemeral/
+
+# Linux related
+/linux/flutter/ephemeral/
+
+# macOS related
+/macos/flutter/ephemeral/
+
+# Web related
+/web/stack_trace_mapper.js

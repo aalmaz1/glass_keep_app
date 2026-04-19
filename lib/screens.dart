@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
-import 'dart:ui';
+import 'dart:ui' as ui;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -24,12 +24,10 @@ class NotesScreen extends StatefulWidget {
   State<NotesScreen> createState() => _NotesScreenState();
 }
 
-class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStateMixin {
+class _NotesScreenState extends State<NotesScreen> {
   String _search = '';
-  final bool _showArchived = false;
   late TextEditingController _searchController;
   late Stream<List<Note>> _notesStream;
-  late AnimationController _fabAnimationController;
   List<Note>? _filteredNotes;
   String _lastSearch = '';
   List<Note>? _lastSourceNotes;
@@ -45,18 +43,12 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
     _searchController = TextEditingController();
     // Initialize stream once in initState
     _notesStream = widget.storage.getNotesStream();
-    _fabAnimationController = AnimationController(
-      duration: const Duration(milliseconds: 600),
-      vsync: this,
-    );
-    _fabAnimationController.forward();
   }
 
   @override
   void dispose() {
     _searchDebounceTimer?.cancel();
     _searchController.dispose();
-    _fabAnimationController.dispose();
     super.dispose();
   }
 
@@ -73,10 +65,11 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
   void _logout() async {
     widget.storage.clearCache();
     await FirebaseAuth.instance.signOut();
+    if (!mounted) return;
   }
 
   void _openNote(BuildContext context, Note note) {
-    HapticFeedback.mediumImpact();
+    HapticFeedback.lightImpact();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -95,7 +88,7 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
           const begin = Offset(1.0, 0.0);
           const end = Offset.zero;
           const curve = Curves.easeOutCubic;
-          var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+          final tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
           return SlideTransition(position: animation.drive(tween), child: child);
         },
       ),
@@ -139,12 +132,6 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
     return notes;
   }
 
-  /// Clear filter cache when notes change significantly
-  void _clearFilterCache() {
-    _filteredNotes = null;
-    _lastSourceNotes = null;
-  }
-
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -180,14 +167,14 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
                           child: Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.1),
+                              color: const Color(0xFFFFFFFF).withOpacity(0.1),
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.white.withOpacity(0.15)),
+                              border: Border.all(color: const Color(0xFFFFFFFF).withOpacity(0.15)),
                             ),
                             child: const Icon(
-                              CupertinoIcons.ellipsis_vertical,
-                              color: AppColors.secondaryText,
+                              Icons.more_vert,
                               size: 22,
+                              color: Colors.white,
                             ),
                           ),
                         ),
@@ -212,7 +199,6 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
                       return const SliverFillRemaining(
                         child: Center(
                           child: CupertinoActivityIndicator(
-                            color: AppColors.accentBlue,
                             radius: 15,
                           ),
                         ),
@@ -239,9 +225,9 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
                     final crossAxisCount = ((size.width - 2 * paddingH + ResponsiveDimensions.gridGap) / (ResponsiveDimensions.cardMinWidth + ResponsiveDimensions.gridGap)).floor().clamp(1, 6);
 
                     return SliverPadding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: paddingH,
-                        vertical: 18,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: ResponsiveDimensions.gridPadding,
+                        vertical: ResponsiveDimensions.gridPadding,
                       ),
                       sliver: SliverMasonryGrid.count(
                         crossAxisCount: crossAxisCount,
@@ -252,6 +238,7 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
                           note: notes[i],
                           onTap: () => _openNote(context, notes[i]),
                           onArchive: () {
+                            HapticFeedback.mediumImpact();
                             final updatedNote = notes[i].copyWith(isArchived: !notes[i].isArchived);
                             widget.storage.save(updatedNote);
                           },
@@ -281,25 +268,24 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        margin: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.obsidianDark.withOpacity(0.95),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white.withOpacity(0.1)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 12),
-            Container(width: 36, height: 5, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2.5))),
-            const SizedBox(height: 20),
-            _MenuItem(icon: CupertinoIcons.paintbrush, label: 'Фон', onTap: () { Navigator.pop(context); _openBackgroundSettings(context); }),
-            _MenuItem(icon: CupertinoIcons.globe, label: l10n.language, onTap: () { Navigator.pop(context); _showLanguagePicker(context); }),
-            _MenuItem(icon: CupertinoIcons.trash, label: l10n.trash, onTap: () { Navigator.pop(context); _openTrash(context); }),
-            _MenuItem(icon: CupertinoIcons.arrow_right_square, label: l10n.logout, onTap: () { Navigator.pop(context); _logout(); }, isDestructive: true),
-            const SizedBox(height: 20),
-          ],
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: VisionGlassCard(
+          borderRadius: 24,
+          color: AppColors.obsidianDark.withOpacity(0.9),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 12),
+              Container(width: 36, height: 5, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2.5))),
+              const SizedBox(height: 20),
+              _MenuItem(icon: Icons.palette, label: 'Appearance', onTap: () { Navigator.pop(context); _openBackgroundSettings(context); }),
+              _MenuItem(icon: Icons.language, label: l10n.language, onTap: () { Navigator.pop(context); _showLanguagePicker(context); }),
+              _MenuItem(icon: Icons.delete, label: l10n.trash, onTap: () { Navigator.pop(context); _openTrash(context); }),
+              _MenuItem(icon: Icons.logout, label: l10n.logout, onTap: () { Navigator.pop(context); _logout(); }, isDestructive: true),
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
     );
@@ -321,55 +307,49 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
   }
 
   void _showLanguagePicker(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     final provider = GlassAnimationProvider.of(context);
     if (provider == null) return;
 
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        margin: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.obsidianDark.withOpacity(0.95),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white.withOpacity(0.1)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 12),
-            Container(width: 36, height: 5, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2.5))),
-            const SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-              child: Row(
-                children: [
-                  const Icon(CupertinoIcons.globe, color: AppColors.accentBlue, size: 22),
-                  const SizedBox(width: 12),
-                  Text(l10n.language, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white)),
-                ],
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: VisionGlassCard(
+          borderRadius: 24,
+          color: AppColors.obsidianDark.withOpacity(0.9),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 12),
+              Container(width: 36, height: 5, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2.5))),
+              const SizedBox(height: 20),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                child: Row(
+                  children: [
+                    Icon(Icons.language, color: AppColors.accentBlue, size: 22),
+                    SizedBox(width: 12),
+                    Text('Language', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white)),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            _LanguageOption(locale: const Locale('en'), flag: '🇺🇸', name: 'English', currentLocale: provider.locale, onTap: (locale) {
-              Navigator.pop(context);
-              // Access the state directly through the provider's widget tree
-              final state = context.findAncestorStateOfType<_GlassKeepAppState>();
-              state?._changeLocale(locale);
-            }),
-            _LanguageOption(locale: const Locale('ru'), flag: '🇷🇺', name: 'Русский', currentLocale: provider.locale, onTap: (locale) {
-              Navigator.pop(context);
-              final state = context.findAncestorStateOfType<_GlassKeepAppState>();
-              state?._changeLocale(locale);
-            }),
-            _LanguageOption(locale: const Locale('ko'), flag: '🇰🇷', name: '한국어', currentLocale: provider.locale, onTap: (locale) {
-              Navigator.pop(context);
-              final state = context.findAncestorStateOfType<_GlassKeepAppState>();
-              state?._changeLocale(locale);
-            }),
-            const SizedBox(height: 20),
-          ],
+              const SizedBox(height: 8),
+              _LanguageOption(locale: const Locale('en'), flag: '🇺🇸', name: 'English', currentLocale: provider.locale, onTap: (locale) {
+                provider.onLocaleChanged(locale);
+                Navigator.pop(context);
+              }),
+              _LanguageOption(locale: const Locale('ru'), flag: '🇷🇺', name: 'Русский', currentLocale: provider.locale, onTap: (locale) {
+                provider.onLocaleChanged(locale);
+                Navigator.pop(context);
+              }),
+              _LanguageOption(locale: const Locale('ko'), flag: '🇰🇷', name: '한국어', currentLocale: provider.locale, onTap: (locale) {
+                provider.onLocaleChanged(locale);
+                Navigator.pop(context);
+              }),
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
     );
@@ -382,12 +362,15 @@ class _MenuItem extends StatelessWidget {
   final VoidCallback onTap;
   final bool isDestructive;
 
-  const _MenuItem({required this.icon, required this.label, required this.onTap, this.isDestructive = false});
+  const _MenuItem({super.key, required this.icon, required this.label, required this.onTap, this.isDestructive = false});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: () {
+        HapticFeedback.mediumImpact();
+        onTap();
+      },
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
@@ -411,6 +394,7 @@ class _LanguageOption extends StatelessWidget {
   final Function(Locale) onTap;
 
   const _LanguageOption({
+    super.key,
     required this.locale,
     required this.flag,
     required this.name,
@@ -454,7 +438,7 @@ class _LanguageOption extends StatelessWidget {
             ),
             if (isSelected)
               const Icon(
-                CupertinoIcons.checkmark_circle_fill,
+                Icons.check_circle,
                 color: AppColors.accentBlue,
                 size: 22,
               ),
@@ -466,7 +450,7 @@ class _LanguageOption extends StatelessWidget {
 }
 
 class _NewNoteButton extends StatelessWidget {
-  const _NewNoteButton();
+  const _NewNoteButton({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -474,6 +458,7 @@ class _NewNoteButton extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
+        HapticFeedback.mediumImpact();
         final storage = _getStorageService(context);
         final n = Note(
           id: '',
@@ -500,7 +485,7 @@ class _NewNoteButton extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             const Icon(
-              CupertinoIcons.add,
+              Icons.add,
               color: Colors.white,
               size: 24,
             ),
@@ -548,7 +533,6 @@ class NoteCard extends StatefulWidget {
 
 class _NoteCardState extends State<NoteCard> with AutomaticKeepAliveClientMixin {
   Uint8List? _decodedImage;
-  String? _lastImageBase64;
   bool _isHovered = false;
 
   @override
@@ -570,7 +554,6 @@ class _NoteCardState extends State<NoteCard> with AutomaticKeepAliveClientMixin 
   }
 
   void _updateImage() {
-    _lastImageBase64 = widget.note.imageBase64;
     _decodedImage = widget.note.cachedImage;
   }
 
@@ -593,6 +576,7 @@ class _NoteCardState extends State<NoteCard> with AutomaticKeepAliveClientMixin 
               note: widget.note,
               decodedImage: _decodedImage,
               onTap: widget.onTap,
+              isHovered: _isHovered,
             ),
           ),
         ),
@@ -606,17 +590,20 @@ class _NoteCardContent extends StatelessWidget {
   final Note note;
   final Uint8List? decodedImage;
   final VoidCallback onTap;
+  final bool isHovered;
 
   const _NoteCardContent({
     required this.note,
     required this.decodedImage,
     required this.onTap,
+    required this.isHovered,
   });
 
   @override
   Widget build(BuildContext context) {
     return VisionGlassCard(
       padding: EdgeInsets.zero,
+      useDistortion: isHovered,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(20),
@@ -642,7 +629,7 @@ class _NoteCardContent extends StatelessWidget {
                 children: [
                   if (note.isPinned)
                     const Icon(
-                      CupertinoIcons.pin_fill,
+                      Icons.push_pin,
                       size: 14,
                       color: AppColors.accentBlue,
                     ),
@@ -730,7 +717,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
 
   void _save() {
     if (_t.text.trim().isEmpty && _c.text.trim().isEmpty && _img == null) return;
-    
+
     final updatedNote = widget.note.copyWith(
       title: _t.text.trim(),
       content: _c.text.trim(),
@@ -760,7 +747,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
         child: ClipRRect(
           borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+            filter: ui.ImageFilter.blur(sigmaX: 20, sigmaY: 20),
             child: Stack(
               children: [
                 Positioned(
@@ -786,17 +773,23 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                             children: [
                               CupertinoButton(
                                 padding: EdgeInsets.zero,
-                                child: Icon(widget.note.isPinned ? CupertinoIcons.pin_fill : CupertinoIcons.pin, color: AppColors.accentBlue, size: 22),
+                                child: Icon(
+                                  Icons.push_pin,
+                                  color: widget.note.isPinned ? AppColors.accentBlue : AppColors.accentBlue.withOpacity(0.3),
+                                  size: 22,
+                                ),
                                 onPressed: () {
+                                  HapticFeedback.lightImpact();
                                   final updatedNote = widget.note.copyWith(isPinned: !widget.note.isPinned);
                                   widget.storage.save(updatedNote);
-                                  setState(() {});
+                                  if (mounted) setState(() {});
                                 },
                               ),
                               CupertinoButton(
                                 padding: EdgeInsets.zero,
-                                child: const Icon(CupertinoIcons.trash, color: AppColors.accentRed, size: 22),
+                                child: const Icon(Icons.delete, color: AppColors.accentRed, size: 22),
                                 onPressed: () {
+                                  HapticFeedback.mediumImpact();
                                   if (widget.note.id.isNotEmpty) widget.storage.delete(widget.note.id);
                                   Navigator.pop(context);
                                 },
@@ -814,7 +807,11 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                         right: 24,
                         bottom: 24,
                         child: GestureDetector(
-                          onTap: () { _save(); Navigator.pop(context); },
+                          onTap: () {
+                            HapticFeedback.mediumImpact();
+                            _save();
+                            Navigator.pop(context);
+                          },
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                             decoration: BoxDecoration(
@@ -825,7 +822,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(CupertinoIcons.check_mark, color: Colors.white, size: 20),
+                                const Icon(Icons.check, color: Colors.white, size: 20),
                                 const SizedBox(width: 8),
                                 Text(l10n.save, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
                               ],
@@ -868,14 +865,19 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                   child: CupertinoButton(
                     padding: EdgeInsets.zero,
                     child: const Icon(
-                      CupertinoIcons.xmark_circle_fill,
+                      Icons.cancel,
                       color: Colors.white70,
                     ),
-                    onPressed: () => setState(() {
-                      _img = null;
-                      _decodedImage = null;
-                      widget.note.clearImageCache();
-                    }),
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      if (mounted) {
+                        setState(() {
+                          _img = null;
+                          _decodedImage = null;
+                          widget.note.clearImageCache();
+                        });
+                      }
+                    },
                   ),
                 ),
               ],
@@ -892,9 +894,10 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                   IconButton(
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
-                    icon: const Icon(CupertinoIcons.photo, color: Colors.white70),
+                    icon: const Icon(Icons.photo, color: Colors.white70),
                     onPressed: _isLoading ? null : () async {
-                      setState(() => _isLoading = true);
+                      HapticFeedback.lightImpact();
+                      if (mounted) setState(() => _isLoading = true);
                       try {
                         final XFile? image = await _picker.pickImage(
                           source: ImageSource.gallery,
@@ -902,15 +905,20 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                           maxHeight: 1200,
                           imageQuality: 85,
                         );
+                        if (!mounted) return;
                         if (image != null) {
                           final bytes = await image.readAsBytes();
+                          if (!mounted) return;
                           // Process in microtask to avoid blocking UI
                           await Future.microtask(() {
-                            setState(() {
-                              _img = base64Encode(bytes);
-                              _decodedImage = bytes;
-                            });
+                            if (mounted) {
+                              setState(() {
+                                _img = base64Encode(bytes);
+                                _decodedImage = bytes;
+                              });
+                            }
                           });
+                          if (!mounted) return;
                         }
                       } finally {
                         if (mounted) {
@@ -920,12 +928,14 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                     },
                   ),
                   const VerticalDivider(color: Colors.white24, indent: 8, endIndent: 8),
-                  IconButton(padding: EdgeInsets.zero, constraints: const BoxConstraints(), icon: const Icon(CupertinoIcons.alarm, color: Colors.white70), onPressed: () async {
+                  IconButton(padding: EdgeInsets.zero, constraints: const BoxConstraints(), icon: const Icon(Icons.alarm, color: Colors.white70), onPressed: () async {
+                    HapticFeedback.lightImpact();
                     final now = DateTime.now();
                     final d = await showDatePicker(context: context, initialDate: now, firstDate: now, lastDate: now.add(const Duration(days: 365)));
-                    if (d == null || !context.mounted) return;
+                    if (d == null || !mounted) return;
                     final t = await showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(now));
-                    if (t != null && context.mounted) setState(() => _rem = DateTime(d.year, d.month, d.day, t.hour, t.minute));
+                    if (!mounted) return;
+                    if (t != null) setState(() => _rem = DateTime(d.year, d.month, d.day, t.hour, t.minute));
                   }),
                   if (_rem != null) ...[
                     const SizedBox(width: 8),
@@ -981,7 +991,10 @@ class _TrashScreenState extends State<TrashScreen> {
                   child: Row(
                     children: [
                       GestureDetector(
-                        onTap: () => Navigator.pop(context),
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          Navigator.pop(context);
+                        },
                         child: Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
@@ -989,7 +1002,7 @@ class _TrashScreenState extends State<TrashScreen> {
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(color: Colors.white.withOpacity(0.15)),
                           ),
-                          child: const Icon(CupertinoIcons.back, color: Colors.white70, size: 22),
+                          child: const Icon(Icons.arrow_back, color: Colors.white70, size: 22),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -1008,7 +1021,7 @@ class _TrashScreenState extends State<TrashScreen> {
                       final archivedNotes = snapshot.data!.where((n) => n.isArchived).toList();
 
                       if (archivedNotes.isEmpty) {
-                        return Center(child: Text(l10n.trashEmpty, style: const TextStyle(color: AppColors.secondaryText, fontSize: 17)));
+                        return Center(child: Text(l10n.trashEmptyHint, style: const TextStyle(color: AppColors.secondaryText, fontSize: 17)));
                       }
 
                       return ListView.builder(
@@ -1049,6 +1062,7 @@ class _TrashNoteCard extends StatelessWidget {
   final VoidCallback onDelete;
 
   const _TrashNoteCard({
+    super.key,
     required this.note,
     required this.onRestore,
     required this.onDelete,
@@ -1058,6 +1072,7 @@ class _TrashNoteCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return RepaintBoundary(
       child: VisionGlassCard(
+        useDistortion: false,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -1075,20 +1090,26 @@ class _TrashNoteCard extends StatelessWidget {
                 ),
                 IconButton(
                   icon: const Icon(
-                    CupertinoIcons.arrow_counterclockwise,
+                    Icons.restore,
                     color: AppColors.accentBlue,
                     size: 20,
                   ),
-                  onPressed: onRestore,
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    onRestore();
+                  },
                   tooltip: 'Restore',
                 ),
                 IconButton(
                   icon: const Icon(
-                    CupertinoIcons.trash,
+                    Icons.delete,
                     color: AppColors.accentRed,
                     size: 20,
                   ),
-                  onPressed: onDelete,
+                  onPressed: () {
+                    HapticFeedback.mediumImpact();
+                    onDelete();
+                  },
                   tooltip: 'Delete forever',
                 ),
               ],

@@ -1,7 +1,7 @@
 name: glass_keep
 description: Glassmorphism Google Keep clone as PWA
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.2.0+4
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -19,7 +19,8 @@ dependencies:
   flutter_staggered_grid_view: ^0.7.0
   cupertino_icons: ^1.0.8
   window_manager: ^0.4.3
-  noise: ^1.0.0
+  fast_noise: ^2.0.0
+  sensors_plus: ^6.1.1
 
 dev_dependencies:
   flutter_test:
@@ -29,3 +30,7 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   generate: true
+
+  shaders:
+    - shaders/chromatic_aberration.frag
+    - shaders/film_grain.frag

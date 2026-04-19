@@ -111,7 +111,7 @@ class Note {
 class StorageService {
   final _db = FirebaseFirestore.instance;
   final _auth = FirebaseAuth.instance;
-  
+
   // Cached stream for notes to avoid multiple subscriptions
   Stream<List<Note>>? _notesStream;
   // Cache for the latest notes data
@@ -119,12 +119,18 @@ class StorageService {
   // Track if persistence is enabled
   static bool _initialized = false;
 
+  StorageService._();
+
   static Future<StorageService> init() async {
     if (!_initialized) {
-      FirebaseFirestore.instance.settings = const Settings(persistenceEnabled: true);
+      try {
+        FirebaseFirestore.instance.settings = const Settings(persistenceEnabled: true);
+      } catch (e) {
+        debugPrint('Firestore settings already set: $e');
+      }
       _initialized = true;
     }
-    return StorageService();
+    return StorageService._();
   }
 
   String get _uid => _auth.currentUser?.uid ?? 'anonymous';
@@ -147,17 +153,16 @@ class StorageService {
               final data = d.data();
               final noteId = data['id'] ?? '';
               final updatedAt = data['updatedAt'] ?? 0;
-              
+
               // Try to find existing note in cache
-              final existingNote = oldNotes.cast<Note?>().firstWhere(
-                (n) => n?.id == noteId && n?.updatedAt.millisecondsSinceEpoch == updatedAt,
-                orElse: () => null,
-              );
-              
+              final existingNote = oldNotes.where(
+                (n) => n.id == noteId && n.updatedAt.millisecondsSinceEpoch == updatedAt,
+              ).firstOrNull;
+
               if (existingNote != null) {
                 return existingNote;
               }
-              
+
               return Note.fromMap(data);
             }).toList();
             _notesCache = List.unmodifiable(notes);
@@ -166,21 +171,13 @@ class StorageService {
         });
 
     // Convert to broadcast stream to allow multiple listeners without recreating
-    _notesStream = stream.asBroadcastStream(
-      onListen: (subscription) {
-        // Handle first listener
-      },
-      onCancel: (subscription) {
-        // Keep the stream alive for potential reconnections
-        // Cache is cleared only on explicit clearCache() call
-      },
-    );
+    _notesStream = stream.asBroadcastStream();
     return _notesStream!;
   }
-  
+
   /// Get cached notes if available
   List<Note>? get cachedNotes => _notesCache;
-  
+
   /// Clear the cache - useful for logout scenarios
   void clearCache() {
     _notesStream = null;
