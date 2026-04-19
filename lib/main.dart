@@ -191,7 +191,8 @@ class _GlassKeepAppState extends State<GlassKeepApp>
                 useMaterial3: true,
                 scaffoldBackgroundColor: AppColors.obsidianDark,
                 colorSchemeSeed: AppColors.accentBlue,
-                fontFamily: 'Noto Sans',
+                fontFamily: kIsWeb ? 'Roboto' : 'Noto Sans',
+                fontFamilyFallback: const ['Roboto', 'Arial'],
                 cupertinoOverrideTheme: const CupertinoThemeData(
                   brightness: Brightness.dark,
                   primaryColor: AppColors.accentBlue,
@@ -348,7 +349,7 @@ class _LoadingLogo extends StatelessWidget {
           ],
         ),
         child: const Icon(
-          CupertinoIcons.circle_grid_hex,
+          CupertinoIcons.lightbulb_fill,
           size: 30,
           color: Colors.white,
           shadows: AppColors.iconShadows,
