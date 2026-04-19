@@ -702,6 +702,28 @@ class _NoteCardContent extends StatelessWidget {
                   children: note.labels.map((l) => LabelChip(label: l)).toList(),
                 ),
               ],
+              if (note.reminder != null) ...[
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    const Icon(
+                      CupertinoIcons.alarm,
+                      size: 14,
+                      color: AppColors.accentBlue,
+                      shadows: AppColors.iconShadows,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      DateFormat('dd.MM HH:mm').format(note.reminder!),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.accentBlue,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ],
           ),
         ),

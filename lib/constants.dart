@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 class AppColors {
   // Obsidian dark background colors
   static const Color background = Color(0xFF0A0A0C);
-  static const Color surface = Color(0xFF1A1A1E);
-  static const Color secondaryBackground = Color(0xFF2A2A30);
 
   // Text colors
   static const Color primaryText = Colors.white;
@@ -32,38 +30,9 @@ class AppColors {
 
 /// Responsive dimensions helper
 class ResponsiveDimensions {
-  static const double mobileBreakpoint = 600;
-  static const double tabletBreakpoint = 900;
-
-  static const double paddingMd = 16.0;
-  static const double paddingLg = 24.0;
-  static const double paddingXl = 32.0;
-
   static const double gridPadding = 24.0;
   static const double gridGap = 18.0;
   static const double cardMinWidth = 300.0;
-
-  /// Get horizontal padding based on screen width
-  static double getHorizontalPadding(Size size) {
-    if (size.width < mobileBreakpoint) {
-      return paddingMd;
-    } else if (size.width < tabletBreakpoint) {
-      return paddingLg;
-    } else {
-      return paddingXl;
-    }
-  }
-
-  /// Get grid columns based on screen width
-  static int getGridColumns(Size size) {
-    if (size.width < mobileBreakpoint) {
-      return 2;
-    } else if (size.width < tabletBreakpoint) {
-      return 3;
-    } else {
-      return 4;
-    }
-  }
 }
 
 /// Utility class for common operations
