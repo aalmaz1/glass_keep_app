@@ -19,6 +19,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
   bool _isLoading = false;
   bool _isLogin = true;
+  bool _obscurePassword = true;
   String? _errorMessage;
 
   @override
@@ -90,19 +91,54 @@ class _AuthScreenState extends State<AuthScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // App Logo or Icon
-                    const Icon(
-                      CupertinoIcons.circle_grid_hex,
-                      size: 80,
-                      color: AppColors.accentBlue,
-                      shadows: AppColors.iconShadows,
+                    // App Logo
+                    Hero(
+                      tag: 'app_logo',
+                      child: Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              AppColors.accentBlue.withValues(alpha: 0.8),
+                              AppColors.accentPurple.withValues(alpha: 0.8),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.accentBlue.withValues(alpha: 0.3),
+                              blurRadius: 20,
+                              offset: const Offset(0, 10),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          CupertinoIcons.circle_grid_hex,
+                          size: 40,
+                          color: Colors.white,
+                          shadows: AppColors.iconShadows,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Glass Keep',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 32,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -1,
+                      ),
                     ),
                     const SizedBox(height: 24),
                     Text(
                       _isLogin ? 'Welcome Back' : 'Create Account',
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 28,
+                        fontSize: 24,
                         fontWeight: FontWeight.bold,
                         letterSpacing: -0.5,
                       ),
@@ -131,7 +167,12 @@ class _AuthScreenState extends State<AuthScreen> {
                             decoration: InputDecoration(
                               labelText: 'Email',
                               labelStyle: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
-                              prefixIcon: const Icon(CupertinoIcons.mail, color: Colors.white, size: 28, shadows: AppColors.iconShadows),
+                              prefixIcon: const Icon(
+                                CupertinoIcons.mail, 
+                                color: AppColors.accentBlue, 
+                                size: 22, 
+                                shadows: AppColors.iconShadows
+                              ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
                                 borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.3)),
@@ -164,12 +205,25 @@ class _AuthScreenState extends State<AuthScreen> {
                           // Password field
                           TextFormField(
                             controller: _passwordController,
-                            obscureText: true,
+                            obscureText: _obscurePassword,
                             style: const TextStyle(color: Colors.white),
                             decoration: InputDecoration(
                               labelText: 'Password',
                               labelStyle: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
-                              prefixIcon: const Icon(CupertinoIcons.lock, color: Colors.white, size: 28, shadows: AppColors.iconShadows),
+                              prefixIcon: const Icon(
+                                CupertinoIcons.lock, 
+                                color: AppColors.accentBlue, 
+                                size: 22, 
+                                shadows: AppColors.iconShadows
+                              ),
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _obscurePassword ? CupertinoIcons.eye : CupertinoIcons.eye_slash,
+                                  color: Colors.white.withValues(alpha: 0.5),
+                                  size: 20,
+                                ),
+                                onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                              ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
                                 borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.3)),

@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 import 'package:glass_keep/constants.dart';
 import 'package:glass_keep/glass_effect.dart';
-import 'package:glass_keep/main.dart';
+import 'package:glass_keep/provider.dart';
 
 /// A premium glass morphism card that uses BackdropFilter and optional distortion
 class VisionGlassCard extends StatelessWidget {
@@ -349,37 +349,6 @@ class _AuroraBlob extends StatelessWidget {
           );
         },
       ),
-    );
-  }
-}
-
-/// Helper for listening to two ValueNotifiers
-class ValueListenableBuilder2<A, B> extends StatelessWidget {
-  final ValueListenable<A> first;
-  final ValueListenable<B> second;
-  final Widget Function(BuildContext context, A a, B b, Widget? child) builder;
-  final Widget? child;
-
-  const ValueListenableBuilder2({
-    super.key,
-    required this.first,
-    required this.second,
-    required this.builder,
-    this.child,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<A>(
-      valueListenable: first,
-      builder: (context, a, _) {
-        return ValueListenableBuilder<B>(
-          valueListenable: second,
-          builder: (context, b, _) {
-            return builder(context, a, b, child);
-          },
-        );
-      },
     );
   }
 }
