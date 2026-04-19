@@ -280,9 +280,9 @@ class _NotesScreenState extends State<NotesScreen> {
               const SizedBox(height: 12),
               Container(width: 36, height: 5, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2.5))),
               const SizedBox(height: 20),
-              _MenuItem(icon: Icons.palette, label: 'Appearance', onTap: () { Navigator.pop(context); _openBackgroundSettings(context); }),
-              _MenuItem(icon: Icons.language, label: l10n.language, onTap: () { Navigator.pop(context); _showLanguagePicker(context); }),
-              _MenuItem(icon: Icons.delete, label: l10n.trash, onTap: () { Navigator.pop(context); _openTrash(context); }),
+              _MenuItem(icon: CupertinoIcons.paintbrush, label: 'Appearance', onTap: () { Navigator.pop(context); _openBackgroundSettings(context); }),
+              _MenuItem(icon: CupertinoIcons.globe, label: l10n.language, onTap: () { Navigator.pop(context); _showLanguagePicker(context); }),
+              _MenuItem(icon: CupertinoIcons.trash, label: l10n.trash, onTap: () { Navigator.pop(context); _openTrash(context); }),
               _MenuItem(icon: CupertinoIcons.square_arrow_right, label: l10n.logout, onTap: () { Navigator.pop(context); _logout(); }, isDestructive: true),
               const SizedBox(height: 20),
             ],
@@ -329,7 +329,7 @@ class _NotesScreenState extends State<NotesScreen> {
                 padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                 child: Row(
                   children: [
-                    Icon(Icons.language, color: AppColors.accentBlue, size: 22),
+                    Icon(CupertinoIcons.globe, color: AppColors.accentBlue, size: 22, shadows: AppColors.iconShadows),
                     SizedBox(width: 12),
                     Text('Language', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white)),
                   ],
@@ -439,9 +439,10 @@ class _LanguageOption extends StatelessWidget {
             ),
             if (isSelected)
               const Icon(
-                Icons.check_circle,
+                CupertinoIcons.check_mark_circled,
                 color: AppColors.accentBlue,
                 size: 22,
+                shadows: AppColors.iconShadows,
               ),
           ],
         ),
@@ -631,9 +632,10 @@ class _NoteCardContent extends StatelessWidget {
                 children: [
                   if (note.isPinned)
                     const Icon(
-                      Icons.push_pin,
+                      CupertinoIcons.pin,
                       size: 14,
                       color: AppColors.accentBlue,
+                      shadows: AppColors.iconShadows,
                     ),
                   if (note.isPinned) const SizedBox(width: 6),
                   Expanded(
@@ -776,9 +778,10 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                               CupertinoButton(
                                 padding: EdgeInsets.zero,
                                 child: Icon(
-                                  Icons.push_pin,
+                                  CupertinoIcons.pin,
                                   color: widget.note.isPinned ? AppColors.accentBlue : AppColors.accentBlue.withOpacity(0.3),
                                   size: 22,
+                                  shadows: AppColors.iconShadows,
                                 ),
                                 onPressed: () {
                                   HapticFeedback.lightImpact();
@@ -789,7 +792,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                               ),
                               CupertinoButton(
                                 padding: EdgeInsets.zero,
-                                child: const Icon(Icons.delete, color: AppColors.accentRed, size: 22),
+                                child: const Icon(CupertinoIcons.trash, color: AppColors.accentRed, size: 22, shadows: AppColors.iconShadows),
                                 onPressed: () {
                                   HapticFeedback.mediumImpact();
                                   if (widget.note.id.isNotEmpty) widget.storage.delete(widget.note.id);
@@ -872,8 +875,9 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                   child: CupertinoButton(
                     padding: EdgeInsets.zero,
                     child: const Icon(
-                      Icons.cancel,
+                      CupertinoIcons.multiply_circle,
                       color: Colors.white70,
+                      shadows: AppColors.iconShadows,
                     ),
                     onPressed: () {
                       HapticFeedback.lightImpact();
@@ -901,7 +905,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                   IconButton(
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
-                    icon: const Icon(Icons.photo, color: Colors.white70),
+                    icon: const Icon(CupertinoIcons.photo, color: Colors.white70, shadows: AppColors.iconShadows),
                     onPressed: _isLoading ? null : () async {
                       HapticFeedback.lightImpact();
                       if (mounted) setState(() => _isLoading = true);
@@ -935,7 +939,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                     },
                   ),
                   const VerticalDivider(color: Colors.white24, indent: 8, endIndent: 8),
-                  IconButton(padding: EdgeInsets.zero, constraints: const BoxConstraints(), icon: const Icon(Icons.alarm, color: Colors.white70), onPressed: () async {
+                  IconButton(padding: EdgeInsets.zero, constraints: const BoxConstraints(), icon: const Icon(CupertinoIcons.alarm, color: Colors.white70, shadows: AppColors.iconShadows), onPressed: () async {
                     HapticFeedback.lightImpact();
                     final now = DateTime.now();
                     final d = await showDatePicker(context: context, initialDate: now, firstDate: now, lastDate: now.add(const Duration(days: 365)));
@@ -1009,7 +1013,7 @@ class _TrashScreenState extends State<TrashScreen> {
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(color: Colors.white.withOpacity(0.15)),
                           ),
-                          child: const Icon(Icons.arrow_back, color: Colors.white70, size: 22),
+                          child: const Icon(CupertinoIcons.arrow_left, color: Colors.white70, size: 22, shadows: AppColors.iconShadows),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -1097,9 +1101,10 @@ class _TrashNoteCard extends StatelessWidget {
                 ),
                 IconButton(
                   icon: const Icon(
-                    Icons.restore,
+                    CupertinoIcons.arrow_counterclockwise,
                     color: AppColors.accentBlue,
                     size: 20,
+                    shadows: AppColors.iconShadows,
                   ),
                   onPressed: () {
                     HapticFeedback.lightImpact();
@@ -1109,9 +1114,10 @@ class _TrashNoteCard extends StatelessWidget {
                 ),
                 IconButton(
                   icon: const Icon(
-                    Icons.delete,
+                    CupertinoIcons.trash,
                     color: AppColors.accentRed,
                     size: 20,
+                    shadows: AppColors.iconShadows,
                   ),
                   onPressed: () {
                     HapticFeedback.mediumImpact();

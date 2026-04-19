@@ -36,8 +36,7 @@ class AppColors {
   static const Color accentPurple = Color(0xFFC273FF);
 
   static const List<Shadow> iconShadows = [
-    Shadow(color: Colors.black54, offset: Offset(0, 2), blurRadius: 4),
-    Shadow(color: Colors.black26, offset: Offset(0, 4), blurRadius: 10),
+    Shadow(color: Colors.black54, offset: Offset(0, 2), blurRadius: 10),
   ];
 }
 
