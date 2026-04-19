@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:glass_keep/constants.dart';
 import 'package:glass_keep/widgets.dart';
 
@@ -25,31 +26,31 @@ class SettingsScreen extends StatelessWidget {
               _buildOption(
                 context,
                 'Standard Vision',
-                Icons.auto_awesome,
+                CupertinoIcons.sparkles,
                 () => onThemeChanged(null, null),
               ),
               _buildOption(
                 context,
                 'Obsidian Dark',
-                Icons.dark_mode,
+                CupertinoIcons.moon,
                 () => onThemeChanged(const Color(0xFF0A0A0C), null),
               ),
               _buildOption(
                 context,
                 'Soft Blue',
-                Icons.color_lens,
+                CupertinoIcons.color_filter,
                 () => onThemeChanged(const Color(0xFFE3F2FD), null),
               ),
               _buildOption(
                 context,
                 'Gentle Green',
-                Icons.eco,
+                CupertinoIcons.leaf_fill,
                 () => onThemeChanged(const Color(0xFFE8F5E9), null),
               ),
               _buildOption(
                 context,
                 'Sunset Gradient',
-                Icons.gradient,
+                CupertinoIcons.layers,
                 () => onThemeChanged(
                   null,
                   const BoxDecoration(
@@ -64,7 +65,7 @@ class SettingsScreen extends StatelessWidget {
               _buildOption(
                 context,
                 'Ocean Gradient',
-                Icons.water,
+                CupertinoIcons.drop,
                 () => onThemeChanged(
                   null,
                   const BoxDecoration(
@@ -111,7 +112,7 @@ class SettingsScreen extends StatelessWidget {
                 color: AppColors.accentBlue.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(icon, color: AppColors.accentBlue, size: 20),
+              child: Icon(icon, color: AppColors.accentBlue, size: 20, shadows: AppColors.iconShadows),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -126,9 +127,10 @@ class SettingsScreen extends StatelessWidget {
               ),
             ),
             const Icon(
-              Icons.chevron_right,
+              CupertinoIcons.chevron_right,
               color: Colors.white38,
               size: 20,
+              shadows: AppColors.iconShadows,
             ),
           ],
         ),

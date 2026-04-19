@@ -331,7 +331,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
             child: IgnorePointer(
               child: Center(
                 child: Text(
-                  'Obsidian Vision Premium v2 [STABLE-READY]',
+                  'CUPERTINO-V1',
                   style: TextStyle(
                     color: Colors.white54,
                     fontSize: 10,
@@ -377,9 +377,16 @@ class _LoadingLogo extends StatelessWidget {
           ],
         ),
         child: const Icon(
-          Icons.blur_on,
+          CupertinoIcons.circle_grid_hex,
           size: 30,
           color: Colors.white,
+          shadows: [
+            Shadow(
+              color: Colors.black54,
+              blurRadius: 10,
+              offset: Offset(0, 2),
+            ),
+          ],
         ),
       ),
     );

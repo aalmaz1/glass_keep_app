@@ -92,7 +92,7 @@ class _AuthScreenState extends State<AuthScreen> {
                   children: [
                     // App Logo or Icon
                     const Icon(
-                      Icons.blur_on,
+                      CupertinoIcons.circle_grid_hex,
                       size: 80,
                       color: AppColors.accentBlue,
                       shadows: AppColors.iconShadows,
@@ -276,7 +276,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     ),
                     const SizedBox(height: 24),
                     const Text(
-                      'Obsidian Vision Premium v2 [STABLE-READY]',
+                      'CUPERTINO-V1',
                       style: TextStyle(
                         color: Colors.white54,
                         fontSize: 12,
