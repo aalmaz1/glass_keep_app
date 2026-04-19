@@ -27,6 +27,8 @@ class GlassAnimationProvider extends InheritedWidget {
     return context.dependOnInheritedWidgetOfExactType<GlassAnimationProvider>();
   }
 
+  static final ValueNotifier<Offset> defaultOffset = ValueNotifier(Offset.zero);
+
   @override
   bool updateShouldNotify(GlassAnimationProvider oldWidget) =>
       oldWidget.locale != locale ||
