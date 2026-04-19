@@ -3,7 +3,6 @@ import 'dart:math' as math;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/foundation.dart';
 import 'package:glass_keep/constants.dart';
 import 'package:glass_keep/glass_effect.dart';
 import 'package:glass_keep/main.dart';
@@ -35,9 +34,6 @@ class VisionGlassCard extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final width = constraints.maxWidth == double.infinity ? 300.0 : constraints.maxWidth;
-        final height = constraints.maxHeight == double.infinity ? 300.0 : constraints.maxHeight;
-
         Widget mainContent = Stack(
           children: [
             // Specular border highlights
