@@ -276,7 +276,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     ),
                     const SizedBox(height: 24),
                     const Text(
-                      'CUPERTINO-V1',
+                      'SYSTEM-REBORN-V3',
                       style: TextStyle(
                         color: Colors.white54,
                         fontSize: 12,

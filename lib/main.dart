@@ -14,7 +14,7 @@ import 'package:glass_keep/screens.dart';
 import 'package:glass_keep/auth_screen.dart';
 import 'package:glass_keep/constants.dart';
 import 'package:glass_keep/widgets.dart';
-import 'firebase_options.dart';
+import 'package:glass_keep/firebase_options.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 
 void main() async {
@@ -331,7 +331,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
             child: IgnorePointer(
               child: Center(
                 child: Text(
-                  'CUPERTINO-V1',
+                  'SYSTEM-REBORN-V3',
                   style: TextStyle(
                     color: Colors.white54,
                     fontSize: 10,

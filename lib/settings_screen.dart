@@ -44,7 +44,7 @@ class SettingsScreen extends StatelessWidget {
               _buildOption(
                 context,
                 'Gentle Green',
-                CupertinoIcons.leaf,
+                CupertinoIcons.tree,
                 () => onThemeChanged(const Color(0xFFE8F5E9), null),
               ),
               _buildOption(

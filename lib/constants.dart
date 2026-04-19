@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 /// Core color constants for the app - Obsidian Vision Premium Dark Theme
@@ -108,12 +107,5 @@ class AppUtils {
   /// Validate password (min 6 chars)
   static bool isValidPassword(String password) {
     return password.length >= 6;
-  }
-
-  /// Log only in debug mode
-  static void debugLog(String msg) {
-    if (kDebugMode) {
-      debugPrint('[GlassKeep] $msg');
-    }
   }
 }
