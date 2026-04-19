@@ -14,7 +14,7 @@ import 'package:glass_keep/screens.dart';
 import 'package:glass_keep/auth_screen.dart';
 import 'package:glass_keep/constants.dart';
 import 'package:glass_keep/widgets.dart';
-import 'package:glass_keep/provider.dart';
+import 'package:glass_keep/providers.dart';
 import 'package:glass_keep/firebase_options.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 
