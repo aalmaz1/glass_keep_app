@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 import 'package:glass_keep/constants.dart';
 import 'package:glass_keep/glass_effect.dart';
-import 'package:glass_keep/provider.dart';
+import 'package:glass_keep/providers.dart';
 
 /// A premium glass morphism card that uses BackdropFilter and optional distortion
 class VisionGlassCard extends StatelessWidget {

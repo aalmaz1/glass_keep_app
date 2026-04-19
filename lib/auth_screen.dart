@@ -169,7 +169,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               labelStyle: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
                               prefixIcon: const Icon(
                                 CupertinoIcons.mail, 
-                                color: AppColors.accentBlue, 
+                                color: Colors.white, 
                                 size: 22, 
                                 shadows: AppColors.iconShadows
                               ),
@@ -212,7 +212,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               labelStyle: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
                               prefixIcon: const Icon(
                                 CupertinoIcons.lock, 
-                                color: AppColors.accentBlue, 
+                                color: Colors.white, 
                                 size: 22, 
                                 shadows: AppColors.iconShadows
                               ),
@@ -222,7 +222,10 @@ class _AuthScreenState extends State<AuthScreen> {
                                   color: Colors.white.withValues(alpha: 0.5),
                                   size: 20,
                                 ),
-                                onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                                onPressed: () {
+                                  HapticFeedback.lightImpact();
+                                  setState(() => _obscurePassword = !_obscurePassword);
+                                },
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),

@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:glass_keep/main.dart';
+import 'package:glass_keep/providers.dart';
 import 'package:fast_noise/fast_noise.dart';
 
 /// Liquid glass distortion painter using Perlin noise
