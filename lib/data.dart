@@ -175,9 +175,6 @@ class StorageService {
     return _notesStream!;
   }
 
-  /// Get cached notes if available
-  List<Note>? get cachedNotes => _notesCache;
-
   /// Clear the cache - useful for logout scenarios
   void clearCache() {
     _notesStream = null;
