@@ -17,10 +17,13 @@ import 'package:glass_keep/widgets.dart';
 import 'package:glass_keep/providers.dart';
 import 'package:glass_keep/firebase_options.dart';
 import 'package:sensors_plus/sensors_plus.dart';
+import 'package:glass_keep/notifications_service.dart';
 
 void main() async {
   runZonedGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
+
+    await NotificationService().init();
 
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,

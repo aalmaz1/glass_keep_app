@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
+import 'package:glass_keep/notifications_service.dart';
 
 class Note {
   final String id;
@@ -187,9 +188,17 @@ class StorageService {
         final doc = _db.collection('notes').doc();
         final newNote = note.copyWith(id: doc.id, userId: _uid);
         await _db.collection('notes').doc(newNote.id).set(newNote.toMap());
+        if (newNote.reminder != null) {
+          await NotificationService().scheduleReminder(newNote);
+        }
       } else {
         final updatedNote = note.copyWith(userId: _uid);
         await _db.collection('notes').doc(note.id).set(updatedNote.toMap());
+        if (updatedNote.reminder != null) {
+          await NotificationService().scheduleReminder(updatedNote);
+        } else {
+          await NotificationService().cancelReminder(updatedNote.id);
+        }
       }
     } catch (e) {
       debugPrint('save note error: $e');
@@ -199,6 +208,7 @@ class StorageService {
 
   Future<void> delete(String id) async {
     try {
+      await NotificationService().cancelReminder(id);
       await _db.collection('notes').doc(id).delete();
     } catch (e) {
       debugPrint('delete note error: $e');
