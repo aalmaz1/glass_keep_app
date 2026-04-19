@@ -173,9 +173,9 @@ class _NotesScreenState extends State<NotesScreen> {
                             ),
                             child: const Icon(
                               CupertinoIcons.ellipsis_vertical,
-                              size: 24,
+                              size: 26,
                               color: Colors.white,
-                              shadows: [Shadow(color: Colors.black45, blurRadius: 4, offset: Offset(0, 2))],
+                              shadows: AppColors.iconShadows,
                             ),
                           ),
                         ),
@@ -283,7 +283,7 @@ class _NotesScreenState extends State<NotesScreen> {
               _MenuItem(icon: Icons.palette, label: 'Appearance', onTap: () { Navigator.pop(context); _openBackgroundSettings(context); }),
               _MenuItem(icon: Icons.language, label: l10n.language, onTap: () { Navigator.pop(context); _showLanguagePicker(context); }),
               _MenuItem(icon: Icons.delete, label: l10n.trash, onTap: () { Navigator.pop(context); _openTrash(context); }),
-              _MenuItem(icon: Icons.logout, label: l10n.logout, onTap: () { Navigator.pop(context); _logout(); }, isDestructive: true),
+              _MenuItem(icon: CupertinoIcons.square_arrow_right, label: l10n.logout, onTap: () { Navigator.pop(context); _logout(); }, isDestructive: true),
               const SizedBox(height: 20),
             ],
           ),
@@ -377,7 +377,7 @@ class _MenuItem extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
         child: Row(
           children: [
-            Icon(icon, color: isDestructive ? AppColors.accentRed : AppColors.accentBlue, size: 22),
+            Icon(icon, color: isDestructive ? AppColors.accentRed : AppColors.accentBlue, size: 26, shadows: AppColors.iconShadows),
             const SizedBox(width: 16),
             Text(label, style: TextStyle(fontSize: 17, color: isDestructive ? AppColors.accentRed : Colors.white)),
           ],
@@ -486,10 +486,10 @@ class _NewNoteButton extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             const Icon(
-              CupertinoIcons.add,
+              CupertinoIcons.plus,
               color: Colors.white,
-              size: 26,
-              shadows: [Shadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2))],
+              size: 28,
+              shadows: AppColors.iconShadows,
             ),
             const SizedBox(width: 8),
             Text(
@@ -825,10 +825,10 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 const Icon(
-                                  CupertinoIcons.check_mark,
+                                  CupertinoIcons.checkmark,
                                   color: Colors.white,
-                                  size: 22,
-                                  shadows: [Shadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 1))],
+                                  size: 24,
+                                  shadows: AppColors.iconShadows,
                                 ),
                                 const SizedBox(width: 8),
                                 Text(l10n.save, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
