@@ -1,8 +1,9 @@
 import 'dart:ui' as ui;
 import 'dart:math' as math;
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 import 'package:glass_keep/constants.dart';
 import 'package:glass_keep/glass_effect.dart';
 import 'package:glass_keep/main.dart';
@@ -445,14 +446,14 @@ class GlassSearchBar extends StatelessWidget {
         },
         style: const TextStyle(color: Colors.white, fontSize: 16),
         decoration: InputDecoration(
-          icon: Icon(
+          icon: const Icon(
             CupertinoIcons.search,
-            color: Colors.white.withValues(alpha: 0.9),
+            color: Colors.white, // simplified for const
             size: 24,
             shadows: AppColors.iconShadows,
           ),
           hintText: 'Search notes...',
-          hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.4)),
+          hintStyle: const TextStyle(color: Colors.white38),
           border: InputBorder.none,
           isDense: true,
         ),

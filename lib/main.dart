@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons, CupertinoActivityIndicator, CupertinoThemeData;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -275,9 +275,9 @@ class _GlassKeepAppState extends State<GlassKeepApp>
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                _LoadingLogo(),
-                                SizedBox(height: 24),
-                                CupertinoActivityIndicator(
+                                const _LoadingLogo(),
+                                const SizedBox(height: 24),
+                                const CupertinoActivityIndicator(
                                   color: AppColors.accentBlue,
                                   radius: 14,
                                 ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:glass_keep/widgets.dart';
@@ -231,12 +231,12 @@ class _AuthScreenState extends State<AuthScreen> {
                       width: double.infinity,
                       height: 56,
                       child: _isLoading
-                          ? const Center(
-                              child: CircularProgressIndicator(
-                                color: AppColors.accentBlue,
-                              ),
-                            )
-                          : ElevatedButton(
+                        ? const Center(
+                            child: CircularProgressIndicator(
+                              color: AppColors.accentBlue,
+                            ),
+                          )
+                        : ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.accentBlue,
                                 shape: RoundedRectangleBorder(
