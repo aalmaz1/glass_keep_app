@@ -14,18 +14,9 @@ class AppColors {
 
   // Glass morphism - Light theme
   static const Color glassLight = Color.fromARGB(48, 255, 255, 255);
-  static const Color glassDark = Color.fromARGB(20, 0, 0, 0);
-  static const Color glassBorder = Color.fromARGB(25, 0, 0, 0);
 
   // Obsidian theme colors
   static const Color obsidianDark = Color(0xFF0A0A0C);
-  static const Color obsidianLight = Color(0xFF1A1A1E);
-
-  // Utilities
-  static const Color white24 = Color.fromARGB(61, 255, 255, 255);
-  static const Color white12 = Color.fromARGB(31, 255, 255, 255);
-  static const Color black12 = Color.fromARGB(31, 0, 0, 0);
-  static const Color black24 = Color.fromARGB(61, 0, 0, 0);
 
   // Accent colors
   static const Color accentBlue = Color(0xFF1FA4FF);
@@ -43,18 +34,10 @@ class AppColors {
 class ResponsiveDimensions {
   static const double mobileBreakpoint = 600;
   static const double tabletBreakpoint = 900;
-  static const double desktopBreakpoint = 1200;
 
-  static const double paddingXs = 8.0;
-  static const double paddingSm = 12.0;
   static const double paddingMd = 16.0;
   static const double paddingLg = 24.0;
   static const double paddingXl = 32.0;
-
-  static const double borderRadiusSm = 8.0;
-  static const double borderRadiusMd = 12.0;
-  static const double borderRadiusLg = 20.0;
-  static const double borderRadiusXl = 30.0;
 
   static const double gridPadding = 24.0;
   static const double gridGap = 18.0;
@@ -79,17 +62,6 @@ class ResponsiveDimensions {
       return 3;
     } else {
       return 4;
-    }
-  }
-
-  /// Get font size multiplier for responsive typography
-  static double getFontSizeMultiplier(Size size) {
-    if (size.width < mobileBreakpoint) {
-      return 1.0;
-    } else if (size.width < tabletBreakpoint) {
-      return 1.1;
-    } else {
-      return 1.2;
     }
   }
 }
