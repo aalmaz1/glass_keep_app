@@ -44,7 +44,7 @@ class SettingsScreen extends StatelessWidget {
               _buildOption(
                 context,
                 'Gentle Green',
-                CupertinoIcons.leaf_fill,
+                CupertinoIcons.leaf,
                 () => onThemeChanged(const Color(0xFFE8F5E9), null),
               ),
               _buildOption(
@@ -109,7 +109,7 @@ class SettingsScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppColors.accentBlue.withOpacity(0.1),
+                color: AppColors.accentBlue.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(icon, color: AppColors.accentBlue, size: 20, shadows: AppColors.iconShadows),

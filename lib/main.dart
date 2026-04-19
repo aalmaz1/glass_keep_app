@@ -363,14 +363,14 @@ class _LoadingLogo extends StatelessWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              AppColors.accentBlue.withOpacity(0.8),
-              AppColors.accentPurple.withOpacity(0.8),
+              AppColors.accentBlue.withValues(alpha: 0.8),
+              AppColors.accentPurple.withValues(alpha: 0.8),
             ],
           ),
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: AppColors.accentBlue.withOpacity(0.3),
+              color: AppColors.accentBlue.withValues(alpha: 0.3),
               blurRadius: 20,
               offset: const Offset(0, 10),
             ),
@@ -380,13 +380,7 @@ class _LoadingLogo extends StatelessWidget {
           CupertinoIcons.circle_grid_hex,
           size: 30,
           color: Colors.white,
-          shadows: [
-            Shadow(
-              color: Colors.black54,
-              blurRadius: 10,
-              offset: Offset(0, 2),
-            ),
-          ],
+          shadows: AppColors.iconShadows,
         ),
       ),
     );
