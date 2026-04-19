@@ -13,7 +13,7 @@ import 'package:glass_keep/l10n/app_localizations.dart';
 import 'package:glass_keep/data.dart';
 import 'package:glass_keep/widgets.dart';
 import 'package:glass_keep/constants.dart';
-import 'package:glass_keep/main.dart';
+import 'package:glass_keep/provider.dart';
 import 'package:glass_keep/settings_screen.dart';
 
 class NotesScreen extends StatefulWidget {
@@ -283,7 +283,7 @@ class _NotesScreenState extends State<NotesScreen> {
               _MenuItem(icon: CupertinoIcons.paintbrush, label: 'Appearance', onTap: () { Navigator.pop(context); _openBackgroundSettings(context); }),
               _MenuItem(icon: CupertinoIcons.globe, label: l10n.language, onTap: () { Navigator.pop(context); _showLanguagePicker(context); }),
               _MenuItem(icon: CupertinoIcons.trash, label: l10n.trash, onTap: () { Navigator.pop(context); _openTrash(context); }),
-              _MenuItem(icon: CupertinoIcons.square_arrow_right, label: l10n.logout, onTap: () { Navigator.pop(context); _logout(); }, isDestructive: true),
+              _MenuItem(icon: CupertinoIcons.arrow_right_square, label: l10n.logout, onTap: () { Navigator.pop(context); _logout(); }, isDestructive: true),
               const SizedBox(height: 20),
             ],
           ),

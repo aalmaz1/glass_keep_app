@@ -14,6 +14,7 @@ import 'package:glass_keep/screens.dart';
 import 'package:glass_keep/auth_screen.dart';
 import 'package:glass_keep/constants.dart';
 import 'package:glass_keep/widgets.dart';
+import 'package:glass_keep/provider.dart';
 import 'package:glass_keep/firebase_options.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 
@@ -65,36 +66,6 @@ void main() async {
 }
 
 /// Global provider for sharing a single AnimationController across all glass effects
-/// and managing app locale state, sensor data, and pointer positions
-class GlassAnimationProvider extends InheritedWidget {
-  final AnimationController animationController;
-  final Locale locale;
-  final Function(Locale) onLocaleChanged;
-  final ValueNotifier<Offset> pointerPosition;
-  final ValueNotifier<Offset> tilt;
-  final ui.FragmentProgram? grainProgram;
-
-  const GlassAnimationProvider({
-    super.key,
-    required this.animationController,
-    required this.locale,
-    required this.onLocaleChanged,
-    required this.pointerPosition,
-    required this.tilt,
-    this.grainProgram,
-    required super.child,
-  });
-
-  static GlassAnimationProvider? of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<GlassAnimationProvider>();
-  }
-
-  @override
-  bool updateShouldNotify(GlassAnimationProvider oldWidget) =>
-      oldWidget.locale != locale ||
-      oldWidget.grainProgram != grainProgram;
-}
-
 class GlassKeepApp extends StatefulWidget {
   const GlassKeepApp({super.key});
 
