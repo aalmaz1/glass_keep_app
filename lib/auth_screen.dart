@@ -116,7 +116,7 @@ class _AuthScreenState extends State<AuthScreen> {
                           ],
                         ),
                         child: const Icon(
-                          CupertinoIcons.circle_grid_hex,
+                          CupertinoIcons.lightbulb_fill,
                           size: 40,
                           color: Colors.white,
                           shadows: AppColors.iconShadows,
@@ -168,7 +168,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               labelText: 'Email',
                               labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
                               prefixIcon: const Icon(
-                                CupertinoIcons.mail, 
+                                CupertinoIcons.envelope_fill, 
                                 color: Colors.white, 
                                 size: 22, 
                                 shadows: AppColors.iconShadows
@@ -211,14 +211,14 @@ class _AuthScreenState extends State<AuthScreen> {
                               labelText: 'Password',
                               labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
                               prefixIcon: const Icon(
-                                CupertinoIcons.lock, 
+                                CupertinoIcons.lock_fill, 
                                 color: Colors.white, 
                                 size: 22, 
                                 shadows: AppColors.iconShadows
                               ),
                               suffixIcon: IconButton(
                                 icon: Icon(
-                                  _obscurePassword ? CupertinoIcons.eye : CupertinoIcons.eye_slash,
+                                  _obscurePassword ? CupertinoIcons.eye_fill : CupertinoIcons.eye_slash_fill,
                                   color: Colors.white.withOpacity(0.5),
                                   size: 20,
                                 ),
