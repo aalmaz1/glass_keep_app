@@ -172,9 +172,10 @@ class _NotesScreenState extends State<NotesScreen> {
                               border: Border.all(color: const Color(0xFFFFFFFF).withOpacity(0.15)),
                             ),
                             child: const Icon(
-                              Icons.more_vert,
-                              size: 22,
+                              CupertinoIcons.ellipsis_vertical,
+                              size: 24,
                               color: Colors.white,
+                              shadows: [Shadow(color: Colors.black45, blurRadius: 4, offset: Offset(0, 2))],
                             ),
                           ),
                         ),
@@ -485,9 +486,10 @@ class _NewNoteButton extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             const Icon(
-              Icons.add,
+              CupertinoIcons.add,
               color: Colors.white,
-              size: 24,
+              size: 26,
+              shadows: [Shadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2))],
             ),
             const SizedBox(width: 8),
             Text(
@@ -822,7 +824,12 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(Icons.check, color: Colors.white, size: 20),
+                                const Icon(
+                                  CupertinoIcons.check_mark,
+                                  color: Colors.white,
+                                  size: 22,
+                                  shadows: [Shadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 1))],
+                                ),
                                 const SizedBox(width: 8),
                                 Text(l10n.save, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
                               ],
