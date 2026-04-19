@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:glass_keep/widgets.dart';
@@ -94,6 +95,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       Icons.blur_on,
                       size: 80,
                       color: AppColors.accentBlue,
+                      shadows: AppColors.iconShadows,
                     ),
                     const SizedBox(height: 24),
                     Text(
@@ -129,7 +131,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             decoration: InputDecoration(
                               labelText: 'Email',
                               labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
-                              prefixIcon: const Icon(Icons.email, color: Colors.white, size: 24),
+                              prefixIcon: const Icon(CupertinoIcons.mail, color: Colors.white, size: 28, shadows: AppColors.iconShadows),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
                                 borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
@@ -167,7 +169,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             decoration: InputDecoration(
                               labelText: 'Password',
                               labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
-                              prefixIcon: const Icon(Icons.lock, color: Colors.white, size: 24),
+                              prefixIcon: const Icon(CupertinoIcons.lock, color: Colors.white, size: 28, shadows: AppColors.iconShadows),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
                                 borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),

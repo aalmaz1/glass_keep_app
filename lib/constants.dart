@@ -34,6 +34,11 @@ class AppColors {
   static const Color accentGreen = Color(0xFF34C759);
   static const Color accentOrange = Color(0xFFFF9500);
   static const Color accentPurple = Color(0xFFC273FF);
+
+  static const List<Shadow> iconShadows = [
+    Shadow(color: Colors.black54, offset: Offset(0, 2), blurRadius: 4),
+    Shadow(color: Colors.black26, offset: Offset(0, 4), blurRadius: 10),
+  ];
 }
 
 /// Responsive dimensions helper
