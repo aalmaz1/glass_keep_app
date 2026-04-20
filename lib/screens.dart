@@ -135,7 +135,7 @@ class _NotesScreenState extends State<NotesScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final paddingH = ResponsiveDimensions.gridPadding;
+    final paddingH = 24.0;
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
@@ -223,26 +223,21 @@ class _NotesScreenState extends State<NotesScreen> {
                       );
                     }
 
-                    final crossAxisCount = ((size.width - 2 * paddingH + ResponsiveDimensions.gridGap) / (ResponsiveDimensions.cardMinWidth + ResponsiveDimensions.gridGap)).floor().clamp(1, 6);
+                    final crossAxisCount = ((size.width - 2 * paddingH + 18.0) / (300.0 + 18.0)).floor().clamp(1, 6);
 
                     return SliverPadding(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: ResponsiveDimensions.gridPadding,
-                        vertical: ResponsiveDimensions.gridPadding,
+                        horizontal: 24.0,
+                        vertical: 24.0,
                       ),
                       sliver: SliverMasonryGrid.count(
                         crossAxisCount: crossAxisCount,
-                        mainAxisSpacing: ResponsiveDimensions.gridGap,
-                        crossAxisSpacing: ResponsiveDimensions.gridGap,
+                        mainAxisSpacing: 18.0,
+                        crossAxisSpacing: 18.0,
                         itemBuilder: (context, i) => NoteCard(
                           key: ValueKey('note_${notes[i].id}'),
                           note: notes[i],
                           onTap: () => _openNote(context, notes[i]),
-                          onArchive: () {
-                            HapticFeedback.mediumImpact();
-                            final updatedNote = notes[i].copyWith(isArchived: !notes[i].isArchived);
-                            widget.storage.save(updatedNote);
-                          },
                         ),
                         childCount: notes.length,
                       ),
@@ -555,9 +550,8 @@ class _NewNoteButton extends StatelessWidget {
 class NoteCard extends StatefulWidget {
   final Note note;
   final VoidCallback onTap;
-  final VoidCallback onArchive;
 
-  const NoteCard({super.key, required this.note, required this.onTap, required this.onArchive});
+  const NoteCard({super.key, required this.note, required this.onTap});
 
   @override
   State<NoteCard> createState() => _NoteCardState();
@@ -1002,6 +996,12 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                   if (_rem != null) ...[
                     const SizedBox(width: 8),
                     Expanded(child: Text(DateFormat('dd.MM HH:mm').format(_rem!), style: const TextStyle(fontSize: 12, color: AppColors.accentBlue, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)),
+                    CupertinoButton(
+                      padding: EdgeInsets.zero,
+                      minSize: 0,
+                      child: const Icon(CupertinoIcons.xmark_circle_fill, size: 18, color: Colors.white54),
+                      onPressed: () => setState(() => _rem = null),
+                    ),
                   ],
                 ],
               ),
