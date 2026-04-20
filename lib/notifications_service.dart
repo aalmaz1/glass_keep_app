@@ -1,6 +1,7 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
+import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:flutter/foundation.dart';
 import 'data.dart';
 
@@ -13,6 +14,14 @@ class NotificationService {
 
   Future<void> init() async {
     tz.initializeTimeZones();
+    try {
+      final String timeZoneName = await FlutterTimezone.getLocalTimezone();
+      tz.setLocalLocation(tz.getLocation(timeZoneName));
+    } catch (e) {
+      debugPrint('Could not get local timezone: $e');
+    }
+
+    if (kIsWeb) return;
     
     const AndroidInitializationSettings androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
     const DarwinInitializationSettings iosSettings = DarwinInitializationSettings(
@@ -35,7 +44,7 @@ class NotificationService {
   }
 
   Future<void> scheduleReminder(Note note) async {
-    if (note.reminder == null || note.reminder!.isBefore(DateTime.now())) {
+    if (kIsWeb || note.reminder == null || note.reminder!.isBefore(DateTime.now())) {
       return;
     }
 
@@ -64,6 +73,7 @@ class NotificationService {
   }
 
   Future<void> cancelReminder(String noteId) async {
+    if (kIsWeb) return;
     await _notificationsPlugin.cancel(noteId.hashCode);
   }
 }

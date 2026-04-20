@@ -131,8 +131,13 @@ class _GlassKeepAppState extends State<GlassKeepApp>
     if (defaultTargetPlatform == TargetPlatform.android ||
         defaultTargetPlatform == TargetPlatform.iOS ||
         kIsWeb) {
+      // Use longer sampling rate on Web to reduce overhead
+      final sensorInterval = kIsWeb 
+          ? const Duration(milliseconds: 100) 
+          : const Duration(milliseconds: 20);
+
       _accelerometerSubscription =
-          accelerometerEventStream().listen((AccelerometerEvent event) {
+          accelerometerEventStream(samplingPeriod: sensorInterval).listen((AccelerometerEvent event) {
         // Low-pass filter for smooth movement
         final newTilt = Offset(
           -event.x / 10.0, // Invert X for more natural tilt
@@ -145,7 +150,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
       });
 
       // Properly initialize gyroscope stream for Web and Mobile
-      _gyroscopeSubscription = gyroscopeEventStream().listen((GyroscopeEvent event) {
+      _gyroscopeSubscription = gyroscopeEventStream(samplingPeriod: sensorInterval).listen((GyroscopeEvent event) {
         // Integrate gyroscope for immediate responsiveness
         final kick = Offset(event.y * 0.015, event.x * 0.015);
         _tilt.value = Offset(
