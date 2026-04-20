@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:glass_keep/providers.dart';
 import 'package:fast_noise/fast_noise.dart';
 
@@ -9,7 +10,8 @@ import 'package:fast_noise/fast_noise.dart';
 class GlassDistortionPainter extends CustomPainter {
   static final _noise = PerlinNoise();
   // Slightly increased grid resolution for smoother high-end distortion
-  static const int _gridResolution = 12;
+  // Reduced on Web for performance
+  static final int _gridResolution = kIsWeb ? 8 : 12;
 
   // Cache for noise values to reduce redundant calculations
   static final Map<int, double> _noiseCache = {};

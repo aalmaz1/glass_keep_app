@@ -215,26 +215,28 @@ class VisionBackground extends StatelessWidget {
                         math.cos(animation.value * 2 * math.pi) * 200 + 150,
                       ),
                     ),
-                    _AuroraBlob(
-                      color: AppColors.accentBlue.withOpacity(0.15),
-                      size: 600,
-                      alignment: Alignment.centerLeft,
-                      depth: 0.03,
-                      baseOffset: Offset(
-                        math.cos(animation.value * 2 * math.pi + math.pi / 2) * 250,
-                        math.sin(animation.value * 2 * math.pi + math.pi / 2) * 150,
+                    if (!kIsWeb) ...[
+                      _AuroraBlob(
+                        color: AppColors.accentBlue.withOpacity(0.15),
+                        size: 600,
+                        alignment: Alignment.centerLeft,
+                        depth: 0.03,
+                        baseOffset: Offset(
+                          math.cos(animation.value * 2 * math.pi + math.pi / 2) * 250,
+                          math.sin(animation.value * 2 * math.pi + math.pi / 2) * 150,
+                        ),
                       ),
-                    ),
-                    _AuroraBlob(
-                      color: AppColors.accentPurple.withOpacity(0.12),
-                      size: 700,
-                      alignment: Alignment.topRight,
-                      depth: 0.1,
-                      baseOffset: Offset(
-                        math.sin(animation.value * 2 * math.pi + math.pi / 4) * 200,
-                        math.cos(animation.value * 2 * math.pi + math.pi / 4) * 200,
+                      _AuroraBlob(
+                        color: AppColors.accentPurple.withOpacity(0.12),
+                        size: 700,
+                        alignment: Alignment.topRight,
+                        depth: 0.1,
+                        baseOffset: Offset(
+                          math.sin(animation.value * 2 * math.pi + math.pi / 4) * 200,
+                          math.cos(animation.value * 2 * math.pi + math.pi / 4) * 200,
+                        ),
                       ),
-                    ),
+                    ],
                     
                     // Noise texture overlay for tactile feel, moved inside AnimatedBuilder for animation
                     Positioned.fill(
@@ -365,7 +367,7 @@ class _ShaderNoisePainter extends CustomPainter {
     if (program == null) {
       // Fallback to simpler grain if shader not loaded
       final random = math.Random(42);
-      for (int i = 0; i < 1000; i++) {
+      for (int i = 0; i < 400; i++) {
         final x = random.nextDouble() * size.width;
         final y = random.nextDouble() * size.height;
         final paint = Paint()..color = Colors.white.withOpacity(0.01);
