@@ -317,25 +317,25 @@ class _NotesScreenState extends State<NotesScreen> {
                 ],
               ),
               const SizedBox(height: 24),
-              _MenuItem(icon: CupertinoIcons.paintbrush, label: 'Appearance', onTap: () { Navigator.pop(context); _openBackgroundSettings(context); }),
+              _MenuItem(icon: CupertinoIcons.paintbrush, label: l10n.appearance, onTap: () { Navigator.pop(context); _openBackgroundSettings(context); }),
               _MenuItem(icon: CupertinoIcons.globe, label: l10n.language, onTap: () { Navigator.pop(context); _showLanguagePicker(context); }),
               _MenuItem(icon: CupertinoIcons.trash, label: l10n.trash, onTap: () { Navigator.pop(context); _openTrash(context); }),
-              _MenuItem(icon: Icons.upload_file, label: 'Export Backup', onTap: () async {
+              _MenuItem(icon: Icons.upload_file, label: l10n.exportBackup, onTap: () async {
                 Navigator.pop(context);
                 try {
                   await widget.storage.exportNotes();
-                  _showSnackBar('Backup exported successfully');
+                  _showSnackBar(l10n.exportSuccess);
                 } catch (e) {
-                  _showSnackBar('Export failed: $e', isError: true);
+                  _showSnackBar('${l10n.exportError}: $e', isError: true);
                 }
               }),
-              _MenuItem(icon: Icons.download, label: 'Import Backup', onTap: () async {
+              _MenuItem(icon: Icons.download, label: l10n.importBackup, onTap: () async {
                 Navigator.pop(context);
                 try {
                   await widget.storage.importNotes();
-                  _showSnackBar('Backup imported successfully');
+                  _showSnackBar(l10n.importSuccess);
                 } catch (e) {
-                  _showSnackBar('Import failed: $e', isError: true);
+                  _showSnackBar('${l10n.importError}: $e', isError: true);
                 }
               }),
               _MenuItem(icon: Icons.logout, label: l10n.logout, onTap: () { Navigator.pop(context); _logout(); }, isDestructive: true),
@@ -822,7 +822,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
     try {
       await widget.storage.save(updatedNote);
     } catch (e) {
-      _showSnackBar('Failed to save note: $e', isError: true);
+      _showSnackBar('${l10n.saveError}: $e', isError: true);
     }
   }
 
@@ -883,7 +883,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                                     await widget.storage.save(updatedNote);
                                     if (mounted) setState(() {});
                                   } catch (e) {
-                                    _showSnackBar('Failed to update pin: $e', isError: true);
+                                    _showSnackBar('${l10n.pinError}: $e', isError: true);
                                   }
                                 },
                               ),
@@ -897,7 +897,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                                       await widget.storage.delete(widget.note.id);
                                       if (mounted) Navigator.pop(context);
                                     } catch (e) {
-                                      _showSnackBar('Failed to delete note: $e', isError: true);
+                                      _showSnackBar('${l10n.deleteError}: $e', isError: true);
                                     }
                                   } else {
                                     Navigator.pop(context);
@@ -1172,17 +1172,17 @@ class _TrashScreenState extends State<TrashScreen> {
                                 final updatedNote = note.copyWith(isArchived: false);
                                 try {
                                   await widget.storage.save(updatedNote);
-                                  _showSnackBar('Note restored');
+                                  _showSnackBar(l10n.noteRestored);
                                 } catch (e) {
-                                  _showSnackBar('Failed to restore note: $e', isError: true);
+                                  _showSnackBar('${l10n.restoreError}: $e', isError: true);
                                 }
                               },
                               onDelete: () async {
                                 try {
                                   await widget.storage.delete(note.id);
-                                  _showSnackBar('Note deleted permanently');
+                                  _showSnackBar(l10n.deletePermanent);
                                 } catch (e) {
-                                  _showSnackBar('Failed to delete note: $e', isError: true);
+                                  _showSnackBar('${l10n.deleteError}: $e', isError: true);
                                 }
                               },
                             ),

@@ -10,6 +10,7 @@ class EncryptionService {
 
   static const _storage = FlutterSecureStorage();
   static const _keyAlias = 'encryption_key';
+  static const _prefix = 'enc:';
   
   encrypt_lib.Key? _key;
 
@@ -30,7 +31,7 @@ class EncryptionService {
       final iv = encrypt_lib.IV.fromSecureRandom(16);
       final encrypter = encrypt_lib.Encrypter(encrypt_lib.AES(_key!));
       final encrypted = encrypter.encrypt(text, iv: iv);
-      return '${iv.base64}:${encrypted.base64}';
+      return '$_prefix${iv.base64}:${encrypted.base64}';
     } catch (e) {
       return text;
     }
@@ -38,9 +39,12 @@ class EncryptionService {
 
   String decryptText(String encryptedWithIv) {
     if (_key == null || encryptedWithIv.isEmpty) return encryptedWithIv;
+    if (!encryptedWithIv.startsWith(_prefix)) return encryptedWithIv;
+
     try {
-      final parts = encryptedWithIv.split(':');
-      if (parts.length != 2) return encryptedWithIv; // Might be plain text
+      final data = encryptedWithIv.substring(_prefix.length);
+      final parts = data.split(':');
+      if (parts.length != 2) return encryptedWithIv;
 
       final iv = encrypt_lib.IV.fromBase64(parts[0]);
       final encryptedBase64 = parts[1];
@@ -49,7 +53,7 @@ class EncryptionService {
       final decrypted = encrypter.decrypt64(encryptedBase64, iv: iv);
       return decrypted;
     } catch (e) {
-      // If decryption fails, it might be because the text was not encrypted (migration scenario)
+      // If decryption fails, it might be because the text was not encrypted or key changed
       return encryptedWithIv;
     }
   }

@@ -22,5 +22,18 @@
   "alreadyHaveAccount": "이미 계정이 있으신가요? 로그인",
   "secureCloudSync": "안전한 클라우드 동기화",
   "language": "언어",
-  "settings": "설정"
+  "settings": "설정",
+  "exportSuccess": "백업을 성공적으로 내보냈습니다",
+  "exportError": "내보내기 실패",
+  "importSuccess": "백업을 성공적으로 가져왔습니다",
+  "importError": "가져오기 실패",
+  "noteRestored": "메모가 복원되었습니다",
+  "restoreError": "메모 복원 실패",
+  "deletePermanent": "메모가 영구적으로 삭제되었습니다",
+  "deleteError": "메모 삭제 실패",
+  "saveError": "메모 저장 실패",
+  "pinError": "고정 상태 변경 실패",
+  "exportBackup": "백업 내보내기",
+  "importBackup": "백업 가져오기",
+  "appearance": "테마 설정"
 }

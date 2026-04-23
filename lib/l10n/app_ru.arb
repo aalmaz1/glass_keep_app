@@ -22,5 +22,18 @@
   "alreadyHaveAccount": "Уже есть аккаунт? Войдите",
   "secureCloudSync": "Безопасная синхронизация",
   "language": "Язык",
-  "settings": "Настройки"
+  "settings": "Настройки",
+  "exportSuccess": "Резервная копия успешно экспортирована",
+  "exportError": "Ошибка экспорта",
+  "importSuccess": "Резервная копия успешно импортирована",
+  "importError": "Ошибка импорта",
+  "noteRestored": "Заметка восстановлена",
+  "restoreError": "Ошибка восстановления заметки",
+  "deletePermanent": "Заметка удалена навсегда",
+  "deleteError": "Ошибка удаления заметки",
+  "saveError": "Ошибка сохранения заметки",
+  "pinError": "Ошибка изменения закрепления",
+  "exportBackup": "Экспорт бэкапа",
+  "importBackup": "Импорт бэкапа",
+  "appearance": "Внешний вид"
 }
