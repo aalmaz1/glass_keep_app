@@ -304,7 +304,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
             child: IgnorePointer(
               child: Center(
                 child: Text(
-                  'SYSTEM-REBORN-V3',
+                  'SYSTEM-REBORN-V3 • v1.5',
                   style: TextStyle(
                     color: Colors.white54,
                     fontSize: 10,
