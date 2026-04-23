@@ -62,7 +62,7 @@ class _NotesScreenState extends State<NotesScreen> {
   }
 
   void _showSnackBar(String message, {bool isError = false}) {
-    if (!context.context.mounted) return;
+    if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
@@ -77,7 +77,7 @@ class _NotesScreenState extends State<NotesScreen> {
   void _logout() async {
     widget.storage.clearCache();
     await FirebaseAuth.instance.signOut();
-    if (!context.context.mounted) return;
+    if (!context.mounted) return;
   }
 
   void _openNote(BuildContext context, Note note) {
@@ -147,7 +147,7 @@ class _NotesScreenState extends State<NotesScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final paddingH = 24.0;
+    const paddingH = 24.0;
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
@@ -323,10 +323,10 @@ class _NotesScreenState extends State<NotesScreen> {
                 Navigator.pop(context);
                 try {
                   await widget.storage.exportNotes();
-                  if (!context.context.mounted) return;
+                  if (!context.mounted) return;
                   _showSnackBar(l10n.exportSuccess);
                 } catch (e) {
-                  if (!context.context.mounted) return;
+                  if (!context.mounted) return;
                   _showSnackBar('${l10n.exportError}: $e', isError: true);
                 }
               }),
@@ -334,10 +334,10 @@ class _NotesScreenState extends State<NotesScreen> {
                 Navigator.pop(context);
                 try {
                   await widget.storage.importNotes();
-                  if (!context.context.mounted) return;
+                  if (!context.mounted) return;
                   _showSnackBar(l10n.importSuccess);
                 } catch (e) {
-                  if (!context.context.mounted) return;
+                  if (!context.mounted) return;
                   _showSnackBar('${l10n.importError}: $e', isError: true);
                 }
               }),
@@ -454,7 +454,6 @@ class _LanguageOption extends StatelessWidget {
   final Function(Locale) onTap;
 
   const _LanguageOption({
-    super.key,
     required this.locale,
     required this.flag,
     required this.name,
@@ -654,7 +653,6 @@ class _NoteCardContent extends StatelessWidget {
   final bool isHovered;
 
   const _NoteCardContent({
-    super.key,
     required this.note,
     required this.decodedImage,
     required this.onTap,
@@ -801,7 +799,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
   }
 
   void _showSnackBar(String message, {bool isError = false}) {
-    if (!context.context.mounted) return;
+    if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
@@ -827,10 +825,10 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
     );
     try {
       await widget.storage.save(updatedNote);
-      if (!context.context.mounted) return;
+      if (!context.mounted) return;
       _showSnackBar(l10n.saveSuccess);
     } catch (e) {
-      if (!context.context.mounted) return;
+      if (!context.mounted) return;
       _showSnackBar('${l10n.saveError}: $e', isError: true);
     }
   }
@@ -890,10 +888,10 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                                   final updatedNote = widget.note.copyWith(isPinned: !widget.note.isPinned);
                                   try {
                                     await widget.storage.save(updatedNote);
-                                    if (!context.context.mounted) return;
+                                    if (!context.mounted) return;
                                     setState(() {});
                                   } catch (e) {
-                                    if (!context.context.mounted) return;
+                                    if (!context.mounted) return;
                                     _showSnackBar('${l10n.pinError}: $e', isError: true);
                                   }
                                 },
@@ -906,10 +904,10 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                                   if (widget.note.id.isNotEmpty) {
                                     try {
                                       await widget.storage.delete(widget.note.id);
-                                      if (!context.context.mounted) return;
+                                      if (!context.mounted) return;
                                       Navigator.pop(context);
                                     } catch (e) {
-                                      if (!context.context.mounted) return;
+                                      if (!context.mounted) return;
                                       _showSnackBar('${l10n.deleteError}: $e', isError: true);
                                     }
                                   } else {
@@ -1034,10 +1032,10 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                           maxHeight: 1200,
                           imageQuality: 85,
                         );
-                        if (!context.context.mounted) return;
+                        if (!context.mounted) return;
                         if (image != null) {
                           final bytes = await image.readAsBytes();
-                          if (!context.context.mounted) return;
+                          if (!context.mounted) return;
                           // Process in microtask to avoid blocking UI
                           await Future.microtask(() {
                             if (context.mounted) {
@@ -1060,9 +1058,9 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                     HapticFeedback.lightImpact();
                     final now = DateTime.now();
                     final d = await showDatePicker(context: context, initialDate: now, firstDate: now, lastDate: now.add(const Duration(days: 365)));
-                    if (d == null || !context.context.mounted) return;
+                    if (d == null || !context.mounted) return;
                     final t = await showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(now));
-                    if (!context.context.mounted) return;
+                    if (!context.mounted) return;
                     if (t != null) setState(() => _rem = DateTime(d.year, d.month, d.day, t.hour, t.minute));
                   }),
                   if (_rem != null) ...[
@@ -1107,7 +1105,7 @@ class _TrashScreenState extends State<TrashScreen> {
   }
 
   void _showSnackBar(String message, {bool isError = false}) {
-    if (!context.context.mounted) return;
+    if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
@@ -1184,20 +1182,20 @@ class _TrashScreenState extends State<TrashScreen> {
                                 final updatedNote = note.copyWith(isArchived: false);
                                 try {
                                   await widget.storage.save(updatedNote);
-                                  if (!context.context.mounted) return;
+                                  if (!context.mounted) return;
                                   _showSnackBar(l10n.noteRestored);
                                 } catch (e) {
-                                  if (!context.context.mounted) return;
+                                  if (!context.mounted) return;
                                   _showSnackBar('${l10n.restoreError}: $e', isError: true);
                                 }
                               },
                               onDelete: () async {
                                 try {
                                   await widget.storage.delete(note.id);
-                                  if (!context.context.mounted) return;
+                                  if (!context.mounted) return;
                                   _showSnackBar(l10n.deletePermanent);
                                 } catch (e) {
-                                  if (!context.context.mounted) return;
+                                  if (!context.mounted) return;
                                   _showSnackBar('${l10n.deleteError}: $e', isError: true);
                                 }
                               },

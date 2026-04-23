@@ -125,9 +125,9 @@ class _GlassKeepAppState extends State<GlassKeepApp>
         defaultTargetPlatform == TargetPlatform.iOS ||
         kIsWeb) {
       // Use longer sampling rate on Web to reduce overhead
-      final sensorInterval = kIsWeb 
-          ? const Duration(milliseconds: 100) 
-          : const Duration(milliseconds: 20);
+      const sensorInterval = kIsWeb 
+          ? Duration(milliseconds: 100) 
+          : Duration(milliseconds: 20);
 
       _accelerometerSubscription =
           accelerometerEventStream(samplingPeriod: sensorInterval).listen((AccelerometerEvent event) {
