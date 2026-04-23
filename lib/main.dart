@@ -1,3 +1,4 @@
+// Last Deployment: 2025-05-22 10:00:00
 import 'dart:async';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
@@ -304,7 +305,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
             child: IgnorePointer(
               child: Center(
                 child: Text(
-                  'SYSTEM-REBORN-V3 • v1.5',
+                  'SYSTEM-REBORN-V1.5.0 • v1.5',
                   style: TextStyle(
                     color: Colors.white54,
                     fontSize: 10,
