@@ -387,7 +387,7 @@ class _BiometricAuthWrapperState extends State<BiometricAuthWrapper> {
       return;
     }
 
-    final isEnabled = await _biometricService.isBiometricEnabled();
+    final isEnabled = await _biometricService.isEnabled();
     if (!isEnabled) {
       if (mounted) {
         setState(() {
