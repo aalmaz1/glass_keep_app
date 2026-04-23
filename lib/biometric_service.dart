@@ -19,12 +19,12 @@ class BiometricService {
     }
   }
 
-  Future<bool> isBiometricEnabled() async {
+  Future<bool> isEnabled() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool(_biometricEnabledKey) ?? false;
   }
 
-  Future<void> setBiometricEnabled(bool enabled) async {
+  Future<void> setEnabled(bool enabled) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_biometricEnabledKey, enabled);
   }

@@ -181,9 +181,9 @@ class _NotesScreenState extends State<NotesScreen> {
                           child: Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFFFFFFF).withValues(alpha: 0.1),
+                              color: Colors.white.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: const Color(0xFFFFFFFF).withValues(alpha: 0.15)),
+                              border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
                             ),
                             child: const Icon(
                               CupertinoIcons.ellipsis_vertical,
@@ -1350,7 +1350,7 @@ class _BiometricToggleState extends State<_BiometricToggle> {
 
   Future<void> _loadStatus() async {
     final available = await _biometricService.isBiometricsAvailable();
-    final enabled = await _biometricService.isBiometricEnabled();
+    final enabled = await _biometricService.isEnabled();
     if (mounted) {
       setState(() {
         _isAvailable = available;
@@ -1387,11 +1387,11 @@ class _BiometricToggleState extends State<_BiometricToggle> {
               if (value) {
                 final authenticated = await _biometricService.authenticate();
                 if (authenticated) {
-                  await _biometricService.setBiometricEnabled(true);
+                  await _biometricService.setEnabled(true);
                   if (mounted) setState(() => _isEnabled = true);
                 }
               } else {
-                await _biometricService.setBiometricEnabled(false);
+                await _biometricService.setEnabled(false);
                 if (mounted) setState(() => _isEnabled = false);
               }
             },
