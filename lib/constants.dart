@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 
 /// Core color constants for the app - Obsidian Vision Premium Dark Theme
 class AppColors {
-  // Obsidian dark background colors
-  static const Color background = Color(0xFF0A0A0C);
-
   // Text colors
   static const Color secondaryText = Color.fromRGBO(255, 255, 255, 0.7); // 70% opacity white
   static const Color tertiaryText = Color(0xFF86868B);
@@ -12,7 +9,7 @@ class AppColors {
   // Glass morphism - Light theme
   static const Color glassLight = Color.fromARGB(48, 255, 255, 255);
 
-  // Obsidian theme colors
+  // Obsidian theme colors (primary background)
   static const Color obsidianDark = Color(0xFF0A0A0C);
 
   // Accent colors

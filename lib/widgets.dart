@@ -185,7 +185,7 @@ class VisionBackground extends StatelessWidget {
     final animation = animationProvider?.animationController;
 
     return Container(
-      color: AppColors.background,
+      color: AppColors.obsidianDark,
       child: Stack(
         children: [
           if (animation != null)
@@ -205,17 +205,16 @@ class VisionBackground extends StatelessWidget {
                         math.sin(animation.value * 2 * math.pi) * 150 - 150,
                       ),
                     ),
-                    if (!kIsWeb)
-                      _AuroraBlob(
-                        color: AppColors.accentPurple.withOpacity(0.2),
-                        size: 900,
-                        alignment: Alignment.bottomRight,
-                        depth: 0.08,
-                        baseOffset: Offset(
-                          math.sin(animation.value * 2 * math.pi) * 200 + 150,
-                          math.cos(animation.value * 2 * math.pi) * 200 + 150,
-                        ),
+                    _AuroraBlob(
+                      color: AppColors.accentPurple.withOpacity(0.2),
+                      size: kIsWeb ? 600 : 900,
+                      alignment: Alignment.bottomRight,
+                      depth: 0.08,
+                      baseOffset: Offset(
+                        math.sin(animation.value * 2 * math.pi) * 200 + 150,
+                        math.cos(animation.value * 2 * math.pi) * 200 + 150,
                       ),
+                    ),
                     if (!kIsWeb) ...[
                       _AuroraBlob(
                         color: AppColors.accentBlue.withOpacity(0.15),
