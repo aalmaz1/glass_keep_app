@@ -328,6 +328,7 @@ class _NotesScreenState extends State<NotesScreen> {
                 Navigator.pop(context);
                 try {
                   await widget.storage.exportNotes();
+                  if (!outerContext.mounted) return;
                   scaffoldMessenger.showSnackBar(
                     SnackBar(
                       content: Text(exportL10n.exportSuccess),
@@ -355,6 +356,7 @@ class _NotesScreenState extends State<NotesScreen> {
                 Navigator.pop(context);
                 try {
                   await widget.storage.importNotes();
+                  if (!outerContext.mounted) return;
                   scaffoldMessenger.showSnackBar(
                     SnackBar(
                       content: Text(importL10n.importSuccess),
@@ -392,11 +394,13 @@ class _NotesScreenState extends State<NotesScreen> {
         builder: (context) => SettingsScreen(
           storage: widget.storage,
           onThemeChanged: (Color? color, Decoration? decoration) {
+          if (mounted) {
             setState(() {
               _backgroundColor = color;
               _backgroundDecoration = decoration;
             });
-          },
+          }
+        },
         ),
       ),
     );
@@ -1104,7 +1108,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                     Expanded(child: Text(DateFormat('dd.MM HH:mm').format(_rem!), style: const TextStyle(fontSize: 12, color: AppColors.accentBlue, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)),
                     CupertinoButton(
                       padding: EdgeInsets.zero,
-                      minimumSize: Size.zero,
+                      minSize: 0,
                       child: const Icon(CupertinoIcons.xmark_circle_fill, size: 18, color: Colors.white54),
                       onPressed: () => setState(() => _rem = null),
                     ),
