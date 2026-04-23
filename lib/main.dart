@@ -467,7 +467,7 @@ class _BiometricAuthWrapperState extends State<BiometricAuthWrapper> {
                           authenticateStr,
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.7),
+                            color: Colors.white.withValues(alpha: 0.7),
                           ),
                         ),
                         const SizedBox(height: 32),
