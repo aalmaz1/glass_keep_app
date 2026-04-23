@@ -11,7 +11,7 @@ class GlassDistortionPainter extends CustomPainter {
   static final _noise = PerlinNoise();
   // Slightly increased grid resolution for smoother high-end distortion
   // Reduced significantly on Web for performance
-  static final int _gridResolution = kIsWeb ? 4 : 12;
+  static final int _gridResolution = kIsWeb ? 8 : 12;
 
   // Cache for noise values to reduce redundant calculations
   static final Map<int, double> _noiseCache = {};

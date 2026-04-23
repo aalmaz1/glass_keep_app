@@ -289,7 +289,7 @@ class _NotesScreenState extends State<NotesScreen> {
                       ),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Icon(CupertinoIcons.lightbulb_fill, size: 20, color: Colors.white),
+                    child: const Icon(Icons.blur_on, size: 20, color: Colors.white),
                   ),
                   const SizedBox(width: 12),
                   const Text(
