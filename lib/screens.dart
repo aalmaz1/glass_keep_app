@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:ui' as ui;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/cupertino.dart' show CupertinoIcons, CupertinoActivityIndicator, CupertinoNavigationBar, CupertinoButton;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -274,6 +275,7 @@ class _NotesScreenState extends State<NotesScreen> {
 
   void _showMenu(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final outerContext = context;
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -317,29 +319,61 @@ class _NotesScreenState extends State<NotesScreen> {
                 ],
               ),
               const SizedBox(height: 24),
-              _MenuItem(icon: CupertinoIcons.paintbrush, label: l10n.appearance, onTap: () { Navigator.pop(context); _openBackgroundSettings(context); }),
-              _MenuItem(icon: CupertinoIcons.globe, label: l10n.language, onTap: () { Navigator.pop(context); _showLanguagePicker(context); }),
-              _MenuItem(icon: CupertinoIcons.trash, label: l10n.trash, onTap: () { Navigator.pop(context); _openTrash(context); }),
+              _MenuItem(icon: CupertinoIcons.paintbrush, label: l10n.appearance, onTap: () { Navigator.pop(context); _openBackgroundSettings(outerContext); }),
+              _MenuItem(icon: CupertinoIcons.globe, label: l10n.language, onTap: () { Navigator.pop(context); _showLanguagePicker(outerContext); }),
+              _MenuItem(icon: CupertinoIcons.trash, label: l10n.trash, onTap: () { Navigator.pop(context); _openTrash(outerContext); }),
               _MenuItem(icon: Icons.upload_file, label: l10n.exportBackup, onTap: () async {
+                final scaffoldMessenger = ScaffoldMessenger.of(outerContext);
+                final exportL10n = AppLocalizations.of(outerContext)!;
                 Navigator.pop(context);
                 try {
                   await widget.storage.exportNotes();
-                  if (!context.mounted) return;
-                  _showSnackBar(l10n.exportSuccess);
+                  scaffoldMessenger.showSnackBar(
+                    SnackBar(
+                      content: Text(exportL10n.exportSuccess),
+                      backgroundColor: AppColors.accentBlue,
+                      behavior: SnackBarBehavior.floating,
+                      margin: const EdgeInsets.all(16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  );
                 } catch (e) {
-                  if (!context.mounted) return;
-                  _showSnackBar('${l10n.exportError}: $e', isError: true);
+                  scaffoldMessenger.showSnackBar(
+                    SnackBar(
+                      content: Text('${exportL10n.exportError}: $e'),
+                      backgroundColor: AppColors.accentRed,
+                      behavior: SnackBarBehavior.floating,
+                      margin: const EdgeInsets.all(16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  );
                 }
               }),
               _MenuItem(icon: Icons.download, label: l10n.importBackup, onTap: () async {
+                final scaffoldMessenger = ScaffoldMessenger.of(outerContext);
+                final importL10n = AppLocalizations.of(outerContext)!;
                 Navigator.pop(context);
                 try {
                   await widget.storage.importNotes();
-                  if (!context.mounted) return;
-                  _showSnackBar(l10n.importSuccess);
+                  scaffoldMessenger.showSnackBar(
+                    SnackBar(
+                      content: Text(importL10n.importSuccess),
+                      backgroundColor: AppColors.accentBlue,
+                      behavior: SnackBarBehavior.floating,
+                      margin: const EdgeInsets.all(16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  );
                 } catch (e) {
-                  if (!context.mounted) return;
-                  _showSnackBar('${l10n.importError}: $e', isError: true);
+                  scaffoldMessenger.showSnackBar(
+                    SnackBar(
+                      content: Text('${importL10n.importError}: $e'),
+                      backgroundColor: AppColors.accentRed,
+                      behavior: SnackBarBehavior.floating,
+                      margin: const EdgeInsets.all(16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  );
                 }
               }),
               const _BiometricToggle(),
@@ -1347,7 +1381,7 @@ class _BiometricToggleState extends State<_BiometricToggle> {
           ),
           Switch.adaptive(
             value: _isEnabled,
-            activeColor: AppColors.accentBlue,
+            activeTrackColor: AppColors.accentBlue,
             onChanged: (value) async {
               HapticFeedback.mediumImpact();
               if (value) {
