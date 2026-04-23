@@ -428,15 +428,15 @@ class GlassSearchBar extends StatelessWidget {
           onChanged(value);
         },
         style: const TextStyle(color: Colors.white, fontSize: 16),
-        decoration: InputDecoration(
-          icon: const Icon(
+        decoration: const InputDecoration(
+          icon: Icon(
             CupertinoIcons.search,
             color: Colors.white, // simplified for const
             size: 24,
             shadows: AppColors.iconShadows,
           ),
           hintText: 'Search notes...',
-          hintStyle: const TextStyle(color: Colors.white38),
+          hintStyle: TextStyle(color: Colors.white38),
           border: InputBorder.none,
           isDense: true,
         ),
