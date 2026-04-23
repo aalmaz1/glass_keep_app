@@ -2,10 +2,9 @@
 import 'dart:async';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons, CupertinoActivityIndicator, CupertinoThemeData;
+import 'package:flutter/cupertino.dart' show CupertinoActivityIndicator, CupertinoThemeData;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:glass_keep/l10n/app_localizations.dart';
 import 'package:window_manager/window_manager.dart';
@@ -102,7 +101,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
     _initSensors();
     // Defer heavy shader loading to improve initial performance
     Future.delayed(const Duration(milliseconds: 300), () {
-      if (mounted) _loadShaders();
+      if (context.mounted) _loadShaders();
     });
   }
 
@@ -111,7 +110,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
       final grainProgram = await ui.FragmentProgram.fromAsset(
         'shaders/film_grain.frag',
       );
-      if (mounted) {
+      if (context.mounted) {
         setState(() {
           _grainProgram = grainProgram;
         });
@@ -249,9 +248,9 @@ class _GlassKeepAppState extends State<GlassKeepApp>
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const _LoadingLogo(),
-                                const SizedBox(height: 24),
-                                const CupertinoActivityIndicator(
+                                _LoadingLogo(),
+                                SizedBox(height: 24),
+                                CupertinoActivityIndicator(
                                   color: AppColors.accentBlue,
                                   radius: 14,
                                 ),
@@ -323,7 +322,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
 }
 
 class _LoadingLogo extends StatelessWidget {
-  const _LoadingLogo({super.key});
+  const _LoadingLogo();
 
   @override
   Widget build(BuildContext context) {

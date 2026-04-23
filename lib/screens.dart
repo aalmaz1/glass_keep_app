@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/cupertino.dart' show CupertinoIcons, CupertinoActivityIndicator, CupertinoNavigationBar, CupertinoButton;
 import 'package:flutter/material.dart';
@@ -56,14 +55,14 @@ class _NotesScreenState extends State<NotesScreen> {
   void _onSearchChanged(String value) {
     _searchDebounceTimer?.cancel();
     _searchDebounceTimer = Timer(const Duration(milliseconds: 150), () {
-      if (mounted) {
+      if (context.mounted) {
         setState(() => _search = value);
       }
     });
   }
 
   void _showSnackBar(String message, {bool isError = false}) {
-    if (!mounted) return;
+    if (!context.context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
@@ -78,7 +77,7 @@ class _NotesScreenState extends State<NotesScreen> {
   void _logout() async {
     widget.storage.clearCache();
     await FirebaseAuth.instance.signOut();
-    if (!mounted) return;
+    if (!context.context.mounted) return;
   }
 
   void _openNote(BuildContext context, Note note) {
@@ -324,10 +323,10 @@ class _NotesScreenState extends State<NotesScreen> {
                 Navigator.pop(context);
                 try {
                   await widget.storage.exportNotes();
-                  if (!mounted) return;
+                  if (!context.context.mounted) return;
                   _showSnackBar(l10n.exportSuccess);
                 } catch (e) {
-                  if (!mounted) return;
+                  if (!context.context.mounted) return;
                   _showSnackBar('${l10n.exportError}: $e', isError: true);
                 }
               }),
@@ -335,10 +334,10 @@ class _NotesScreenState extends State<NotesScreen> {
                 Navigator.pop(context);
                 try {
                   await widget.storage.importNotes();
-                  if (!mounted) return;
+                  if (!context.context.mounted) return;
                   _showSnackBar(l10n.importSuccess);
                 } catch (e) {
-                  if (!mounted) return;
+                  if (!context.context.mounted) return;
                   _showSnackBar('${l10n.importError}: $e', isError: true);
                 }
               }),
@@ -423,7 +422,7 @@ class _MenuItem extends StatelessWidget {
   final VoidCallback onTap;
   final bool isDestructive;
 
-  const _MenuItem({super.key, required this.icon, required this.label, required this.onTap, this.isDestructive = false});
+  const _MenuItem({required this.icon, required this.label, required this.onTap, this.isDestructive = false});
 
   @override
   Widget build(BuildContext context) {
@@ -512,7 +511,7 @@ class _LanguageOption extends StatelessWidget {
 }
 
 class _NewNoteButton extends StatelessWidget {
-  const _NewNoteButton({super.key});
+  const _NewNoteButton();
 
   @override
   Widget build(BuildContext context) {
@@ -802,7 +801,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
   }
 
   void _showSnackBar(String message, {bool isError = false}) {
-    if (!mounted) return;
+    if (!context.context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
@@ -828,10 +827,10 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
     );
     try {
       await widget.storage.save(updatedNote);
-      if (!mounted) return;
+      if (!context.context.mounted) return;
       _showSnackBar(l10n.saveSuccess);
     } catch (e) {
-      if (!mounted) return;
+      if (!context.context.mounted) return;
       _showSnackBar('${l10n.saveError}: $e', isError: true);
     }
   }
@@ -891,10 +890,10 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                                   final updatedNote = widget.note.copyWith(isPinned: !widget.note.isPinned);
                                   try {
                                     await widget.storage.save(updatedNote);
-                                    if (!mounted) return;
+                                    if (!context.context.mounted) return;
                                     setState(() {});
                                   } catch (e) {
-                                    if (!mounted) return;
+                                    if (!context.context.mounted) return;
                                     _showSnackBar('${l10n.pinError}: $e', isError: true);
                                   }
                                 },
@@ -907,10 +906,10 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                                   if (widget.note.id.isNotEmpty) {
                                     try {
                                       await widget.storage.delete(widget.note.id);
-                                      if (!mounted) return;
+                                      if (!context.context.mounted) return;
                                       Navigator.pop(context);
                                     } catch (e) {
-                                      if (!mounted) return;
+                                      if (!context.context.mounted) return;
                                       _showSnackBar('${l10n.deleteError}: $e', isError: true);
                                     }
                                   } else {
@@ -1000,7 +999,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                     ),
                     onPressed: () {
                       HapticFeedback.lightImpact();
-                      if (mounted) {
+                      if (context.mounted) {
                         setState(() {
                           _img = null;
                           _decodedImage = null;
@@ -1027,7 +1026,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                     icon: const Icon(CupertinoIcons.photo, color: Colors.white70, shadows: AppColors.iconShadows),
                     onPressed: _isLoading ? null : () async {
                       HapticFeedback.lightImpact();
-                      if (mounted) setState(() => _isLoading = true);
+                      if (context.mounted) setState(() => _isLoading = true);
                       try {
                         final XFile? image = await _picker.pickImage(
                           source: ImageSource.gallery,
@@ -1035,13 +1034,13 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                           maxHeight: 1200,
                           imageQuality: 85,
                         );
-                        if (!mounted) return;
+                        if (!context.context.mounted) return;
                         if (image != null) {
                           final bytes = await image.readAsBytes();
-                          if (!mounted) return;
+                          if (!context.context.mounted) return;
                           // Process in microtask to avoid blocking UI
                           await Future.microtask(() {
-                            if (mounted) {
+                            if (context.mounted) {
                               setState(() {
                                 _img = base64Encode(bytes);
                                 _decodedImage = bytes;
@@ -1050,7 +1049,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                           });
                         }
                       } finally {
-                        if (mounted) {
+                        if (context.mounted) {
                           setState(() => _isLoading = false);
                         }
                       }
@@ -1061,9 +1060,9 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                     HapticFeedback.lightImpact();
                     final now = DateTime.now();
                     final d = await showDatePicker(context: context, initialDate: now, firstDate: now, lastDate: now.add(const Duration(days: 365)));
-                    if (d == null || !mounted) return;
+                    if (d == null || !context.context.mounted) return;
                     final t = await showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(now));
-                    if (!mounted) return;
+                    if (!context.context.mounted) return;
                     if (t != null) setState(() => _rem = DateTime(d.year, d.month, d.day, t.hour, t.minute));
                   }),
                   if (_rem != null) ...[
@@ -1071,7 +1070,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                     Expanded(child: Text(DateFormat('dd.MM HH:mm').format(_rem!), style: const TextStyle(fontSize: 12, color: AppColors.accentBlue, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)),
                     CupertinoButton(
                       padding: EdgeInsets.zero,
-                      minimumSize: 0,
+                      minimumSize: Size.zero,
                       child: const Icon(CupertinoIcons.xmark_circle_fill, size: 18, color: Colors.white54),
                       onPressed: () => setState(() => _rem = null),
                     ),
@@ -1108,7 +1107,7 @@ class _TrashScreenState extends State<TrashScreen> {
   }
 
   void _showSnackBar(String message, {bool isError = false}) {
-    if (!mounted) return;
+    if (!context.context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
@@ -1185,20 +1184,20 @@ class _TrashScreenState extends State<TrashScreen> {
                                 final updatedNote = note.copyWith(isArchived: false);
                                 try {
                                   await widget.storage.save(updatedNote);
-                                  if (!mounted) return;
+                                  if (!context.context.mounted) return;
                                   _showSnackBar(l10n.noteRestored);
                                 } catch (e) {
-                                  if (!mounted) return;
+                                  if (!context.context.mounted) return;
                                   _showSnackBar('${l10n.restoreError}: $e', isError: true);
                                 }
                               },
                               onDelete: () async {
                                 try {
                                   await widget.storage.delete(note.id);
-                                  if (!mounted) return;
+                                  if (!context.context.mounted) return;
                                   _showSnackBar(l10n.deletePermanent);
                                 } catch (e) {
-                                  if (!mounted) return;
+                                  if (!context.context.mounted) return;
                                   _showSnackBar('${l10n.deleteError}: $e', isError: true);
                                 }
                               },
@@ -1224,7 +1223,6 @@ class _TrashNoteCard extends StatelessWidget {
   final VoidCallback onDelete;
 
   const _TrashNoteCard({
-    super.key,
     required this.note,
     required this.onRestore,
     required this.onDelete,
