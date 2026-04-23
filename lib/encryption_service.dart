@@ -1,7 +1,5 @@
 import 'package:encrypt/encrypt.dart' as encrypt_lib;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'dart:convert';
-import 'dart:typed_data';
 
 class EncryptionService {
   static final EncryptionService _instance = EncryptionService._internal();
@@ -29,7 +27,7 @@ class EncryptionService {
     if (_key == null || text.isEmpty) return text;
     try {
       final iv = encrypt_lib.IV.fromSecureRandom(16);
-      final encrypter = encrypt_lib.Encrypter(encrypt_lib.AES(_key!));
+      final encrypter = encrypt_lib.Encrypter(encrypt_lib.AES(_key!, mode: encrypt_lib.AESMode.gcm));
       final encrypted = encrypter.encrypt(text, iv: iv);
       return '$_prefix${iv.base64}:${encrypted.base64}';
     } catch (e) {
@@ -49,7 +47,7 @@ class EncryptionService {
       final iv = encrypt_lib.IV.fromBase64(parts[0]);
       final encryptedBase64 = parts[1];
       
-      final encrypter = encrypt_lib.Encrypter(encrypt_lib.AES(_key!));
+      final encrypter = encrypt_lib.Encrypter(encrypt_lib.AES(_key!, mode: encrypt_lib.AESMode.gcm));
       final decrypted = encrypter.decrypt64(encryptedBase64, iv: iv);
       return decrypted;
     } catch (e) {

@@ -35,5 +35,8 @@
   "pinError": "Failed to update pin",
   "exportBackup": "Export Backup",
   "importBackup": "Import Backup",
-  "appearance": "Appearance"
+  "appearance": "Appearance",
+  "themes": "Themes",
+  "dataManagement": "Data Management",
+  "saveSuccess": "Note saved successfully"
 }

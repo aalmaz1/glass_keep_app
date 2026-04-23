@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -249,29 +248,64 @@ class StorageService {
     }
   }
 
+  Future<String> exportNotesToJson() async {
+    final snapshot = await _db.collection('notes')
+        .where('userId', isEqualTo: _uid)
+        .get();
+    
+    final notes = snapshot.docs.map((d) {
+      final data = d.data();
+      try {
+        final note = Note.fromMap(data);
+        return note.copyWith(
+          title: EncryptionService().decryptText(note.title),
+          content: EncryptionService().decryptText(note.content),
+        );
+      } catch (e) {
+        return null;
+      }
+    }).whereType<Note>().map((n) => n.toMap()).toList();
+
+    final jsonString = jsonEncode(notes);
+    return EncryptionService().encryptText(jsonString);
+  }
+
+  Future<void> importNotesFromJson(String json) async {
+    final decryptedJson = EncryptionService().decryptText(json);
+    final List<dynamic> jsonList = jsonDecode(decryptedJson);
+
+    final batch = _db.batch();
+    for (var item in jsonList) {
+      try {
+        final data = Map<String, dynamic>.from(item);
+        final newDoc = _db.collection('notes').doc();
+        
+        final note = Note.fromMap(data).copyWith(
+          id: newDoc.id,
+          updatedAt: DateTime.now(),
+        );
+        
+        final encryptedNote = note.copyWith(
+          title: EncryptionService().encryptText(note.title),
+          content: EncryptionService().encryptText(note.content),
+        );
+        
+        final map = encryptedNote.toMap();
+        map['userId'] = _uid;
+        batch.set(newDoc, map);
+      } catch (e) {
+        debugPrint('Error importing item: $e');
+      }
+    }
+    await batch.commit();
+  }
+
   Future<void> exportNotes() async {
     try {
-      final snapshot = await _db.collection('notes')
-          .where('userId', isEqualTo: _uid)
-          .get();
-      
-      final notes = snapshot.docs.map((d) {
-        final data = d.data();
-        try {
-          final note = Note.fromMap(data);
-          return note.copyWith(
-            title: EncryptionService().decryptText(note.title),
-            content: EncryptionService().decryptText(note.content),
-          );
-        } catch (e) {
-          return null;
-        }
-      }).whereType<Note>().map((n) => n.toMap()).toList();
-
-      final jsonString = jsonEncode(notes);
+      final encryptedJson = await exportNotesToJson();
       final directory = await getTemporaryDirectory();
       final file = File('${directory.path}/glass_keep_backup.json');
-      await file.writeAsString(jsonString);
+      await file.writeAsString(encryptedJson);
 
       await Share.shareXFiles([XFile(file.path)], text: 'Glass Keep Backup');
     } catch (e) {
@@ -290,34 +324,7 @@ class StorageService {
       if (result != null && result.files.single.path != null) {
         final file = File(result.files.single.path!);
         final jsonString = await file.readAsString();
-        final List<dynamic> jsonList = jsonDecode(jsonString);
-
-        final batch = _db.batch();
-        for (var item in jsonList) {
-          try {
-            final data = Map<String, dynamic>.from(item);
-            // We generate new IDs but keep other data.
-            final newDoc = _db.collection('notes').doc();
-            
-            final note = Note.fromMap(data).copyWith(
-              id: newDoc.id,
-              updatedAt: DateTime.now(),
-            );
-            
-            final encryptedNote = note.copyWith(
-              title: EncryptionService().encryptText(note.title),
-              content: EncryptionService().encryptText(note.content),
-            );
-            
-            final map = encryptedNote.toMap();
-            map['userId'] = _uid;
-            batch.set(newDoc, map);
-          } catch (e) {
-            debugPrint('Error importing item: $e');
-            // Skip corrupted items in the backup
-          }
-        }
-        await batch.commit();
+        await importNotesFromJson(jsonString);
       }
     } catch (e) {
       debugPrint('Import error: $e');
