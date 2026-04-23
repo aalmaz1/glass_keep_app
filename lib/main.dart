@@ -99,7 +99,10 @@ class _GlassKeepAppState extends State<GlassKeepApp>
     )..repeat();
 
     _initSensors();
-    _loadShaders();
+    // Defer heavy shader loading to improve initial performance
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (mounted) _loadShaders();
+    });
   }
 
   Future<void> _loadShaders() async {

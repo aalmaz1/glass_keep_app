@@ -360,19 +360,31 @@ class _ShaderNoisePainter extends CustomPainter {
   final ui.FragmentProgram? program;
   final double time;
 
+  // Cache for fallback noise to avoid generating it every frame
+  static ui.Picture? _cachedFallback;
+  static Size? _cachedSize;
+
   const _ShaderNoisePainter({this.program, required this.time});
 
   @override
   void paint(Canvas canvas, Size size) {
     if (program == null) {
-      // Fallback to simpler grain if shader not loaded
-      final random = math.Random(42);
-      for (int i = 0; i < 400; i++) {
-        final x = random.nextDouble() * size.width;
-        final y = random.nextDouble() * size.height;
-        final paint = Paint()..color = Colors.white.withOpacity(0.01);
-        canvas.drawRect(Rect.fromLTWH(x, y, 1, 1), paint);
+      // Optimized fallback: draw static noise once and reuse
+      if (_cachedFallback == null || _cachedSize != size) {
+        final recorder = ui.PictureRecorder();
+        final c = Canvas(recorder);
+        final random = math.Random(42);
+        final paint = Paint()..color = Colors.white.withOpacity(0.012);
+        
+        for (int i = 0; i < 800; i++) {
+          final x = random.nextDouble() * size.width;
+          final y = random.nextDouble() * size.height;
+          c.drawRect(Rect.fromLTWH(x, y, 1.2, 1.2), paint);
+        }
+        _cachedFallback = recorder.endRecording();
+        _cachedSize = size;
       }
+      canvas.drawPicture(_cachedFallback!);
       return;
     }
 
@@ -387,7 +399,7 @@ class _ShaderNoisePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _ShaderNoisePainter oldDelegate) =>
-      oldDelegate.time != time || oldDelegate.program != program;
+      (program != null && oldDelegate.time != time) || oldDelegate.program != program;
 }
 
 /// Glass search bar component
