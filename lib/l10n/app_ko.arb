@@ -38,5 +38,9 @@
   "appearance": "테마 설정",
   "themes": "테마",
   "dataManagement": "데이터 관리",
-  "saveSuccess": "메모가 성공적으로 저장되었습니다"
+  "saveSuccess": "메모가 성공적으로 저장되었습니다",
+  "appLocked": "앱이 잠겼습니다",
+  "authenticateToUnlock": "메모에 접근하려면 인증이 필요합니다",
+  "unlock": "잠금 해제",
+  "biometricLock": "생체 인식 잠금"
 }
