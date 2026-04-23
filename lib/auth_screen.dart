@@ -116,7 +116,7 @@ class _AuthScreenState extends State<AuthScreen> {
                           ],
                         ),
                         child: const Icon(
-                          CupertinoIcons.lightbulb_fill,
+                          Icons.blur_on,
                           size: 40,
                           color: Colors.white,
                           shadows: AppColors.iconShadows,

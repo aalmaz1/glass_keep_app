@@ -29,16 +29,6 @@ void main() async {
       options: DefaultFirebaseOptions.currentPlatform,
     );
 
-    if (kIsWeb) {
-      try {
-        FirebaseFirestore.instance.settings = const Settings(
-          persistenceEnabled: true,
-        );
-      } catch (e) {
-        debugPrint('Firestore persistence error: $e');
-      }
-    }
-
     if (!kIsWeb &&
         (defaultTargetPlatform == TargetPlatform.windows ||
             defaultTargetPlatform == TargetPlatform.linux ||
@@ -357,7 +347,7 @@ class _LoadingLogo extends StatelessWidget {
           ],
         ),
         child: const Icon(
-          CupertinoIcons.lightbulb_fill,
+          Icons.blur_on,
           size: 30,
           color: Colors.white,
           shadows: AppColors.iconShadows,
