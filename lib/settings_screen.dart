@@ -2,18 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:glass_keep/constants.dart';
 import 'package:glass_keep/widgets.dart';
+import 'package:glass_keep/data.dart';
+import 'package:glass_keep/l10n/app_localizations.dart';
 
 class SettingsScreen extends StatelessWidget {
+  final StorageService storage;
   final Function(Color? color, Decoration? decoration) onThemeChanged;
 
-  const SettingsScreen({super.key, required this.onThemeChanged});
+  const SettingsScreen({super.key, required this.storage, required this.onThemeChanged});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text('Appearance'),
+        title: Text(l10n.appearance),
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
@@ -23,6 +27,7 @@ class SettingsScreen extends StatelessWidget {
           ListView(
             padding: const EdgeInsets.fromLTRB(16, kToolbarHeight + 60, 16, 16),
             children: [
+              _buildSectionTitle(l10n.themes),
               _buildOption(
                 context,
                 'Standard Vision',
@@ -77,9 +82,70 @@ class SettingsScreen extends StatelessWidget {
                   ),
                 ),
               ),
+              const SizedBox(height: 24),
+              _buildSectionTitle(l10n.dataManagement),
+              _buildOption(
+                context,
+                l10n.exportBackup,
+                Icons.upload_file,
+                () async {
+                  try {
+                    await storage.exportNotes();
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(l10n.exportSuccess), backgroundColor: AppColors.accentBlue),
+                      );
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('${l10n.exportError}: $e'), backgroundColor: AppColors.accentRed),
+                      );
+                    }
+                  }
+                },
+                popOnTap: false,
+              ),
+              _buildOption(
+                context,
+                l10n.importBackup,
+                Icons.download,
+                () async {
+                  try {
+                    await storage.importNotes();
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(l10n.importSuccess), backgroundColor: AppColors.accentBlue),
+                      );
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('${l10n.importError}: $e'), backgroundColor: AppColors.accentRed),
+                      );
+                    }
+                  }
+                },
+                popOnTap: false,
+              ),
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 8, bottom: 12, top: 8),
+      child: Text(
+        title.toUpperCase(),
+        style: const TextStyle(
+          color: Colors.white54,
+          fontSize: 12,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 1.2,
+        ),
       ),
     );
   }
@@ -88,28 +154,31 @@ class SettingsScreen extends StatelessWidget {
     BuildContext context,
     String title,
     IconData icon,
-    VoidCallback onTap,
-  ) {
+    VoidCallback onTap, {
+    bool popOnTap = true,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: GlassButton(
         onTap: () {
           onTap();
-          Navigator.pop(context);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Appearance updated: $title'),
-              duration: const Duration(seconds: 2),
-              backgroundColor: AppColors.accentBlue,
-            ),
-          );
+          if (popOnTap) {
+            Navigator.pop(context);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Appearance updated: $title'),
+                duration: const Duration(seconds: 2),
+                backgroundColor: AppColors.accentBlue,
+              ),
+            );
+          }
         },
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppColors.accentBlue.withOpacity(0.1),
+                color: AppColors.accentBlue.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(icon, color: AppColors.accentBlue, size: 20, shadows: AppColors.iconShadows),

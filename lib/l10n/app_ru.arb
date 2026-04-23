@@ -35,5 +35,8 @@
   "pinError": "Ошибка изменения закрепления",
   "exportBackup": "Экспорт бэкапа",
   "importBackup": "Импорт бэкапа",
-  "appearance": "Внешний вид"
+  "appearance": "Внешний вид",
+  "themes": "Темы",
+  "dataManagement": "Управление данными",
+  "saveSuccess": "Заметка успешно сохранена"
 }
