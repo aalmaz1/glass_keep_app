@@ -333,7 +333,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     ),
                     const SizedBox(height: 24),
                     const Text(
-                      'SYSTEM-REBORN-V3',
+                      'SYSTEM-REBORN-V3 • v1.5',
                       style: TextStyle(
                         color: Colors.white54,
                         fontSize: 12,
