@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:ui' as ui;
 import 'package:flutter/cupertino.dart' show CupertinoIcons, CupertinoActivityIndicator, CupertinoNavigationBar, CupertinoButton;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -1347,7 +1348,7 @@ class _BiometricToggleState extends State<_BiometricToggle> {
           ),
           Switch.adaptive(
             value: _isEnabled,
-            activeColor: AppColors.accentBlue,
+            activeTrackColor: AppColors.accentBlue,
             onChanged: (value) async {
               HapticFeedback.mediumImpact();
               if (value) {
