@@ -38,5 +38,8 @@
   "appearance": "Appearance",
   "themes": "Themes",
   "dataManagement": "Data Management",
-  "saveSuccess": "Note saved successfully"
+  "saveSuccess": "Note saved successfully",
+  "appLocked": "App Locked",
+  "authenticateToUnlock": "Please authenticate to access your notes",
+  "unlock": "Unlock"
 }

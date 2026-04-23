@@ -63,6 +63,9 @@ abstract class AppLocalizations {
   String get secureCloudSync;
   String get language;
   String get settings;
+  String get appLocked;
+  String get authenticateToUnlock;
+  String get unlock;
 }
 
 class _AppLocalizationsDelegate

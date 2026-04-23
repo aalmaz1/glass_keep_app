@@ -80,4 +80,13 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get settings => '설정';
+
+  @override
+  String get appLocked => '앱 잠금';
+
+  @override
+  String get authenticateToUnlock => '메모에 액세스하려면 인증하세요';
+
+  @override
+  String get unlock => '해제';
 }
