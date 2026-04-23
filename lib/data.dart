@@ -16,7 +16,6 @@ class Note {
   final DateTime? reminder;
   final String? imageBase64;
   final DateTime updatedAt;
-  final String? userId;
 
   /// Cached decoded image bytes to avoid repeated base64 decoding
   Uint8List? _cachedImage;
@@ -31,7 +30,6 @@ class Note {
     this.reminder,
     this.imageBase64,
     required this.updatedAt,
-    this.userId,
   });
 
   /// Get cached image bytes, decoding only on first access
@@ -66,7 +64,6 @@ class Note {
     'reminder': reminder?.millisecondsSinceEpoch,
     'imageBase64': imageBase64,
     'updatedAt': updatedAt.millisecondsSinceEpoch,
-    'userId': userId,
   };
 
   factory Note.fromMap(Map<String, dynamic> m) => Note(
@@ -79,7 +76,6 @@ class Note {
     reminder: m['reminder'] != null ? DateTime.fromMillisecondsSinceEpoch(m['reminder']) : null,
     imageBase64: m['imageBase64'],
     updatedAt: DateTime.fromMillisecondsSinceEpoch(m['updatedAt'] ?? DateTime.now().millisecondsSinceEpoch),
-    userId: m['userId'],
   );
 
   Note copyWith({
@@ -92,7 +88,6 @@ class Note {
     DateTime? reminder,
     String? imageBase64,
     DateTime? updatedAt,
-    String? userId,
   }) {
     return Note(
       id: id ?? this.id,
@@ -104,7 +99,6 @@ class Note {
       reminder: reminder ?? this.reminder,
       imageBase64: imageBase64 ?? this.imageBase64,
       updatedAt: updatedAt ?? this.updatedAt,
-      userId: userId ?? this.userId,
     );
   }
 }
@@ -188,20 +182,23 @@ class StorageService {
 
   Future<void> save(Note note) async {
     try {
+      final map = note.toMap();
+      map['userId'] = _uid;
+
       if (note.id.isEmpty) {
         final doc = _db.collection('notes').doc();
-        final newNote = note.copyWith(id: doc.id, userId: _uid);
-        await _db.collection('notes').doc(newNote.id).set(newNote.toMap());
+        map['id'] = doc.id;
+        final newNote = Note.fromMap(map);
+        await _db.collection('notes').doc(newNote.id).set(map);
         if (newNote.reminder != null && !newNote.isArchived) {
           await NotificationService().scheduleReminder(newNote);
         }
       } else {
-        final updatedNote = note.copyWith(userId: _uid);
-        await _db.collection('notes').doc(note.id).set(updatedNote.toMap());
-        if (updatedNote.reminder != null && !updatedNote.isArchived) {
-          await NotificationService().scheduleReminder(updatedNote);
+        await _db.collection('notes').doc(note.id).set(map);
+        if (note.reminder != null && !note.isArchived) {
+          await NotificationService().scheduleReminder(note);
         } else {
-          await NotificationService().cancelReminder(updatedNote.id);
+          await NotificationService().cancelReminder(note.id);
         }
       }
     } catch (e) {

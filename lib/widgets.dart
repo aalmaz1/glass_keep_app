@@ -197,7 +197,7 @@ class VisionBackground extends StatelessWidget {
                     // Drifting aurora blobs optimized with RadialGradient
                     _AuroraBlob(
                       color: AppColors.accentBlue.withOpacity(0.25),
-                      size: kIsWeb ? 500 : 800,
+                      size: kIsWeb ? 400 : 800,
                       alignment: Alignment.topLeft,
                       depth: 0.05,
                       baseOffset: Offset(
@@ -207,7 +207,7 @@ class VisionBackground extends StatelessWidget {
                     ),
                     _AuroraBlob(
                       color: AppColors.accentPurple.withOpacity(0.2),
-                      size: kIsWeb ? 600 : 900,
+                      size: kIsWeb ? 500 : 900,
                       alignment: Alignment.bottomRight,
                       depth: 0.08,
                       baseOffset: Offset(
