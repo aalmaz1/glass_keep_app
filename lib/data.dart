@@ -125,9 +125,13 @@ class StorageService {
   static Future<StorageService> init() async {
     if (!_initialized) {
       try {
-        FirebaseFirestore.instance.settings = const Settings(persistenceEnabled: true);
+        // Optimized for safety and performance
+        FirebaseFirestore.instance.settings = const Settings(
+          persistenceEnabled: true,
+          cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
+        );
       } catch (e) {
-        debugPrint('Firestore settings already set: $e');
+        debugPrint('Firestore settings already set or error: $e');
       }
       _initialized = true;
     }
@@ -188,13 +192,13 @@ class StorageService {
         final doc = _db.collection('notes').doc();
         final newNote = note.copyWith(id: doc.id, userId: _uid);
         await _db.collection('notes').doc(newNote.id).set(newNote.toMap());
-        if (newNote.reminder != null) {
+        if (newNote.reminder != null && !newNote.isArchived) {
           await NotificationService().scheduleReminder(newNote);
         }
       } else {
         final updatedNote = note.copyWith(userId: _uid);
         await _db.collection('notes').doc(note.id).set(updatedNote.toMap());
-        if (updatedNote.reminder != null) {
+        if (updatedNote.reminder != null && !updatedNote.isArchived) {
           await NotificationService().scheduleReminder(updatedNote);
         } else {
           await NotificationService().cancelReminder(updatedNote.id);
