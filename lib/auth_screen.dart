@@ -47,26 +47,26 @@ class _AuthScreenState extends State<AuthScreen> {
           email: email,
           password: password,
         );
-        if (!mounted) return;
+        if (!context.mounted) return;
       } else {
         await FirebaseAuth.instance.createUserWithEmailAndPassword(
           email: email,
           password: password,
         );
-        if (!mounted) return;
+        if (!context.mounted) return;
       }
     } on FirebaseAuthException catch (e) {
-      if (!mounted) return;
+      if (!context.mounted) return;
       setState(() {
         _errorMessage = e.message ?? 'An error occurred during authentication';
       });
     } catch (e) {
-      if (!mounted) return;
+      if (!context.mounted) return;
       setState(() {
         _errorMessage = 'An unexpected error occurred';
       });
     } finally {
-      if (mounted) {
+      if (context.mounted) {
         setState(() {
           _isLoading = false;
         });

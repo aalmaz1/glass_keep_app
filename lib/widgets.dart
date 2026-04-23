@@ -292,7 +292,6 @@ class _AuroraBlob extends StatelessWidget {
   final double depth;
 
   const _AuroraBlob({
-    super.key,
     required this.color,
     required this.size,
     required this.baseOffset,
@@ -342,7 +341,7 @@ class _AuroraBlob extends StatelessWidget {
                 gradient: RadialGradient(
                   colors: [
                     color,
-                    color.withValues(alpha: color.opacity * 0.5),
+                    color.withValues(alpha: color.a * 0.5),
                     color.withValues(alpha: 0.0),
                   ],
                   stops: const [0.0, 0.4, 1.0],
