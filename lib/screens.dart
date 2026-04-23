@@ -62,6 +62,19 @@ class _NotesScreenState extends State<NotesScreen> {
     });
   }
 
+  void _showSnackBar(String message, {bool isError = false}) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? AppColors.accentRed : AppColors.accentBlue,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
+  }
+
   void _logout() async {
     widget.storage.clearCache();
     await FirebaseAuth.instance.signOut();
@@ -307,6 +320,24 @@ class _NotesScreenState extends State<NotesScreen> {
               _MenuItem(icon: CupertinoIcons.paintbrush, label: 'Appearance', onTap: () { Navigator.pop(context); _openBackgroundSettings(context); }),
               _MenuItem(icon: CupertinoIcons.globe, label: l10n.language, onTap: () { Navigator.pop(context); _showLanguagePicker(context); }),
               _MenuItem(icon: CupertinoIcons.trash, label: l10n.trash, onTap: () { Navigator.pop(context); _openTrash(context); }),
+              _MenuItem(icon: Icons.upload_file, label: 'Export Backup', onTap: () async {
+                Navigator.pop(context);
+                try {
+                  await widget.storage.exportNotes();
+                  _showSnackBar('Backup exported successfully');
+                } catch (e) {
+                  _showSnackBar('Export failed: $e', isError: true);
+                }
+              }),
+              _MenuItem(icon: Icons.download, label: 'Import Backup', onTap: () async {
+                Navigator.pop(context);
+                try {
+                  await widget.storage.importNotes();
+                  _showSnackBar('Backup imported successfully');
+                } catch (e) {
+                  _showSnackBar('Import failed: $e', isError: true);
+                }
+              }),
               _MenuItem(icon: Icons.logout, label: l10n.logout, onTap: () { Navigator.pop(context); _logout(); }, isDestructive: true),
               const SizedBox(height: 20),
             ],
@@ -764,7 +795,20 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
     super.dispose();
   }
 
-  void _save() {
+  void _showSnackBar(String message, {bool isError = false}) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? AppColors.accentRed : AppColors.accentBlue,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
+  }
+
+  void _save() async {
     if (_t.text.trim().isEmpty && _c.text.trim().isEmpty && _img == null) return;
 
     final updatedNote = widget.note.copyWith(
@@ -775,7 +819,11 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
       reminder: _rem,
       updatedAt: DateTime.now(),
     );
-    widget.storage.save(updatedNote);
+    try {
+      await widget.storage.save(updatedNote);
+    } catch (e) {
+      _showSnackBar('Failed to save note: $e', isError: true);
+    }
   }
 
   @override
@@ -828,20 +876,32 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                                   size: 22,
                                   shadows: AppColors.iconShadows,
                                 ),
-                                onPressed: () {
+                                onPressed: () async {
                                   HapticFeedback.lightImpact();
                                   final updatedNote = widget.note.copyWith(isPinned: !widget.note.isPinned);
-                                  widget.storage.save(updatedNote);
-                                  if (mounted) setState(() {});
+                                  try {
+                                    await widget.storage.save(updatedNote);
+                                    if (mounted) setState(() {});
+                                  } catch (e) {
+                                    _showSnackBar('Failed to update pin: $e', isError: true);
+                                  }
                                 },
                               ),
                               CupertinoButton(
                                 padding: EdgeInsets.zero,
                                 child: const Icon(CupertinoIcons.trash, color: AppColors.accentRed, size: 22, shadows: AppColors.iconShadows),
-                                onPressed: () {
+                                onPressed: () async {
                                   HapticFeedback.mediumImpact();
-                                  if (widget.note.id.isNotEmpty) widget.storage.delete(widget.note.id);
-                                  Navigator.pop(context);
+                                  if (widget.note.id.isNotEmpty) {
+                                    try {
+                                      await widget.storage.delete(widget.note.id);
+                                      if (mounted) Navigator.pop(context);
+                                    } catch (e) {
+                                      _showSnackBar('Failed to delete note: $e', isError: true);
+                                    }
+                                  } else {
+                                    Navigator.pop(context);
+                                  }
                                 },
                               ),
                             ],
@@ -1034,6 +1094,19 @@ class _TrashScreenState extends State<TrashScreen> {
     _notesStream = widget.storage.getNotesStream();
   }
 
+  void _showSnackBar(String message, {bool isError = false}) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? AppColors.accentRed : AppColors.accentBlue,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -1095,12 +1168,22 @@ class _TrashScreenState extends State<TrashScreen> {
                             padding: const EdgeInsets.only(bottom: 12),
                             child: _TrashNoteCard(
                               note: note,
-                              onRestore: () {
+                              onRestore: () async {
                                 final updatedNote = note.copyWith(isArchived: false);
-                                widget.storage.save(updatedNote);
+                                try {
+                                  await widget.storage.save(updatedNote);
+                                  _showSnackBar('Note restored');
+                                } catch (e) {
+                                  _showSnackBar('Failed to restore note: $e', isError: true);
+                                }
                               },
-                              onDelete: () {
-                                widget.storage.delete(note.id);
+                              onDelete: () async {
+                                try {
+                                  await widget.storage.delete(note.id);
+                                  _showSnackBar('Note deleted permanently');
+                                } catch (e) {
+                                  _showSnackBar('Failed to delete note: $e', isError: true);
+                                }
                               },
                             ),
                           );
