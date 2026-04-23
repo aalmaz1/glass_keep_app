@@ -1,10 +1,15 @@
 import 'dart:convert';
 import 'dart:typed_data';
+import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:glass_keep/notifications_service.dart';
+import 'package:glass_keep/encryption_service.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:share_plus/share_plus.dart';
 
 class Note {
   final String id;
@@ -66,17 +71,24 @@ class Note {
     'updatedAt': updatedAt.millisecondsSinceEpoch,
   };
 
-  factory Note.fromMap(Map<String, dynamic> m) => Note(
-    id: m['id'] ?? '',
-    title: m['title'] ?? '',
-    content: m['content'] ?? '',
-    labels: List<String>.from(m['labels'] ?? []),
-    isPinned: m['isPinned'] ?? false,
-    isArchived: m['isArchived'] ?? false,
-    reminder: m['reminder'] != null ? DateTime.fromMillisecondsSinceEpoch(m['reminder']) : null,
-    imageBase64: m['imageBase64'],
-    updatedAt: DateTime.fromMillisecondsSinceEpoch(m['updatedAt'] ?? DateTime.now().millisecondsSinceEpoch),
-  );
+  factory Note.fromMap(Map<String, dynamic> m) {
+    try {
+      return Note(
+        id: m['id'] ?? '',
+        title: m['title'] ?? '',
+        content: m['content'] ?? '',
+        labels: List<String>.from(m['labels'] ?? []),
+        isPinned: m['isPinned'] ?? false,
+        isArchived: m['isArchived'] ?? false,
+        reminder: m['reminder'] != null ? DateTime.fromMillisecondsSinceEpoch(m['reminder']) : null,
+        imageBase64: m['imageBase64'],
+        updatedAt: DateTime.fromMillisecondsSinceEpoch(m['updatedAt'] ?? DateTime.now().millisecondsSinceEpoch),
+      );
+    } catch (e) {
+      debugPrint('Error parsing note: $e');
+      rethrow;
+    }
+  }
 
   Note copyWith({
     String? id,
@@ -119,6 +131,9 @@ class StorageService {
   static Future<StorageService> init() async {
     if (!_initialized) {
       try {
+        // Initialize Encryption
+        await EncryptionService().init();
+
         // Optimized for safety and performance
         FirebaseFirestore.instance.settings = const Settings(
           persistenceEnabled: true,
@@ -162,8 +177,18 @@ class StorageService {
                 return existingNote;
               }
 
-              return Note.fromMap(data);
-            }).toList();
+              try {
+                final note = Note.fromMap(data);
+                // Decrypt sensitive fields
+                return note.copyWith(
+                  title: EncryptionService().decryptText(note.title),
+                  content: EncryptionService().decryptText(note.content),
+                );
+              } catch (e) {
+                debugPrint('Skipping corrupted note $noteId: $e');
+                return null;
+              }
+            }).whereType<Note>().toList();
             _notesCache = List.unmodifiable(notes);
             return notes;
           });
@@ -182,16 +207,22 @@ class StorageService {
 
   Future<void> save(Note note) async {
     try {
-      final map = note.toMap();
+      // Encrypt sensitive fields before saving
+      final encryptedNote = note.copyWith(
+        title: EncryptionService().encryptText(note.title),
+        content: EncryptionService().encryptText(note.content),
+      );
+
+      final map = encryptedNote.toMap();
       map['userId'] = _uid;
 
       if (note.id.isEmpty) {
         final doc = _db.collection('notes').doc();
         map['id'] = doc.id;
-        final newNote = Note.fromMap(map);
-        await _db.collection('notes').doc(newNote.id).set(map);
-        if (newNote.reminder != null && !newNote.isArchived) {
-          await NotificationService().scheduleReminder(newNote);
+        // We use the original note for scheduling reminders as it has unencrypted text
+        await _db.collection('notes').doc(map['id']).set(map);
+        if (note.reminder != null && !note.isArchived) {
+          await NotificationService().scheduleReminder(note.copyWith(id: map['id']));
         }
       } else {
         await _db.collection('notes').doc(note.id).set(map);
@@ -213,6 +244,82 @@ class StorageService {
       await _db.collection('notes').doc(id).delete();
     } catch (e) {
       debugPrint('delete note error: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> exportNotes() async {
+    try {
+      final snapshot = await _db.collection('notes')
+          .where('userId', isEqualTo: _uid)
+          .get();
+      
+      final notes = snapshot.docs.map((d) {
+        final data = d.data();
+        try {
+          final note = Note.fromMap(data);
+          return note.copyWith(
+            title: EncryptionService().decryptText(note.title),
+            content: EncryptionService().decryptText(note.content),
+          );
+        } catch (e) {
+          return null;
+        }
+      }).whereType<Note>().map((n) => n.toMap()).toList();
+
+      final jsonString = jsonEncode(notes);
+      final directory = await getTemporaryDirectory();
+      final file = File('${directory.path}/glass_keep_backup.json');
+      await file.writeAsString(jsonString);
+
+      await Share.shareXFiles([XFile(file.path)], text: 'Glass Keep Backup');
+    } catch (e) {
+      debugPrint('Export error: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> importNotes() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['json'],
+      );
+
+      if (result != null && result.files.single.path != null) {
+        final file = File(result.files.single.path!);
+        final jsonString = await file.readAsString();
+        final List<dynamic> jsonList = jsonDecode(jsonString);
+
+        final batch = _db.batch();
+        for (var item in jsonList) {
+          try {
+            final data = Map<String, dynamic>.from(item);
+            // We generate new IDs but keep other data.
+            final newDoc = _db.collection('notes').doc();
+            
+            final note = Note.fromMap(data).copyWith(
+              id: newDoc.id,
+              updatedAt: DateTime.now(),
+            );
+            
+            final encryptedNote = note.copyWith(
+              title: EncryptionService().encryptText(note.title),
+              content: EncryptionService().encryptText(note.content),
+            );
+            
+            final map = encryptedNote.toMap();
+            map['userId'] = _uid;
+            batch.set(newDoc, map);
+          } catch (e) {
+            debugPrint('Error importing item: $e');
+            // Skip corrupted items in the backup
+          }
+        }
+        await batch.commit();
+      }
+    } catch (e) {
+      debugPrint('Import error: $e');
       rethrow;
     }
   }

@@ -1,0 +1,41 @@
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              CupertinoButton(
+                                padding: EdgeInsets.zero,
+                                child: Icon(
+                                  CupertinoIcons.pin,
+                                  color: widget.note.isPinned ? AppColors.accentBlue : AppColors.accentBlue.withOpacity(0.3),
+                                  size: 22,
+                                  shadows: AppColors.iconShadows,
+                                ),
+                                onPressed: () async {
+                                  HapticFeedback.lightImpact();
+                                  final updatedNote = widget.note.copyWith(isPinned: !widget.note.isPinned);
+                                  try {
+                                    await widget.storage.save(updatedNote);
+                                    if (mounted) setState(() {});
+                                  } catch (e) {
+                                    _showSnackBar('Failed to update pin: $e', isError: true);
+                                  }
+                                },
+                              ),
+                              CupertinoButton(
+                                padding: EdgeInsets.zero,
+                                child: const Icon(CupertinoIcons.trash, color: AppColors.accentRed, size: 22, shadows: AppColors.iconShadows),
+                                onPressed: () async {
+                                  HapticFeedback.mediumImpact();
+                                  if (widget.note.id.isNotEmpty) {
+                                    try {
+                                      await widget.storage.delete(widget.note.id);
+                                      if (mounted) Navigator.pop(context);
+                                    } catch (e) {
+                                      _showSnackBar('Failed to delete note: $e', isError: true);
+                                    }
+                                  } else {
+                                    Navigator.pop(context);
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
