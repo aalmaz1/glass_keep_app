@@ -14,6 +14,7 @@ import 'package:glass_keep/widgets.dart';
 import 'package:glass_keep/constants.dart';
 import 'package:glass_keep/providers.dart';
 import 'package:glass_keep/settings_screen.dart';
+import 'package:glass_keep/biometric_service.dart';
 
 class NotesScreen extends StatefulWidget {
   final StorageService storage;
@@ -341,6 +342,7 @@ class _NotesScreenState extends State<NotesScreen> {
                   _showSnackBar('${l10n.importError}: $e', isError: true);
                 }
               }),
+              const _BiometricToggle(),
               _MenuItem(icon: Icons.logout, label: l10n.logout, onTap: () { Navigator.pop(context); _logout(); }, isDestructive: true),
               const SizedBox(height: 20),
             ],
@@ -1289,6 +1291,78 @@ class _TrashNoteCard extends StatelessWidget {
               ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _BiometricToggle extends StatefulWidget {
+  const _BiometricToggle();
+
+  @override
+  State<_BiometricToggle> createState() => _BiometricToggleState();
+}
+
+class _BiometricToggleState extends State<_BiometricToggle> {
+  final BiometricService _biometricService = BiometricService();
+  bool _isEnabled = false;
+  bool _isAvailable = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadStatus();
+  }
+
+  Future<void> _loadStatus() async {
+    final available = await _biometricService.isBiometricsAvailable();
+    final enabled = await _biometricService.isBiometricEnabled();
+    if (mounted) {
+      setState(() {
+        _isAvailable = available;
+        _isEnabled = enabled;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_isAvailable || kIsWeb) return const SizedBox.shrink();
+
+    final l10n = AppLocalizations.of(context)!;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
+      child: Row(
+        children: [
+          const Icon(CupertinoIcons.lock_shield,
+              color: AppColors.accentBlue, size: 26, shadows: AppColors.iconShadows),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              l10n.biometricLock,
+              style: const TextStyle(fontSize: 17, color: Colors.white),
+            ),
+          ),
+          Switch.adaptive(
+            value: _isEnabled,
+            activeColor: AppColors.accentBlue,
+            onChanged: (value) async {
+              HapticFeedback.mediumImpact();
+              if (value) {
+                final authenticated = await _biometricService.authenticate();
+                if (authenticated) {
+                  await _biometricService.setBiometricEnabled(true);
+                  if (mounted) setState(() => _isEnabled = true);
+                }
+              } else {
+                await _biometricService.setBiometricEnabled(false);
+                if (mounted) setState(() => _isEnabled = false);
+              }
+            },
+          ),
+        ],
       ),
     );
   }

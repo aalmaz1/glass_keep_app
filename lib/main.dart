@@ -2,7 +2,7 @@
 import 'dart:async';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoActivityIndicator, CupertinoThemeData;
+import 'package:flutter/cupertino.dart' show CupertinoActivityIndicator, CupertinoThemeData, CupertinoIcons;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -377,6 +377,27 @@ class _BiometricAuthWrapperState extends State<BiometricAuthWrapper> {
   }
 
   Future<void> _checkBiometrics() async {
+    if (kIsWeb) {
+      if (mounted) {
+        setState(() {
+          _isAuthenticated = true;
+          _isChecking = false;
+        });
+      }
+      return;
+    }
+
+    final isEnabled = await _biometricService.isBiometricEnabled();
+    if (!isEnabled) {
+      if (mounted) {
+        setState(() {
+          _isAuthenticated = true;
+          _isChecking = false;
+        });
+      }
+      return;
+    }
+
     final isAvailable = await _biometricService.isBiometricsAvailable();
     if (!isAvailable) {
       if (mounted) {
@@ -428,7 +449,7 @@ class _BiometricAuthWrapperState extends State<BiometricAuthWrapper> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         const Icon(
-                          Icons.lock_outline,
+                          CupertinoIcons.lock_shield_fill,
                           size: 64,
                           color: AppColors.accentBlue,
                         ),
@@ -450,20 +471,28 @@ class _BiometricAuthWrapperState extends State<BiometricAuthWrapper> {
                           ),
                         ),
                         const SizedBox(height: 32),
-                        ElevatedButton(
-                          onPressed: _authenticate,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.accentBlue,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 32,
-                              vertical: 16,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                        GlassButton(
+                          onTap: _authenticate,
+                          color: AppColors.accentBlue.withValues(alpha: 0.2),
+                          borderRadius: 16,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(CupertinoIcons.lock_open_fill, color: Colors.white, size: 20),
+                                const SizedBox(width: 12),
+                                Text(
+                                  unlockStr,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          child: Text(unlockStr),
                         ),
                       ],
                     ),

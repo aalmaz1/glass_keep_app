@@ -41,5 +41,6 @@
   "saveSuccess": "Note saved successfully",
   "appLocked": "App Locked",
   "authenticateToUnlock": "Please authenticate to access your notes",
-  "unlock": "Unlock"
+  "unlock": "Unlock",
+  "biometricLock": "Biometric Lock"
 }
