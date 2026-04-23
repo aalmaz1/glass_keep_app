@@ -18,6 +18,7 @@ import 'package:glass_keep/providers.dart';
 import 'package:glass_keep/firebase_options.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:glass_keep/notifications_service.dart';
+import 'package:glass_keep/biometric_service.dart';
 
 void main() async {
   runZonedGuarded(() async {
@@ -274,7 +275,9 @@ class _GlassKeepAppState extends State<GlassKeepApp>
                           );
                         }
                         if (storeSnapshot.hasData) {
-                          return NotesScreen(storage: storeSnapshot.data!);
+                          return BiometricAuthWrapper(
+                            child: NotesScreen(storage: storeSnapshot.data!),
+                          );
                         }
                         return const Scaffold(
                           body: Stack(
@@ -349,12 +352,124 @@ class _LoadingLogo extends StatelessWidget {
             ),
           ],
         ),
-        child: const Icon(
-          Icons.blur_on,
-          size: 30,
-          color: Colors.white,
-          shadows: AppColors.iconShadows,
-        ),
+      ),
+    );
+  }
+}
+
+class BiometricAuthWrapper extends StatefulWidget {
+  final Widget child;
+  const BiometricAuthWrapper({super.key, required this.child});
+
+  @override
+  State<BiometricAuthWrapper> createState() => _BiometricAuthWrapperState();
+}
+
+class _BiometricAuthWrapperState extends State<BiometricAuthWrapper> {
+  bool _isAuthenticated = false;
+  bool _isChecking = true;
+  final BiometricService _biometricService = BiometricService();
+
+  @override
+  void initState() {
+    super.initState();
+    _checkBiometrics();
+  }
+
+  Future<void> _checkBiometrics() async {
+    final isAvailable = await _biometricService.isBiometricsAvailable();
+    if (!isAvailable) {
+      if (mounted) {
+        setState(() {
+          _isAuthenticated = true;
+          _isChecking = false;
+        });
+      }
+      return;
+    }
+    _authenticate();
+  }
+
+  Future<void> _authenticate() async {
+    if (mounted) {
+      setState(() => _isChecking = true);
+    }
+    final authenticated = await _biometricService.authenticate();
+    if (mounted) {
+      setState(() {
+        _isAuthenticated = authenticated;
+        _isChecking = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isAuthenticated) {
+      return widget.child;
+    }
+
+    final l10n = AppLocalizations.of(context);
+    final appLockedStr = l10n?.appLocked ?? 'App Locked';
+    final authenticateStr = l10n?.authenticateToUnlock ?? 
+                           'Please authenticate to access your notes';
+    final unlockStr = l10n?.unlock ?? 'Unlock';
+
+    return Scaffold(
+      body: Stack(
+        children: [
+          const VisionBackground(),
+          Center(
+            child: _isChecking
+                ? const CupertinoActivityIndicator(color: AppColors.accentBlue)
+                : VisionGlassCard(
+                    padding: const EdgeInsets.all(32),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.lock_outline,
+                          size: 64,
+                          color: AppColors.accentBlue,
+                        ),
+                        const SizedBox(height: 24),
+                        Text(
+                          appLockedStr,
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          authenticateStr,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.7),
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+                        ElevatedButton(
+                          onPressed: _authenticate,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.accentBlue,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 32,
+                              vertical: 16,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: Text(unlockStr),
+                        ),
+                      ],
+                    ),
+                  ),
+          ),
+        ],
       ),
     );
   }

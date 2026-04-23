@@ -80,4 +80,13 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settings => 'Настройки';
+
+  @override
+  String get appLocked => 'Приложение заблокировано';
+
+  @override
+  String get authenticateToUnlock => 'Пожалуйста, авторизуйтесь для доступа к вашим заметкам';
+
+  @override
+  String get unlock => 'Разблокировать';
 }

@@ -80,4 +80,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings => 'Settings';
+
+  @override
+  String get appLocked => 'App Locked';
+
+  @override
+  String get authenticateToUnlock => 'Please authenticate to access your notes';
+
+  @override
+  String get unlock => 'Unlock';
 }
