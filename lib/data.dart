@@ -74,18 +74,19 @@ class Note {
   factory Note.fromMap(Map<String, dynamic> m) {
     try {
       return Note(
-        id: m['id'] ?? '',
-        title: m['title'] ?? '',
-        content: m['content'] ?? '',
-        labels: List<String>.from(m['labels'] ?? []),
-        isPinned: m['isPinned'] ?? false,
-        isArchived: m['isArchived'] ?? false,
-        reminder: m['reminder'] != null ? DateTime.fromMillisecondsSinceEpoch(m['reminder']) : null,
-        imageBase64: m['imageBase64'],
-        updatedAt: DateTime.fromMillisecondsSinceEpoch(m['updatedAt'] ?? DateTime.now().millisecondsSinceEpoch),
+        id: m['id']?.toString() ?? '',
+        title: m['title']?.toString() ?? '',
+        content: m['content']?.toString() ?? '',
+        labels: m['labels'] is List ? List<String>.from(m['labels']) : [],
+        isPinned: m['isPinned'] == true,
+        isArchived: m['isArchived'] == true,
+        reminder: m['reminder'] is int ? DateTime.fromMillisecondsSinceEpoch(m['reminder']) : null,
+        imageBase64: m['imageBase64']?.toString(),
+        updatedAt: DateTime.fromMillisecondsSinceEpoch(m['updatedAt'] is int ? m['updatedAt'] : DateTime.now().millisecondsSinceEpoch),
       );
     } catch (e) {
       debugPrint('Error parsing note: $e');
+      // Still rethrow so StorageService can skip it, but the parsing itself is safer
       rethrow;
     }
   }

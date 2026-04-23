@@ -22,5 +22,18 @@
   "alreadyHaveAccount": "Already have an account? Sign in",
   "secureCloudSync": "Secure cloud sync",
   "language": "Language",
-  "settings": "Settings"
+  "settings": "Settings",
+  "exportSuccess": "Backup exported successfully",
+  "exportError": "Export failed",
+  "importSuccess": "Backup imported successfully",
+  "importError": "Import failed",
+  "noteRestored": "Note restored",
+  "restoreError": "Failed to restore note",
+  "deletePermanent": "Note deleted permanently",
+  "deleteError": "Failed to delete note",
+  "saveError": "Failed to save note",
+  "pinError": "Failed to update pin",
+  "exportBackup": "Export Backup",
+  "importBackup": "Import Backup",
+  "appearance": "Appearance"
 }
