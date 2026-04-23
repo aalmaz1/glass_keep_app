@@ -41,6 +41,13 @@ class NotificationService {
         // Handle notification tap
       },
     );
+
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      await _notificationsPlugin
+          .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>()
+          ?.requestNotificationsPermission();
+    }
   }
 
   Future<void> scheduleReminder(Note note) async {
