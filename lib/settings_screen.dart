@@ -39,38 +39,6 @@ class SettingsScreen extends StatelessWidget {
           ListView(
             padding: const EdgeInsets.fromLTRB(16, kToolbarHeight + 60, 16, 16),
             children: [
-              _buildSectionTitle('PREMIUM DARK COLLECTION'),
-              _buildOption(
-                context,
-                'Midnight (Default)',
-                CupertinoIcons.moon_fill,
-                () => onThemeChanged(AppColors.obsidianBlack, [AppColors.accentBlue, AppColors.accentIndigo, AppColors.accentDeepPurple], null),
-              ),
-              _buildOption(
-                context,
-                'Deep Sea (Teal/Indigo)',
-                CupertinoIcons.drop_fill,
-                () => onThemeChanged(AppColors.obsidianBlack, [AppColors.accentTeal, AppColors.accentIndigo, AppColors.accentBlue], null),
-              ),
-              _buildOption(
-                context,
-                'Cosmic (Purple/Indigo)',
-                CupertinoIcons.sparkles,
-                () => onThemeChanged(AppColors.obsidianBlack, [AppColors.accentDeepPurple, AppColors.accentIndigo, AppColors.accentBlue], null),
-              ),
-              _buildOption(
-                context,
-                'Cyber (Blue/Teal)',
-                CupertinoIcons.device_desktop,
-                () => onThemeChanged(AppColors.obsidianBlack, [AppColors.accentBlue, AppColors.accentTeal, AppColors.accentIndigo], null),
-              ),
-              _buildOption(
-                context,
-                'Electric (Red/Indigo)',
-                CupertinoIcons.bolt_fill,
-                () => onThemeChanged(AppColors.obsidianBlack, [AppColors.accentRed, AppColors.accentIndigo, AppColors.accentBlue], null),
-              ),
-              const SizedBox(height: 24),
               _buildSectionTitle(l10n?.dataManagement ?? 'DATA MANAGEMENT'),
               _buildOption(
                 context,
