@@ -180,7 +180,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
-                                borderSide: const BorderSide(color: AppColors.accentBlue, width: 1.5),
+                                borderSide: const BorderSide(color: AppColors.accentDeepPurple, width: 1.5),
                               ),
                               errorBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
@@ -234,7 +234,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
-                                borderSide: const BorderSide(color: AppColors.accentBlue, width: 1.5),
+                                borderSide: const BorderSide(color: AppColors.accentDeepPurple, width: 1.5),
                               ),
                               errorBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
@@ -291,12 +291,12 @@ class _AuthScreenState extends State<AuthScreen> {
                       child: _isLoading
                         ? const Center(
                             child: CircularProgressIndicator(
-                              color: AppColors.accentBlue,
+                              color: AppColors.accentDeepPurple,
                             ),
                           )
                         : ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.accentBlue,
+                                backgroundColor: AppColors.accentDeepPurple,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(16),
                                 ),

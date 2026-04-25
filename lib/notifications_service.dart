@@ -13,15 +13,19 @@ class NotificationService {
   final FlutterLocalNotificationsPlugin _notificationsPlugin = FlutterLocalNotificationsPlugin();
 
   Future<void> init() async {
+    debugPrint('[SYSTEM-REBORN] Initializing NotificationService...');
     tz.initializeTimeZones();
     try {
       final String timeZoneName = await FlutterTimezone.getLocalTimezone();
       tz.setLocalLocation(tz.getLocation(timeZoneName));
     } catch (e) {
-      debugPrint('Could not get local timezone: $e');
+      debugPrint('[SYSTEM-REBORN] Could not get local timezone: $e');
     }
 
-    if (kIsWeb) return;
+    if (kIsWeb) {
+      debugPrint('[SYSTEM-REBORN] NotificationService skipped on Web');
+      return;
+    }
     
     const AndroidInitializationSettings androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
     const DarwinInitializationSettings iosSettings = DarwinInitializationSettings(
@@ -48,6 +52,7 @@ class NotificationService {
               AndroidFlutterLocalNotificationsPlugin>()
           ?.requestNotificationsPermission();
     }
+    debugPrint('[SYSTEM-REBORN] NotificationService initialized');
   }
 
   Future<void> scheduleReminder(Note note) async {

@@ -75,7 +75,7 @@ class SettingsScreen extends StatelessWidget {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(l10n?.exportSuccess ?? 'Exported successfully'),
-                          backgroundColor: AppColors.accentBlue,
+                          backgroundColor: AppColors.accentDeepPurple,
                           behavior: SnackBarBehavior.floating,
                         ),
                       );
@@ -105,7 +105,7 @@ class SettingsScreen extends StatelessWidget {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(l10n?.importSuccess ?? 'Imported successfully'),
-                          backgroundColor: AppColors.accentBlue,
+                          backgroundColor: AppColors.accentDeepPurple,
                           behavior: SnackBarBehavior.floating,
                         ),
                       );
@@ -164,7 +164,7 @@ class SettingsScreen extends StatelessWidget {
               SnackBar(
                 content: Text('Theme applied: $title'),
                 duration: const Duration(seconds: 2),
-                backgroundColor: AppColors.accentBlue,
+                backgroundColor: AppColors.accentDeepPurple,
                 behavior: SnackBarBehavior.floating,
                 margin: const EdgeInsets.all(16),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -177,10 +177,10 @@ class SettingsScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppColors.accentBlue.withValues(alpha: 0.1),
+                color: AppColors.accentDeepPurple.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(icon, color: AppColors.accentBlue, size: 20, shadows: AppColors.iconShadows),
+              child: Icon(icon, color: AppColors.accentDeepPurple, size: 20, shadows: AppColors.iconShadows),
             ),
             const SizedBox(width: 16),
             Expanded(
