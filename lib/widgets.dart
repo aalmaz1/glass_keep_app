@@ -431,16 +431,14 @@ class _ShaderNoisePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (program == null) return;
     final prog = program;
     if (prog == null) {
-      // Optimized fallback: draw static noise once and reuse
       if (_cachedFallback == null || _cachedSize != size) {
         final recorder = ui.PictureRecorder();
         final c = Canvas(recorder);
         final random = math.Random(42);
         final paint = Paint()..color = Colors.white.withValues(alpha: 0.012);
-        
+
         for (int i = 0; i < 800; i++) {
           final x = random.nextDouble() * size.width;
           final y = random.nextDouble() * size.height;

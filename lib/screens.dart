@@ -223,7 +223,10 @@ class _NotesScreenState extends State<NotesScreen> {
                       );
                     }
 
-                    final crossAxisCount = ((size.width - 2 * paddingH + 18.0) / (300.0 + 18.0)).floor().clamp(1, 6);
+                    final crossAxisCount = ((size.width - 2 * paddingH + 18.0) / (300.0 + 18.0))
+                        .floor()
+                        .clamp(1, 6)
+                        .toInt();
 
                     return SliverPadding(
                       padding: const EdgeInsets.symmetric(
@@ -496,7 +499,6 @@ class _LanguageOption extends StatelessWidget {
       onTap: () {
         HapticFeedback.mediumImpact();
         onTap(locale);
-        Navigator.pop(context);
       },
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
