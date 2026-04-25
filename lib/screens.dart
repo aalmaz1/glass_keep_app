@@ -389,12 +389,13 @@ class _NotesScreenState extends State<NotesScreen> {
   }
 
   void _openBackgroundSettings(BuildContext context) {
+    final provider = GlassAnimationProvider.of(context);
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => SettingsScreen(
           storage: widget.storage,
           onThemeChanged: (Color? color, List<Color>? blobs, Decoration? decoration) {
-            GlassAnimationProvider.of(context)?.onThemeChanged?.call(color, blobs);
+            provider?.onThemeChanged?.call(color, blobs);
           },
         ),
       ),

@@ -233,10 +233,8 @@ class _VisionBackgroundState extends State<VisionBackground> {
 
   @override
   Widget build(BuildContext context) {
+    // Rebuild when theme changes by depending on InheritedWidget
     final animationProvider = GlassAnimationProvider.of(context);
-    if (animationProvider == null) {
-      debugPrint('[SYSTEM-REBORN] VisionBackground failed to find GlassAnimationProvider');
-    }
     
     // Use theme color if available, otherwise default to obsidian black
     final bg = widget.backgroundColor ?? animationProvider?.themeColor ?? AppColors.obsidianBlack;
