@@ -203,7 +203,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
               theme: ThemeData(
                 brightness: Brightness.dark,
                 useMaterial3: true,
-                scaffoldBackgroundColor: AppColors.obsidianDark,
+                scaffoldBackgroundColor: AppColors.obsidianBlack,
                 colorSchemeSeed: AppColors.accentBlue,
                 fontFamily: kIsWeb ? 'Roboto' : 'Noto Sans',
                 fontFamilyFallback: const ['Roboto', 'Arial'],
@@ -353,7 +353,7 @@ class _LoadingLogo extends StatelessWidget {
             end: Alignment.bottomRight,
             colors: [
               AppColors.accentBlue.withValues(alpha: 0.8),
-              AppColors.accentPurple.withValues(alpha: 0.8),
+              AppColors.accentDeepPurple.withValues(alpha: 0.8),
             ],
           ),
           borderRadius: BorderRadius.circular(16),
@@ -391,7 +391,7 @@ class _BiometricAuthWrapperState extends State<BiometricAuthWrapper> {
 
   Future<void> _checkBiometrics() async {
     if (kIsWeb) {
-      if (mounted) {
+      if (context.mounted) {
         setState(() {
           _isAuthenticated = true;
           _isChecking = false;
@@ -402,7 +402,7 @@ class _BiometricAuthWrapperState extends State<BiometricAuthWrapper> {
 
     final isEnabled = await _biometricService.isEnabled();
     if (!isEnabled) {
-      if (mounted) {
+      if (context.mounted) {
         setState(() {
           _isAuthenticated = true;
           _isChecking = false;
@@ -413,7 +413,7 @@ class _BiometricAuthWrapperState extends State<BiometricAuthWrapper> {
 
     final isAvailable = await _biometricService.isBiometricsAvailable();
     if (!isAvailable) {
-      if (mounted) {
+      if (context.mounted) {
         setState(() {
           _isAuthenticated = true;
           _isChecking = false;
@@ -425,11 +425,11 @@ class _BiometricAuthWrapperState extends State<BiometricAuthWrapper> {
   }
 
   Future<void> _authenticate() async {
-    if (mounted) {
+    if (context.mounted) {
       setState(() => _isChecking = true);
     }
     final authenticated = await _biometricService.authenticate();
-    if (mounted) {
+    if (context.mounted) {
       setState(() {
         _isAuthenticated = authenticated;
         _isChecking = false;

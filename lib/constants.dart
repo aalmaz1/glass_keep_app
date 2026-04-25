@@ -10,7 +10,7 @@ class AppColors {
   static const Color glassLight = Color.fromARGB(25, 255, 255, 255);
 
   // Obsidian theme colors (primary background)
-  static const Color obsidianDark = Color(0xFF050505);
+  static const Color obsidianBlack = Color(0xFF020204);
 
   // Accent colors
   static const Color accentBlue = Color(0xFF0A84FF);
