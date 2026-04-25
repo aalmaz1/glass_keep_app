@@ -130,6 +130,7 @@ class StorageService {
   StorageService._();
 
   static Future<StorageService> init() async {
+    debugPrint('[SYSTEM-REBORN] Initializing StorageService...');
     if (!_initialized) {
       try {
         // Initialize Encryption
@@ -140,8 +141,9 @@ class StorageService {
           persistenceEnabled: true,
           cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
         );
+        debugPrint('[SYSTEM-REBORN] Firestore persistence enabled');
       } catch (e) {
-        debugPrint('Firestore settings already set or error: $e');
+        debugPrint('[SYSTEM-REBORN] Firestore settings already set or error: $e');
       }
       _initialized = true;
     }
@@ -187,7 +189,7 @@ class StorageService {
                   content: EncryptionService().decryptText(note.content),
                 );
               } catch (e) {
-                debugPrint('Skipping corrupted note $noteId: $e');
+                debugPrint('[SYSTEM-REBORN] Skipping corrupted note $noteId: $e');
                 return null;
               }
             }).whereType<Note>().toList();

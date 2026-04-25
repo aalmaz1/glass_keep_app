@@ -44,11 +44,11 @@ class _VisionGlassCardState extends State<VisionGlassCard> with SingleTickerProv
     super.initState();
     _hoverController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 400),
     );
     _hoverAnimation = CurvedAnimation(
       parent: _hoverController,
-      curve: Curves.easeOutCubic,
+      curve: Curves.easeInOutCubic,
     );
   }
 
@@ -73,6 +73,9 @@ class _VisionGlassCardState extends State<VisionGlassCard> with SingleTickerProv
   @override
   Widget build(BuildContext context) {
     final animationProvider = GlassAnimationProvider.of(context);
+    if (animationProvider == null) {
+      debugPrint('[SYSTEM-REBORN] VisionGlassCard failed to find GlassAnimationProvider');
+    }
 
     return MouseRegion(
       onEnter: (_) => _handleHover(true),
@@ -243,6 +246,9 @@ class VisionBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final animationProvider = GlassAnimationProvider.of(context);
+    if (animationProvider == null) {
+      debugPrint('[SYSTEM-REBORN] VisionBackground failed to find GlassAnimationProvider');
+    }
     final animation = animationProvider?.animationController;
     
     // Default colors if none provided - preferring provider state if available
@@ -425,6 +431,7 @@ class _ShaderNoisePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    if (program == null) return;
     final prog = program;
     if (prog == null) {
       // Optimized fallback: draw static noise once and reuse

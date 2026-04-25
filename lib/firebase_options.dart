@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb, Tar
 
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
+    _logKeys();
     if (_apiKey.isEmpty) {
       debugPrint(
         '\n\x1B[31m[ERROR] Firebase configuration is missing!\x1B[0m\n'
@@ -28,6 +29,16 @@ class DefaultFirebaseOptions {
       default:
         throw UnsupportedError('DefaultFirebaseOptions are not supported for this platform.');
     }
+  }
+
+  static void _logKeys() {
+    debugPrint('[SYSTEM-REBORN] FIREBASE_API_KEY: ${_apiKey.isNotEmpty ? "FOUND" : "EMPTY"}');
+    debugPrint('[SYSTEM-REBORN] FIREBASE_APP_ID: ${_appId.isNotEmpty ? "FOUND" : "EMPTY"}');
+    debugPrint('[SYSTEM-REBORN] FIREBASE_MESSAGING_SENDER_ID: ${_messagingSenderId.isNotEmpty ? "FOUND" : "EMPTY"}');
+    debugPrint('[SYSTEM-REBORN] FIREBASE_PROJECT_ID: ${_projectId.isNotEmpty ? "FOUND" : "EMPTY"}');
+    debugPrint('[SYSTEM-REBORN] FIREBASE_AUTH_DOMAIN: ${_authDomain.isNotEmpty ? "FOUND" : "EMPTY"}');
+    debugPrint('[SYSTEM-REBORN] FIREBASE_STORAGE_BUCKET: ${_storageBucket.isNotEmpty ? "FOUND" : "EMPTY"}');
+    debugPrint('[SYSTEM-REBORN] FIREBASE_MEASUREMENT_ID: ${_measurementId.isNotEmpty ? "FOUND" : "EMPTY"}');
   }
 
   static const String _apiKey = String.fromEnvironment('FIREBASE_API_KEY');
