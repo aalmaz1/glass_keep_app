@@ -1,8 +1,16 @@
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
-import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb, TargetPlatform;
+import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb, TargetPlatform, debugPrint;
 
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
+    if (_apiKey.isEmpty) {
+      debugPrint(
+        '\n\x1B[31m[ERROR] Firebase configuration is missing!\x1B[0m\n'
+        'Please ensure you are providing environment variables using:\n'
+        '  \x1B[33m--dart-define-from-file=config.json\x1B[0m\n'
+        'Make sure config.json exists and contains the required Firebase keys.\n'
+      );
+    }
     if (kIsWeb) {
       return web;
     }
