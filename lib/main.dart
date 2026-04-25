@@ -263,13 +263,13 @@ class _GlassKeepAppState extends State<GlassKeepApp>
           theme: ThemeData(
             brightness: Brightness.dark,
             useMaterial3: true,
-            scaffoldBackgroundColor: AppColors.obsidianBlack,
-            colorSchemeSeed: AppColors.accentDeepPurple,
+            scaffoldBackgroundColor: _themeColor ?? AppColors.obsidianBlack,
+            colorSchemeSeed: _themeColor ?? AppColors.accentDeepPurple,
             fontFamily: kIsWeb ? 'Roboto' : 'Noto Sans',
             fontFamilyFallback: const ['Roboto', 'Arial'],
-            cupertinoOverrideTheme: const CupertinoThemeData(
+            cupertinoOverrideTheme: CupertinoThemeData(
               brightness: Brightness.dark,
-              primaryColor: AppColors.accentDeepPurple,
+              primaryColor: _themeColor ?? AppColors.accentDeepPurple,
             ),
             appBarTheme: const AppBarTheme(
               backgroundColor: Colors.transparent,
