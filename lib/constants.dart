@@ -10,14 +10,14 @@ class AppColors {
   static const Color glassLight = Color.fromARGB(25, 255, 255, 255);
 
   // Obsidian theme colors (primary background)
-  static const Color obsidianDark = Color(0xFF050508);
+  static const Color obsidianDark = Color(0xFF050505);
 
   // Accent colors
-  static const Color accentBlue = Color(0xFF007AFF);
+  static const Color accentBlue = Color(0xFF0A84FF);
   static const Color accentTeal = Color(0xFF64FFDA);
   static const Color accentIndigo = Color(0xFF5E5CE6);
   static const Color accentRed = Color(0xFFFF453A);
-  static const Color accentPurple = Color(0xFFBF5AF2);
+  static const Color accentDeepPurple = Color(0xFFBF5AF2);
 
   static const List<Shadow> iconShadows = [
     Shadow(color: Colors.black54, offset: Offset(0, 2), blurRadius: 10),
