@@ -336,31 +336,7 @@ class VisionBackground extends StatelessWidget {
               },
             )
           else
-            Container(
-              color: AppColors.obsidianBlack,
-              child: const Stack(
-                children: [
-                  Positioned(
-                    top: -150,
-                    right: -150,
-                    child: _AuroraBlob(
-                      color: Color(0x336C5CE7),
-                      size: 500,
-                      baseOffset: Offset.zero,
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 50,
-                    left: -100,
-                    child: _AuroraBlob(
-                      color: Color(0x330984E3),
-                      size: 400,
-                      baseOffset: Offset.zero,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            const ColoredBox(color: AppColors.obsidianBlack),
         ],
       ),
     );
