@@ -241,7 +241,6 @@ class _NotesScreenState extends State<NotesScreen> {
                         crossAxisCount: crossAxisCount,
                         mainAxisSpacing: 18.0,
                         crossAxisSpacing: 18.0,
-                        cacheExtent: 600, // Pre-cache items for smoother scrolling
                         itemBuilder: (context, i) => NoteCard(
                           key: ValueKey('note_${notes[i].id}'),
                           note: notes[i],

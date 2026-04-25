@@ -23,7 +23,7 @@ class GlassDistortionPainter extends CustomPainter {
   // Pre-calculated time hash
   final int _timeHash;
 
-  const GlassDistortionPainter({
+  GlassDistortionPainter({
     required this.time,
     this.strength = 1.2,
     this.scale = 0.01,
