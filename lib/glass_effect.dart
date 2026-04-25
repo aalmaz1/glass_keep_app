@@ -19,12 +19,15 @@ class GlassDistortionPainter extends CustomPainter {
   final double time;
   final double strength;
   final double scale;
+  
+  // Pre-calculated time hash
+  final int _timeHash;
 
   const GlassDistortionPainter({
     required this.time,
     this.strength = 1.2,
     this.scale = 0.01,
-  });
+  }) : _timeHash = (time * 10).toInt();
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -48,15 +51,13 @@ class GlassDistortionPainter extends CustomPainter {
       _noiseCache.clear();
     }
 
-    final int timeHash = (time * 10).toInt();
-
     // Draw horizontal waves
     for (int y = 0; y <= _gridResolution; y++) {
       final path = Path();
       bool isFirstPoint = true;
 
       for (int x = 0; x <= _gridResolution; x++) {
-        final cacheKey = (timeHash << 16) | (y << 8) | x;
+        final cacheKey = (_timeHash << 16) | (y << 8) | x;
         final noiseVal = _getNoiseOffsetCached(
           x.toDouble(),
           y.toDouble(),
@@ -82,7 +83,7 @@ class GlassDistortionPainter extends CustomPainter {
       bool isFirstPoint = true;
 
       for (int y = 0; y <= _gridResolution; y++) {
-        final cacheKey = (timeHash << 16) | (x << 8) | y | 0x8000;
+        final cacheKey = (_timeHash << 16) | (x << 8) | y | 0x8000;
         final noiseVal = _getNoiseOffsetCached(
           y.toDouble(),
           x.toDouble(),
@@ -123,7 +124,7 @@ class GlassDistortionPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(GlassDistortionPainter oldDelegate) =>
-      oldDelegate.time != time || oldDelegate.strength != strength;
+      oldDelegate._timeHash != _timeHash || oldDelegate.strength != strength;
 
   @override
   bool shouldRebuildSemantics(GlassDistortionPainter oldDelegate) => false;
@@ -164,7 +165,7 @@ class GlassDistortionEffect extends StatelessWidget {
             child: RepaintBoundary(
               child: CustomPaint(
                 painter: GlassDistortionPainter(
-                  time: animationProvider.animationController.value * 10,
+                  time: animationProvider.animationController.value * 5, // Reduced from 10 for better performance
                   strength: distortionStrength,
                   scale: distortionScale,
                 ),
