@@ -63,19 +63,6 @@ class _NotesScreenState extends State<NotesScreen> {
     });
   }
 
-  void _showSnackBar(String message, {bool isError = false}) {
-    if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: isError ? AppColors.accentRed : AppColors.accentBlue,
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.all(16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-    );
-  }
-
   void _logout() async {
     widget.storage.clearCache();
     await FirebaseAuth.instance.signOut();
@@ -166,7 +153,7 @@ class _NotesScreenState extends State<NotesScreen> {
               slivers: [
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: EdgeInsets.fromLTRB(paddingH, 10, paddingH, 0),
+                    padding: const EdgeInsets.fromLTRB(paddingH, 10, paddingH, 0),
                     child: Row(
                       children: [
                         Expanded(
@@ -1098,9 +1085,9 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                     HapticFeedback.lightImpact();
                     final now = DateTime.now();
                     final d = await showDatePicker(context: context, initialDate: now, firstDate: now, lastDate: now.add(const Duration(days: 365)));
-                    if (d == null || !context.mounted) return;
+                    if (d == null || !mounted) return;
                     final t = await showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(now));
-                    if (!context.mounted) return;
+                    if (!mounted) return;
                     if (t != null) setState(() => _rem = DateTime(d.year, d.month, d.day, t.hour, t.minute));
                   }),
                   if (_rem != null) ...[
@@ -1108,7 +1095,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                     Expanded(child: Text(DateFormat('dd.MM HH:mm').format(_rem!), style: const TextStyle(fontSize: 12, color: AppColors.accentBlue, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)),
                     CupertinoButton(
                       padding: EdgeInsets.zero,
-                      minSize: 0,
+                      minimumSize: 0,
                       child: const Icon(CupertinoIcons.xmark_circle_fill, size: 18, color: Colors.white54),
                       onPressed: () => setState(() => _rem = null),
                     ),
