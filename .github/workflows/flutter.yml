@@ -31,8 +31,13 @@ jobs:
       - name: Analyze project source
         run: flutter analyze --no-fatal-infos --no-fatal-warnings
 
+      - name: Create config.json
+        env:
+          CONFIG_JSON: ${{ secrets.CONFIG_JSON }}
+        run: echo "$CONFIG_JSON" > config.json
+
       - name: Build Web
-        run: flutter build web --release --base-href="/${{ github.event.repository.name }}/"
+        run: flutter build web --release --base-href="/${{ github.event.repository.name }}/" --dart-define-from-file=config.json
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
