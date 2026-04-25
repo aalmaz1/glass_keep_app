@@ -141,6 +141,8 @@ class _NotesScreenState extends State<NotesScreen> {
     final size = MediaQuery.sizeOf(context);
     const paddingH = 24.0;
     final l10n = AppLocalizations.of(context);
+    final provider = GlassAnimationProvider.of(context);
+    final themeColor = provider?.themeColor ?? AppColors.accentDeepPurple;
 
     return Scaffold(
       backgroundColor: AppColors.obsidianBlack,
@@ -174,10 +176,10 @@ class _NotesScreenState extends State<NotesScreen> {
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
                             ),
-                            child: const Icon(
+                            child: Icon(
                               CupertinoIcons.ellipsis_vertical,
                               size: 26,
-                              color: Colors.white,
+                              color: themeColor,
                               shadows: AppColors.iconShadows,
                             ),
                           ),
@@ -557,8 +559,7 @@ class _NewNoteButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final animationProvider = GlassAnimationProvider.of(context);
-    final blobColors = animationProvider?.blobColors ?? [AppColors.accentBlue, AppColors.accentIndigo, AppColors.accentDeepPurple];
-    final primaryBlobColor = blobColors.isNotEmpty ? blobColors[0] : AppColors.accentDeepPurple;
+    final themeColor = animationProvider?.themeColor ?? AppColors.accentDeepPurple;
 
     return GestureDetector(
       onTap: () {
@@ -576,11 +577,11 @@ class _NewNoteButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
         decoration: BoxDecoration(
-          color: primaryBlobColor.withValues(alpha: 0.9),
+          color: themeColor.withValues(alpha: 0.9),
           borderRadius: BorderRadius.circular(30),
           boxShadow: [
             BoxShadow(
-              color: primaryBlobColor.withValues(alpha: 0.3),
+              color: themeColor.withValues(alpha: 0.3),
               blurRadius: 16,
               offset: const Offset(0, 6),
             ),
@@ -589,7 +590,7 @@ class _NewNoteButton extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
+            Icon(
               CupertinoIcons.plus,
               color: Colors.white,
               size: 28,
@@ -811,6 +812,12 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
   Uint8List? _decodedImage;
   bool _isLoading = false;
 
+  /// Get current theme color from provider
+  Color _getThemeColor() {
+    final provider = GlassAnimationProvider.of(context);
+    return provider?.themeColor ?? AppColors.accentDeepPurple;
+  }
+
   /// Compress image to fit within maxBytes limit
   Future<Uint8List?> _compressImage(Uint8List bytes, int maxBytes) async {
     // For web, we can't use dart:io easily, so if image is too large, return null to skip it
@@ -931,7 +938,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                                 padding: EdgeInsets.zero,
                                 child: Icon(
                                   CupertinoIcons.pin,
-                                  color: widget.note.isPinned ? AppColors.accentDeepPurple : AppColors.accentDeepPurple.withValues(alpha: 0.3),
+                                  color: widget.note.isPinned ? _getThemeColor() : _getThemeColor().withValues(alpha: 0.3),
                                   size: 22,
                                   shadows: AppColors.iconShadows,
                                 ),
@@ -983,21 +990,21 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                             decoration: BoxDecoration(
-                              color: AppColors.accentDeepPurple.withValues(alpha: 0.9),
+                              color: _getThemeColor().withValues(alpha: 0.9),
                               borderRadius: BorderRadius.circular(30),
-                              boxShadow: [BoxShadow(color: AppColors.accentDeepPurple.withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 4))],
+                              boxShadow: [BoxShadow(color: _getThemeColor().withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 4))],
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(
+                                Icon(
                                   CupertinoIcons.checkmark,
                                   color: Colors.white,
                                   size: 24,
                                   shadows: AppColors.iconShadows,
                                 ),
                                 const SizedBox(width: 8),
-                                Text(l10n?.save ?? 'Save', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                                Text(l10n?.save ?? 'Save', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
                               ],
                             ),
                           ),
@@ -1070,7 +1077,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                   IconButton(
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
-                    icon: const Icon(CupertinoIcons.photo, color: Colors.white70, shadows: AppColors.iconShadows),
+                    icon: Icon(CupertinoIcons.photo, color: _getThemeColor().withValues(alpha: 0.7), shadows: AppColors.iconShadows),
                     onPressed: _isLoading ? null : () async {
                       HapticFeedback.lightImpact();
                       if (context.mounted) setState(() => _isLoading = true);
@@ -1115,7 +1122,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                     },
                   ),
                   const VerticalDivider(color: Colors.white24, indent: 8, endIndent: 8),
-                  IconButton(padding: EdgeInsets.zero, constraints: const BoxConstraints(), icon: const Icon(CupertinoIcons.alarm, color: Colors.white70, shadows: AppColors.iconShadows), onPressed: () async {
+                  IconButton(padding: EdgeInsets.zero, constraints: const BoxConstraints(), icon: Icon(CupertinoIcons.alarm, color: _getThemeColor().withValues(alpha: 0.7), shadows: AppColors.iconShadows), onPressed: () async {
                     HapticFeedback.lightImpact();
                     final now = DateTime.now();
                     final d = await showDatePicker(context: context, initialDate: now, firstDate: now, lastDate: now.add(const Duration(days: 365)));
@@ -1126,7 +1133,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                   }),
                   if (reminder != null) ...[
                     const SizedBox(width: 8),
-                    Expanded(child: Text(DateFormat('dd.MM HH:mm').format(reminder), style: const TextStyle(fontSize: 12, color: AppColors.accentDeepPurple, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)),
+                    Expanded(child: Text(DateFormat('dd.MM HH:mm').format(reminder), style: TextStyle(fontSize: 12, color: _getThemeColor(), fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)),
                     CupertinoButton(
                       padding: EdgeInsets.zero,
                       minimumSize: Size.zero,

@@ -449,23 +449,22 @@ class LabelChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final animationProvider = GlassAnimationProvider.of(context);
-    final blobColors = animationProvider?.blobColors ?? [AppColors.accentBlue, AppColors.accentIndigo, AppColors.accentDeepPurple];
-    final primaryBlobColor = blobColors.isNotEmpty ? blobColors[0] : AppColors.accentDeepPurple;
+    final themeColor = animationProvider?.themeColor ?? AppColors.accentDeepPurple;
     
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: primaryBlobColor.withValues(alpha: 0.15),
+        color: themeColor.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(6),
         border: Border.all(
-          color: primaryBlobColor.withValues(alpha: 0.2),
+          color: themeColor.withValues(alpha: 0.2),
           width: 0.5,
         ),
       ),
       child: Text(
         label,
         style: TextStyle(
-          color: primaryBlobColor,
+          color: themeColor,
           fontSize: 11,
           fontWeight: FontWeight.w500,
         ),
