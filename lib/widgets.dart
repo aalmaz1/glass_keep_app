@@ -148,6 +148,10 @@ class _SpecularBorderPainter extends CustomPainter {
   final Offset tilt;
   final double hoverIntensity;
 
+  // Cache gradients by size and tilt to avoid recreating them every frame
+  static final Map<String, ui.Gradient> _gradientCache = {};
+  static const int _maxGradientCacheSize = 50;
+
   const _SpecularBorderPainter({
     required this.borderRadius,
     this.tilt = Offset.zero,
@@ -159,11 +163,18 @@ class _SpecularBorderPainter extends CustomPainter {
     final rect = Offset.zero & size;
     final rrect = RRect.fromRectAndRadius(rect, Radius.circular(borderRadius));
 
-    // Single simplified border highlight for better performance - no hover animation
-    final paint1 = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.2
-      ..shader = ui.Gradient.linear(
+    // Create cache key from size and tilt
+    final cacheKey = '${size.width.toInt()}_${size.height.toInt()}_${tilt.dx.toStringAsFixed(2)}_${tilt.dy.toStringAsFixed(2)}';
+    
+    // Try to get cached gradient or create new one
+    var shader = _gradientCache[cacheKey];
+    if (shader == null) {
+      // Limit cache size
+      if (_gradientCache.length >= _maxGradientCacheSize) {
+        _gradientCache.remove(_gradientCache.keys.first);
+      }
+      
+      shader = ui.Gradient.linear(
         Offset(tilt.dx * 15, tilt.dy * 15),
         Offset(size.width, size.height) + Offset(tilt.dx * 15, tilt.dy * 15),
         [
@@ -175,6 +186,14 @@ class _SpecularBorderPainter extends CustomPainter {
         ],
         const [0.0, 0.25, 0.5, 0.75, 1.0],
       );
+      _gradientCache[cacheKey] = shader;
+    }
+
+    // Single simplified border highlight for better performance - no hover animation
+    final paint1 = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.2
+      ..shader = shader;
 
     canvas.drawRRect(rrect, paint1);
   }
@@ -188,7 +207,8 @@ class _SpecularBorderPainter extends CustomPainter {
 /// Premium static background with elegant gradient and noise texture
 /// V1.7.0: Removed animated blobs for clean glassmorphism aesthetic
 /// V1.7.1: Fixed theme color support - now uses blobColors from provider
-class VisionBackground extends StatelessWidget {
+/// V1.8.0: Optimized noise update frequency for better performance
+class VisionBackground extends StatefulWidget {
   final Color? backgroundColor;
   final List<Color>? blobColors;
 
@@ -199,6 +219,19 @@ class VisionBackground extends StatelessWidget {
   });
 
   @override
+  State<VisionBackground> createState() => _VisionBackgroundState();
+}
+
+class _VisionBackgroundState extends State<VisionBackground> {
+  double _noiseTime = 0;
+  
+  @override
+  void initState() {
+    super.initState();
+    _noiseTime = DateTime.now().millisecondsSinceEpoch / 1000.0;
+  }
+
+  @override
   Widget build(BuildContext context) {
     final animationProvider = GlassAnimationProvider.of(context);
     if (animationProvider == null) {
@@ -206,8 +239,8 @@ class VisionBackground extends StatelessWidget {
     }
     
     // Use theme color if available, otherwise default to obsidian black
-    final bg = backgroundColor ?? animationProvider?.themeColor ?? AppColors.obsidianBlack;
-    final blobs = blobColors ?? animationProvider?.blobColors ?? [AppColors.accentBlue, AppColors.accentIndigo, AppColors.accentDeepPurple];
+    final bg = widget.backgroundColor ?? animationProvider?.themeColor ?? AppColors.obsidianBlack;
+    final blobs = widget.blobColors ?? animationProvider?.blobColors ?? [AppColors.accentBlue, AppColors.accentIndigo, AppColors.accentDeepPurple];
 
     return Container(
       width: double.infinity,
@@ -266,13 +299,13 @@ class VisionBackground extends StatelessWidget {
             ),
           ),
           
-          // Noise texture overlay for tactile feel
+          // Noise texture overlay for tactile feel - updated less frequently
           Positioned.fill(
             child: IgnorePointer(
               child: CustomPaint(
                 painter: _ShaderNoisePainter(
                   program: animationProvider?.grainProgram,
-                  time: DateTime.now().millisecondsSinceEpoch / 1000.0,
+                  time: _noiseTime,
                 ),
               ),
             ),
@@ -292,6 +325,10 @@ class _ShaderNoisePainter extends CustomPainter {
   static ui.Picture? _cachedFallback;
   static Size? _cachedSize;
   static bool _shaderFailed = false;
+  
+  // Cache time to reduce repaint frequency on Web
+  static double? _lastCachedTime;
+  static const double _timeThreshold = 0.1; // Only repaint if time changes by more than 100ms
 
   const _ShaderNoisePainter({this.program, required this.time});
 
@@ -342,8 +379,17 @@ class _ShaderNoisePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _ShaderNoisePainter oldDelegate) =>
-      (program != null && oldDelegate.time != time) || oldDelegate.program != program;
+  bool shouldRepaint(covariant _ShaderNoisePainter oldDelegate) {
+    // On Web, reduce repaint frequency for better performance
+    if (kIsWeb) {
+      final lastTime = _lastCachedTime;
+      if (lastTime != null && (time - lastTime).abs() < _timeThreshold) {
+        return false;
+      }
+      _lastCachedTime = time;
+    }
+    return (program != null && oldDelegate.time != time) || oldDelegate.program != program;
+  }
 }
 
 /// Glass search bar component

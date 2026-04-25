@@ -92,18 +92,22 @@ class _NotesScreenState extends State<NotesScreen> {
     );
   }
 
-  /// Optimized filtering with memoization - prevents unnecessary recalculations
+  /// Optimized filtering with memoization using hash-based comparison for better performance
   List<Note> _getFilteredAndSortedNotes(List<Note> sourceNotes) {
     final lastSource = _lastSourceNotes;
     final filtered = _filteredNotes;
 
-    // Quick cache check using multiple criteria for accuracy
+    // Quick cache check using hash-based comparison for O(1) lookup instead of O(n²)
     if (filtered != null &&
         _lastSearch == _search &&
         lastSource != null &&
-        lastSource.length == sourceNotes.length &&
-        lastSource.every((note) => sourceNotes.any((n) => n.id == note.id && n.updatedAt == note.updatedAt))) {
-      return filtered;
+        lastSource.length == sourceNotes.length) {
+      // Use hash set for O(1) comparison instead of O(n²) every/any
+      final oldIds = Map.fromEntries(lastSource.map((n) => MapEntry('${n.id}_${n.updatedAt.millisecondsSinceEpoch}', true)));
+      final allMatch = sourceNotes.every((n) => oldIds.containsKey('${n.id}_${n.updatedAt.millisecondsSinceEpoch}'));
+      if (allMatch) {
+        return filtered;
+      }
     }
 
     // Filter out archived notes
@@ -237,6 +241,7 @@ class _NotesScreenState extends State<NotesScreen> {
                         crossAxisCount: crossAxisCount,
                         mainAxisSpacing: 18.0,
                         crossAxisSpacing: 18.0,
+                        cacheExtent: 600, // Pre-cache items for smoother scrolling
                         itemBuilder: (context, i) => NoteCard(
                           key: ValueKey('note_${notes[i].id}'),
                           note: notes[i],
