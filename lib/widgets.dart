@@ -444,14 +444,12 @@ class GlassSearchBar extends StatelessWidget {
 /// Styled chip for note labels
 class LabelChip extends StatelessWidget {
   final String label;
+  final Color themeColor;
 
-  const LabelChip({super.key, required this.label});
+  const LabelChip({super.key, required this.label, required this.themeColor});
 
   @override
   Widget build(BuildContext context) {
-    final animationProvider = GlassAnimationProvider.of(context);
-    final themeColor = animationProvider?.themeColor ?? AppColors.accentDeepPurple;
-    
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(

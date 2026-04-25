@@ -646,6 +646,11 @@ class _NoteCardState extends State<NoteCard> with AutomaticKeepAliveClientMixin 
   @override
   bool get wantKeepAlive => true;
 
+  Color _getThemeColor() {
+    final provider = GlassAnimationProvider.of(context);
+    return provider?.themeColor ?? AppColors.accentDeepPurple;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -675,6 +680,7 @@ class _NoteCardState extends State<NoteCard> with AutomaticKeepAliveClientMixin 
         note: widget.note,
         decodedImage: image,
         onTap: widget.onTap,
+        themeColor: _getThemeColor(),
       ),
     );
   }
@@ -685,12 +691,14 @@ class _NoteCardContent extends StatelessWidget {
   final Note note;
   final Uint8List? decodedImage;
   final VoidCallback onTap;
+  final Color themeColor;
 
   const _NoteCardContent({
     super.key,
     required this.note,
     required this.decodedImage,
     required this.onTap,
+    required this.themeColor,
   });
 
   @override
@@ -725,10 +733,10 @@ class _NoteCardContent extends StatelessWidget {
               Row(
                 children: [
                   if (note.isPinned)
-                    const Icon(
+                    Icon(
                       CupertinoIcons.pin,
                       size: 14,
-                      color: AppColors.accentDeepPurple,
+                      color: themeColor,
                       shadows: AppColors.iconShadows,
                     ),
                   if (note.isPinned) const SizedBox(width: 6),
@@ -764,25 +772,25 @@ class _NoteCardContent extends StatelessWidget {
                 Wrap(
                   spacing: 6,
                   runSpacing: 6,
-                  children: note.labels.map((l) => LabelChip(label: l)).toList(),
+                  children: note.labels.map((l) => LabelChip(label: l, themeColor: themeColor)).toList(),
                 ),
               ],
               if (reminder != null) ...[
                 const SizedBox(height: 10),
                 Row(
                   children: [
-                    const Icon(
+                    Icon(
                       CupertinoIcons.alarm,
                       size: 14,
-                      color: AppColors.accentDeepPurple,
+                      color: themeColor,
                       shadows: AppColors.iconShadows,
                     ),
                     const SizedBox(width: 4),
                     Text(
                       DateFormat('dd.MM HH:mm').format(reminder),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
-                        color: AppColors.accentDeepPurple,
+                        color: themeColor,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
