@@ -556,6 +556,9 @@ class _NewNoteButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final animationProvider = GlassAnimationProvider.of(context);
+    final blobColors = animationProvider?.blobColors ?? [AppColors.accentBlue, AppColors.accentIndigo, AppColors.accentDeepPurple];
+    final primaryBlobColor = blobColors.isNotEmpty ? blobColors[0] : AppColors.accentDeepPurple;
 
     return GestureDetector(
       onTap: () {
@@ -573,11 +576,11 @@ class _NewNoteButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
         decoration: BoxDecoration(
-          color: AppColors.accentDeepPurple.withValues(alpha: 0.9),
+          color: primaryBlobColor.withValues(alpha: 0.9),
           borderRadius: BorderRadius.circular(30),
           boxShadow: [
             BoxShadow(
-              color: AppColors.accentDeepPurple.withValues(alpha: 0.3),
+              color: primaryBlobColor.withValues(alpha: 0.3),
               blurRadius: 16,
               offset: const Offset(0, 6),
             ),
