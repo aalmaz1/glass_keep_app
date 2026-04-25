@@ -5,19 +5,23 @@ import 'package:glass_keep/widgets.dart';
 import 'package:glass_keep/data.dart';
 import 'package:glass_keep/l10n/app_localizations.dart';
 
+/// Settings screen for managing appearance and data.
+/// Updated in V1.6.0 with the 'Premium Dark' collection.
 class SettingsScreen extends StatelessWidget {
   final StorageService storage;
-  final Function(Color? color, Decoration? decoration) onThemeChanged;
+  final Function(Color? backgroundColor, List<Color>? blobColors, Decoration? decoration) onThemeChanged;
 
   const SettingsScreen({super.key, required this.storage, required this.onThemeChanged});
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
+    final themeTitle = l10n?.settings ?? 'Appearance';
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text(l10n.appearance),
+        title: Text(themeTitle),
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
@@ -27,36 +31,45 @@ class SettingsScreen extends StatelessWidget {
           ListView(
             padding: const EdgeInsets.fromLTRB(16, kToolbarHeight + 60, 16, 16),
             children: [
-              _buildSectionTitle(l10n.themes),
+              _buildSectionTitle('PREMIUM DARK COLLECTION'),
+              _buildOption(
+                context,
+                'Midnight Obsidian',
+                CupertinoIcons.moon_fill,
+                () => onThemeChanged(const Color(0xFF050505), [const Color(0xFF0A84FF), const Color(0xFFBF5AF2)], null),
+              ),
+              _buildOption(
+                context,
+                'Deep Sea Abyss',
+                CupertinoIcons.drop_fill,
+                () => onThemeChanged(const Color(0xFF000B18), [const Color(0xFF00F2FE), const Color(0xFF4FACFE)], null),
+              ),
+              _buildOption(
+                context,
+                'Cosmic Nebula',
+                CupertinoIcons.sparkles,
+                () => onThemeChanged(const Color(0xFF0A001A), [const Color(0xFFFF007F), const Color(0xFF7F00FF)], null),
+              ),
+              _buildOption(
+                context,
+                'Cyber Neon',
+                CupertinoIcons.bolt_fill,
+                () => onThemeChanged(const Color(0xFF0D0D0D), [const Color(0xFF39FF14), const Color(0xFF00FFFF)], null),
+              ),
+              const SizedBox(height: 24),
+              _buildSectionTitle('CLASSIC THEMES'),
               _buildOption(
                 context,
                 'Standard Vision',
-                CupertinoIcons.sparkles,
-                () => onThemeChanged(null, null),
+                CupertinoIcons.circle_grid_hex_fill,
+                () => onThemeChanged(null, null, null),
               ),
               _buildOption(
                 context,
-                'Obsidian Dark',
-                CupertinoIcons.moon,
-                () => onThemeChanged(const Color(0xFF0A0A0C), null),
-              ),
-              _buildOption(
-                context,
-                'Soft Blue',
-                CupertinoIcons.color_filter,
-                () => onThemeChanged(const Color(0xFFE3F2FD), null),
-              ),
-              _buildOption(
-                context,
-                'Gentle Green',
-                CupertinoIcons.tree,
-                () => onThemeChanged(const Color(0xFFE8F5E9), null),
-              ),
-              _buildOption(
-                context,
-                'Sunset Gradient',
-                CupertinoIcons.layers,
+                'Sunset Bliss',
+                CupertinoIcons.layers_fill,
                 () => onThemeChanged(
+                  null,
                   null,
                   const BoxDecoration(
                     gradient: LinearGradient(
@@ -67,39 +80,32 @@ class SettingsScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              _buildOption(
-                context,
-                'Ocean Gradient',
-                CupertinoIcons.drop,
-                () => onThemeChanged(
-                  null,
-                  const BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [Color(0xFF4FC3F7), Color(0xFF0288D1)],
-                    ),
-                  ),
-                ),
-              ),
               const SizedBox(height: 24),
-              _buildSectionTitle(l10n.dataManagement),
+              _buildSectionTitle(l10n?.dataManagement ?? 'DATA MANAGEMENT'),
               _buildOption(
                 context,
-                l10n.exportBackup,
+                l10n?.exportBackup ?? 'Export Backup',
                 Icons.upload_file,
                 () async {
                   try {
                     await storage.exportNotes();
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(l10n.exportSuccess), backgroundColor: AppColors.accentBlue),
+                        SnackBar(
+                          content: Text(l10n?.exportSuccess ?? 'Exported successfully'),
+                          backgroundColor: AppColors.accentBlue,
+                          behavior: SnackBarBehavior.floating,
+                        ),
                       );
                     }
                   } catch (e) {
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('${l10n.exportError}: $e'), backgroundColor: AppColors.accentRed),
+                        SnackBar(
+                          content: Text('${l10n?.exportError ?? 'Export error'}: $e'),
+                          backgroundColor: AppColors.accentRed,
+                          behavior: SnackBarBehavior.floating,
+                        ),
                       );
                     }
                   }
@@ -108,20 +114,28 @@ class SettingsScreen extends StatelessWidget {
               ),
               _buildOption(
                 context,
-                l10n.importBackup,
+                l10n?.importBackup ?? 'Import Backup',
                 Icons.download,
                 () async {
                   try {
                     await storage.importNotes();
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(l10n.importSuccess), backgroundColor: AppColors.accentBlue),
+                        SnackBar(
+                          content: Text(l10n?.importSuccess ?? 'Imported successfully'),
+                          backgroundColor: AppColors.accentBlue,
+                          behavior: SnackBarBehavior.floating,
+                        ),
                       );
                     }
                   } catch (e) {
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('${l10n.importError}: $e'), backgroundColor: AppColors.accentRed),
+                        SnackBar(
+                          content: Text('${l10n?.importError ?? 'Import error'}: $e'),
+                          backgroundColor: AppColors.accentRed,
+                          behavior: SnackBarBehavior.floating,
+                        ),
                       );
                     }
                   }
@@ -142,9 +156,9 @@ class SettingsScreen extends StatelessWidget {
         title.toUpperCase(),
         style: const TextStyle(
           color: Colors.white54,
-          fontSize: 12,
+          fontSize: 11,
           fontWeight: FontWeight.bold,
-          letterSpacing: 1.2,
+          letterSpacing: 1.5,
         ),
       ),
     );
@@ -166,9 +180,12 @@ class SettingsScreen extends StatelessWidget {
             Navigator.pop(context);
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('Appearance updated: $title'),
+                content: Text('Theme applied: $title'),
                 duration: const Duration(seconds: 2),
                 backgroundColor: AppColors.accentBlue,
+                behavior: SnackBarBehavior.floating,
+                margin: const EdgeInsets.all(16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
             );
           }
@@ -198,8 +215,7 @@ class SettingsScreen extends StatelessWidget {
             const Icon(
               CupertinoIcons.chevron_right,
               color: Colors.white38,
-              size: 20,
-              shadows: AppColors.iconShadows,
+              size: 18,
             ),
           ],
         ),

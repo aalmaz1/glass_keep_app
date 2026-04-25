@@ -31,7 +31,8 @@ class _AuthScreenState extends State<AuthScreen> {
 
   /// Validate and submit form
   Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) return;
+    final currentState = _formKey.currentState;
+    if (currentState == null || !currentState.validate()) return;
 
     setState(() {
       _isLoading = true;
@@ -272,7 +273,7 @@ class _AuthScreenState extends State<AuthScreen> {
                           ),
                         ),
                         child: Text(
-                          _errorMessage!,
+                          _errorMessage ?? '',
                           style: const TextStyle(
                             color: Color.fromARGB(255, 255, 100, 100),
                             fontSize: 13,
@@ -333,7 +334,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     ),
                     const SizedBox(height: 24),
                     const Text(
-                      'SYSTEM-REBORN-V1.5.0',
+                      'SYSTEM-REBORN-V1.6.0',
                       style: TextStyle(
                         color: Colors.white54,
                         fontSize: 12,

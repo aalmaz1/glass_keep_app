@@ -9,7 +9,8 @@ import 'package:glass_keep/glass_effect.dart';
 import 'package:glass_keep/providers.dart';
 
 /// A premium glass morphism card that uses BackdropFilter and optional distortion
-class VisionGlassCard extends StatelessWidget {
+/// Enhanced in V1.6.0 with internal hover state management and smooth distortion scaling.
+class VisionGlassCard extends StatefulWidget {
   final Widget child;
   final double borderRadius;
   final bool useDistortion;
@@ -30,103 +31,152 @@ class VisionGlassCard extends StatelessWidget {
   });
 
   @override
+  State<VisionGlassCard> createState() => _VisionGlassCardState();
+}
+
+class _VisionGlassCardState extends State<VisionGlassCard> with SingleTickerProviderStateMixin {
+  late AnimationController _hoverController;
+  late Animation<double> _hoverAnimation;
+  bool _isHovered = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _hoverController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+    _hoverAnimation = CurvedAnimation(
+      parent: _hoverController,
+      curve: Curves.easeOutCubic,
+    );
+  }
+
+  @override
+  void dispose() {
+    _hoverController.dispose();
+    super.dispose();
+  }
+
+  void _handleHover(bool isHovered) {
+    if (_isHovered == isHovered) return;
+    setState(() {
+      _isHovered = isHovered;
+    });
+    if (isHovered) {
+      _hoverController.forward();
+    } else {
+      _hoverController.reverse();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final animationProvider = GlassAnimationProvider.of(context);
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        Widget mainContent = Stack(
-          children: [
-            // Specular border highlights
-            Positioned.fill(
-              child: ValueListenableBuilder<Offset>(
-                valueListenable: animationProvider?.tilt ?? GlassAnimationProvider.defaultOffset,
-                builder: (context, currentTilt, _) {
-                  return CustomPaint(
-                    painter: _SpecularBorderPainter(
-                      borderRadius: borderRadius,
-                      tilt: currentTilt,
-                    ),
-                  );
-                },
+    return MouseRegion(
+      onEnter: (_) => _handleHover(true),
+      onExit: (_) => _handleHover(false),
+      child: AnimatedBuilder(
+        animation: _hoverAnimation,
+        builder: (context, child) {
+          final hoverValue = _hoverAnimation.value;
+          
+          Widget mainContent = Stack(
+            children: [
+              // Specular border highlights
+              Positioned.fill(
+                child: ValueListenableBuilder<Offset>(
+                  valueListenable: animationProvider?.tilt ?? GlassAnimationProvider.defaultOffset,
+                  builder: (context, currentTilt, _) {
+                    return CustomPaint(
+                      painter: _SpecularBorderPainter(
+                        borderRadius: widget.borderRadius,
+                        tilt: currentTilt,
+                        hoverIntensity: hoverValue,
+                      ),
+                    );
+                  },
+                ),
               ),
-            ),
-            Padding(
-              padding: padding ?? EdgeInsets.zero,
-              child: child,
-            ),
-          ],
-        );
-
-        if (useDistortion) {
-          mainContent = GlassDistortionEffect(
-            borderRadius: borderRadius,
-            child: mainContent,
-          );
-        }
-
-        final blurFilter = ui.ImageFilter.blur(sigmaX: blur, sigmaY: blur);
-        
-        Widget cardContent = Container(
-          decoration: BoxDecoration(
-            color: color ?? AppColors.glassLight,
-            borderRadius: BorderRadius.circular(borderRadius),
-            border: border,
-          ),
-          child: mainContent,
-        );
-
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(borderRadius),
-            boxShadow: [
-              // Multi-layered deep premium shadows for physical depth
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.5),
-                blurRadius: 50,
-                offset: const Offset(0, 25),
-                spreadRadius: -15,
-              ),
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.3),
-                blurRadius: 25,
-                offset: const Offset(0, 12),
-                spreadRadius: -5,
-              ),
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.15),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              ),
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
-                blurRadius: 2,
-                offset: const Offset(0, 1),
+              Padding(
+                padding: widget.padding ?? EdgeInsets.zero,
+                child: widget.child,
               ),
             ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(borderRadius),
-            child: BackdropFilter(
-              filter: blurFilter,
-              child: cardContent,
+          );
+
+          if (widget.useDistortion) {
+            mainContent = GlassDistortionEffect(
+              borderRadius: widget.borderRadius,
+              distortionStrength: 1.0 + (hoverValue * 1.8), // Richer distortion on hover
+              child: mainContent,
+            );
+          }
+
+          final blurFilter = ui.ImageFilter.blur(
+            sigmaX: widget.blur + (hoverValue * 8), 
+            sigmaY: widget.blur + (hoverValue * 8)
+          );
+          
+          Widget cardContent = Container(
+            decoration: BoxDecoration(
+              color: widget.color ?? AppColors.glassLight.withValues(alpha: AppColors.glassLight.a + (hoverValue * 0.08)),
+              borderRadius: BorderRadius.circular(widget.borderRadius),
+              border: widget.border,
             ),
-          ),
-        );
-      },
+            child: mainContent,
+          );
+
+          return Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(widget.borderRadius),
+              boxShadow: [
+                // Multi-layered deep premium shadows for physical depth
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.5 + (hoverValue * 0.15)),
+                  blurRadius: 50 + (hoverValue * 30),
+                  offset: Offset(0, 25 + (hoverValue * 15)),
+                  spreadRadius: -15,
+                ),
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.3 + (hoverValue * 0.05)),
+                  blurRadius: 25 + (hoverValue * 15),
+                  offset: Offset(0, 12 + (hoverValue * 8)),
+                  spreadRadius: -5,
+                ),
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.15),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(widget.borderRadius),
+              child: BackdropFilter(
+                filter: blurFilter,
+                child: cardContent,
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 }
 
 /// Painter for specular border highlights on glass cards with enhanced dual-layer gradient
-/// and gyroscope-based dynamic lighting
+/// and gyroscope-based dynamic lighting, now with hover intensity.
 class _SpecularBorderPainter extends CustomPainter {
   final double borderRadius;
   final Offset tilt;
+  final double hoverIntensity;
 
   const _SpecularBorderPainter({
     required this.borderRadius,
     this.tilt = Offset.zero,
+    this.hoverIntensity = 0.0,
   });
 
   @override
@@ -135,18 +185,19 @@ class _SpecularBorderPainter extends CustomPainter {
     final rrect = RRect.fromRectAndRadius(rect, Radius.circular(borderRadius));
 
     // Primary specular border with complex gradient simulating light catch
+    // Intensifies and widens slightly on hover
     final paint1 = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5
+      ..strokeWidth = 1.5 + (hoverIntensity * 0.5)
       ..shader = ui.Gradient.linear(
         Offset.zero + Offset(tilt.dx * 20, tilt.dy * 20),
         Offset(size.width, size.height) + Offset(tilt.dx * 20, tilt.dy * 20),
         [
-          Colors.white.withValues(alpha: 0.9),
+          Colors.white.withValues(alpha: 0.9 + (hoverIntensity * 0.1)),
           Colors.white.withValues(alpha: 0.2),
-          Colors.white.withValues(alpha: 0.7),
+          Colors.white.withValues(alpha: 0.7 + (hoverIntensity * 0.2)),
           Colors.white.withValues(alpha: 0.1),
-          Colors.white.withValues(alpha: 0.8),
+          Colors.white.withValues(alpha: 0.8 + (hoverIntensity * 0.15)),
         ],
         const [0.0, 0.25, 0.5, 0.75, 1.0],
       );
@@ -154,13 +205,13 @@ class _SpecularBorderPainter extends CustomPainter {
     // Secondary subtle highlight for added depth on the opposite edge
     final paint2 = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.8
+      ..strokeWidth = 0.8 + (hoverIntensity * 0.4)
       ..shader = ui.Gradient.linear(
         Offset(size.width, 0) - Offset(tilt.dx * 30, tilt.dy * 30),
         Offset(0, size.height) - Offset(tilt.dx * 30, tilt.dy * 30),
         [
           Colors.white.withValues(alpha: 0.0),
-          Colors.white.withValues(alpha: 0.4),
+          Colors.white.withValues(alpha: 0.4 + (hoverIntensity * 0.3)),
           Colors.white.withValues(alpha: 0.0),
         ],
         const [0.0, 0.5, 1.0],
@@ -172,20 +223,40 @@ class _SpecularBorderPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _SpecularBorderPainter oldDelegate) =>
-      oldDelegate.borderRadius != borderRadius || oldDelegate.tilt != tilt;
+      oldDelegate.borderRadius != borderRadius || 
+      oldDelegate.tilt != tilt || 
+      oldDelegate.hoverIntensity != hoverIntensity;
 }
 
 /// Premium animated background with moving aurora blobs and noise texture
+/// Enhanced in V1.6.0 with more layers and support for theme-specific colors.
 class VisionBackground extends StatelessWidget {
-  const VisionBackground({super.key});
+  final Color? backgroundColor;
+  final List<Color>? blobColors;
+
+  const VisionBackground({
+    super.key,
+    this.backgroundColor,
+    this.blobColors,
+  });
 
   @override
   Widget build(BuildContext context) {
     final animationProvider = GlassAnimationProvider.of(context);
     final animation = animationProvider?.animationController;
+    
+    // Default colors if none provided
+    final bg = backgroundColor ?? AppColors.obsidianDark;
+    final colors = blobColors ?? [
+      AppColors.accentBlue,
+      AppColors.accentPurple,
+      AppColors.accentBlue,
+      AppColors.accentPurple,
+      AppColors.accentBlue,
+    ];
 
     return Container(
-      color: AppColors.obsidianDark,
+      color: bg,
       child: Stack(
         children: [
           if (animation != null)
@@ -195,8 +266,9 @@ class VisionBackground extends StatelessWidget {
                 return Stack(
                   children: [
                     // Drifting aurora blobs optimized with RadialGradient
+                    // Increased blob count and layered movement for deeper 'Vision Pro' look
                     _AuroraBlob(
-                      color: AppColors.accentBlue.withValues(alpha: 0.25),
+                      color: colors[0 % colors.length].withValues(alpha: 0.25),
                       size: kIsWeb ? 400 : 800,
                       alignment: Alignment.topLeft,
                       depth: 0.05,
@@ -206,7 +278,7 @@ class VisionBackground extends StatelessWidget {
                       ),
                     ),
                     _AuroraBlob(
-                      color: AppColors.accentPurple.withValues(alpha: 0.2),
+                      color: colors[1 % colors.length].withValues(alpha: 0.2),
                       size: kIsWeb ? 500 : 900,
                       alignment: Alignment.bottomRight,
                       depth: 0.08,
@@ -215,9 +287,19 @@ class VisionBackground extends StatelessWidget {
                         math.cos(animation.value * 2 * math.pi) * 200 + 150,
                       ),
                     ),
+                    _AuroraBlob(
+                      color: colors[2 % colors.length].withValues(alpha: 0.18),
+                      size: kIsWeb ? 350 : 750,
+                      alignment: Alignment.topRight,
+                      depth: 0.06,
+                      baseOffset: Offset(
+                        math.cos(animation.value * 2 * math.pi + math.pi/3) * 180,
+                        math.sin(animation.value * 2 * math.pi + math.pi/3) * 180,
+                      ),
+                    ),
                     if (!kIsWeb) ...[
                       _AuroraBlob(
-                        color: AppColors.accentBlue.withValues(alpha: 0.15),
+                        color: colors[3 % colors.length].withValues(alpha: 0.15),
                         size: 600,
                         alignment: Alignment.centerLeft,
                         depth: 0.03,
@@ -227,7 +309,7 @@ class VisionBackground extends StatelessWidget {
                         ),
                       ),
                       _AuroraBlob(
-                        color: AppColors.accentPurple.withValues(alpha: 0.12),
+                        color: colors[4 % colors.length].withValues(alpha: 0.12),
                         size: 700,
                         alignment: Alignment.topRight,
                         depth: 0.1,
@@ -238,7 +320,7 @@ class VisionBackground extends StatelessWidget {
                       ),
                     ],
                     
-                    // Noise texture overlay for tactile feel, moved inside AnimatedBuilder for animation
+                    // Noise texture overlay for tactile feel
                     Positioned.fill(
                       child: IgnorePointer(
                         child: CustomPaint(
@@ -318,13 +400,9 @@ class _AuroraBlob extends StatelessWidget {
             final dist = relPos.distance;
             final maxDim = math.max(screenSize.width, screenSize.height);
             
-            // Non-linear scaling: using square root for a more organic, liquid transition.
-            // This ensures the movement isn't strictly linear to the pointer position.
             final normalizedDist = (dist / maxDim).clamp(0.0, 1.0);
             final liquidFactor = math.sqrt(normalizedDist);
 
-            // Incorporate depth into interaction to create layered 3D repulsion effect.
-            // Blobs at different depths will react with different intensities.
             interactionOffset = relPos * (-0.1 - depth * 2.0) * liquidFactor;
           }
 
@@ -368,7 +446,8 @@ class _ShaderNoisePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (program == null) {
+    final prog = program;
+    if (prog == null) {
       // Optimized fallback: draw static noise once and reuse
       if (_cachedFallback == null || _cachedSize != size) {
         final recorder = ui.PictureRecorder();
@@ -384,11 +463,14 @@ class _ShaderNoisePainter extends CustomPainter {
         _cachedFallback = recorder.endRecording();
         _cachedSize = size;
       }
-      canvas.drawPicture(_cachedFallback!);
+      final fallback = _cachedFallback;
+      if (fallback != null) {
+        canvas.drawPicture(fallback);
+      }
       return;
     }
 
-    final shader = program!.fragmentShader();
+    final shader = prog.fragmentShader();
     shader.setFloat(0, size.width);
     shader.setFloat(1, size.height);
     shader.setFloat(2, time);
@@ -431,7 +513,7 @@ class GlassSearchBar extends StatelessWidget {
         decoration: const InputDecoration(
           icon: Icon(
             CupertinoIcons.search,
-            color: Colors.white, // simplified for const
+            color: Colors.white,
             size: 24,
             shadows: AppColors.iconShadows,
           ),

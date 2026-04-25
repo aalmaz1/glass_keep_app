@@ -24,10 +24,11 @@ class EncryptionService {
   }
 
   String encryptText(String text) {
-    if (_key == null || text.isEmpty) return text;
+    final key = _key;
+    if (key == null || text.isEmpty) return text;
     try {
       final iv = encrypt_lib.IV.fromSecureRandom(16);
-      final encrypter = encrypt_lib.Encrypter(encrypt_lib.AES(_key!, mode: encrypt_lib.AESMode.gcm));
+      final encrypter = encrypt_lib.Encrypter(encrypt_lib.AES(key, mode: encrypt_lib.AESMode.gcm));
       final encrypted = encrypter.encrypt(text, iv: iv);
       return '$_prefix${iv.base64}:${encrypted.base64}';
     } catch (e) {
@@ -36,7 +37,8 @@ class EncryptionService {
   }
 
   String decryptText(String encryptedWithIv) {
-    if (_key == null || encryptedWithIv.isEmpty) return encryptedWithIv;
+    final key = _key;
+    if (key == null || encryptedWithIv.isEmpty) return encryptedWithIv;
     if (!encryptedWithIv.startsWith(_prefix)) return encryptedWithIv;
 
     try {
@@ -47,7 +49,7 @@ class EncryptionService {
       final iv = encrypt_lib.IV.fromBase64(parts[0]);
       final encryptedBase64 = parts[1];
       
-      final encrypter = encrypt_lib.Encrypter(encrypt_lib.AES(_key!, mode: encrypt_lib.AESMode.gcm));
+      final encrypter = encrypt_lib.Encrypter(encrypt_lib.AES(key, mode: encrypt_lib.AESMode.gcm));
       final decrypted = encrypter.decrypt64(encryptedBase64, iv: iv);
       return decrypted;
     } catch (e) {
