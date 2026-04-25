@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:glass_keep/widgets.dart';
 import 'package:glass_keep/constants.dart' show AppColors, AppUtils;
+import 'package:glass_keep/providers.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -77,11 +78,19 @@ class _AuthScreenState extends State<AuthScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final provider = GlassAnimationProvider.of(context);
+    final themeColor = provider?.themeColor ?? AppColors.accentDeepPurple;
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Stack(
         children: [
-          Positioned.fill(child: VisionBackground()),
+          Positioned.fill(
+            child: VisionBackground(
+              backgroundColor: themeColor,
+              blobColors: provider?.blobColors,
+            ),
+          ),
           Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(24, 24, 24, 80),

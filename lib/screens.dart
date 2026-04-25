@@ -150,7 +150,10 @@ class _NotesScreenState extends State<NotesScreen> {
       body: Stack(
         children: [
           Positioned.fill(
-            child: VisionBackground(),
+            child: VisionBackground(
+              backgroundColor: themeColor,
+              blobColors: provider?.blobColors,
+            ),
           ),
           SafeArea(
             child: CustomScrollView(
@@ -1190,12 +1193,19 @@ class _TrashScreenState extends State<TrashScreen> {
     final l10n = AppLocalizations.of(context);
     final size = MediaQuery.sizeOf(context);
     final paddingH = size.width * 0.04;
+    final provider = GlassAnimationProvider.of(context);
+    final themeColor = provider?.themeColor ?? AppColors.accentDeepPurple;
 
     return Scaffold(
       backgroundColor: AppColors.obsidianBlack,
       body: Stack(
         children: [
-          Positioned.fill(child: VisionBackground()),
+          Positioned.fill(
+            child: VisionBackground(
+              backgroundColor: themeColor,
+              blobColors: provider?.blobColors,
+            ),
+          ),
           SafeArea(
             child: Column(
               children: [

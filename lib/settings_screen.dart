@@ -4,6 +4,7 @@ import 'package:glass_keep/constants.dart';
 import 'package:glass_keep/widgets.dart';
 import 'package:glass_keep/data.dart';
 import 'package:glass_keep/l10n/app_localizations.dart';
+import 'package:glass_keep/providers.dart';
 
 /// Settings screen for managing appearance and data.
 /// Updated in V1.6.0 with the 'Premium Dark' collection.
@@ -17,6 +18,8 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final themeTitle = l10n?.settings ?? 'Appearance';
+    final provider = GlassAnimationProvider.of(context);
+    final themeColor = provider?.themeColor ?? AppColors.accentDeepPurple;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -27,7 +30,12 @@ class SettingsScreen extends StatelessWidget {
       ),
       body: Stack(
         children: [
-          Positioned.fill(child: VisionBackground()),
+          Positioned.fill(
+            child: VisionBackground(
+              backgroundColor: themeColor,
+              blobColors: provider?.blobColors,
+            ),
+          ),
           ListView(
             padding: const EdgeInsets.fromLTRB(16, kToolbarHeight + 60, 16, 16),
             children: [
