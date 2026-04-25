@@ -1,33 +1,67 @@
 ```
 # Build artifacts
-build/
-*.dart.js
-*.js
-*.map
+*.class
+*.o
+*.obj
+*.out
+*.exe
+*.dll
+*.so
+*.a
 
 # Dependencies
-.pub/
-.dart_tool/
+node_modules/
+venv/
+.venv/
+__pycache__/
+.mypy_cache/
+.pytest_cache/
+target/
+.gradle/
 
-# Logs and temp files
-*.log
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
 *.tmp
 
-# Environment
+# System files
+.DS_Store
+Thumbs.db
 .env
 .env.local
 *.env.*
 
-# IDE files
-.idea/
-*.iml
-*.ipr
-*.iws
-.vscode/
-*.swp
-*.swo
+# Logs
+*.log
 
-# OS generated files
-.DS_Store
-Thumbs.db
+# Coverage
+coverage/
+htmlcov/
+.coverage
+
+# Compressed files
+*.zip
+*.gz
+*.tar
+*.tgz
+*.bz2
+*.xz
+*.7z
+*.rar
+*.zst
+*.lz4
+*.lzh
+*.cab
+*.arj
+*.rpm
+*.deb
+*.Z
+*.lz
+*.lzo
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst
 ```

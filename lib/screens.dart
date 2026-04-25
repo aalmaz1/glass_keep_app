@@ -147,7 +147,7 @@ class _NotesScreenState extends State<NotesScreen> {
       extendBodyBehindAppBar: true,
       body: Stack(
         children: [
-          const Positioned.fill(
+          Positioned.fill(
             child: VisionBackground(),
           ),
           SafeArea(
@@ -1179,7 +1179,7 @@ class _TrashScreenState extends State<TrashScreen> {
       backgroundColor: AppColors.obsidianBlack,
       body: Stack(
         children: [
-          const Positioned.fill(child: VisionBackground()),
+          Positioned.fill(child: VisionBackground()),
           SafeArea(
             child: Column(
               children: [
