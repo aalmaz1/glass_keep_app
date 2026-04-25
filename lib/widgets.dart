@@ -121,7 +121,7 @@ class _VisionGlassCardState extends State<VisionGlassCard> with SingleTickerProv
           
           Widget cardContent = Container(
             decoration: BoxDecoration(
-              color: widget.color ?? AppColors.obsidianDark.withValues(alpha: 0.5 + (hoverValue * 0.1)),
+              color: widget.color ?? AppColors.obsidianBlack.withValues(alpha: 0.5 + (hoverValue * 0.1)),
               borderRadius: BorderRadius.circular(widget.borderRadius),
               border: widget.border,
             ),
@@ -246,7 +246,7 @@ class VisionBackground extends StatelessWidget {
     final animation = animationProvider?.animationController;
     
     // Default colors if none provided - preferring provider state if available
-    final bg = backgroundColor ?? animationProvider?.themeColor ?? AppColors.obsidianDark;
+    final bg = backgroundColor ?? animationProvider?.themeColor ?? AppColors.obsidianBlack;
     final colors = blobColors ?? animationProvider?.blobColors ?? [
       AppColors.accentIndigo,
       AppColors.accentTeal,
@@ -334,27 +334,30 @@ class VisionBackground extends StatelessWidget {
               },
             )
           else
-            const Stack(
-              children: [
-                Positioned(
-                  top: -150,
-                  right: -150,
-                  child: _AuroraBlob(
-                    color: Color(0x336C5CE7),
-                    size: 500,
-                    baseOffset: Offset.zero,
+            Container(
+              color: AppColors.obsidianBlack,
+              child: const Stack(
+                children: [
+                  Positioned(
+                    top: -150,
+                    right: -150,
+                    child: _AuroraBlob(
+                      color: Color(0x336C5CE7),
+                      size: 500,
+                      baseOffset: Offset.zero,
+                    ),
                   ),
-                ),
-                Positioned(
-                  bottom: 50,
-                  left: -100,
-                  child: _AuroraBlob(
-                    color: Color(0x330984E3),
-                    size: 400,
-                    baseOffset: Offset.zero,
+                  Positioned(
+                    bottom: 50,
+                    left: -100,
+                    child: _AuroraBlob(
+                      color: Color(0x330984E3),
+                      size: 400,
+                      baseOffset: Offset.zero,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
         ],
       ),

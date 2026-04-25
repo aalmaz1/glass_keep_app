@@ -54,7 +54,7 @@ class _NotesScreenState extends State<NotesScreen> {
   void _onSearchChanged(String value) {
     _searchDebounceTimer?.cancel();
     _searchDebounceTimer = Timer(const Duration(milliseconds: 150), () {
-      if (mounted) {
+      if (context.mounted) {
         setState(() => _search = value);
       }
     });
@@ -139,7 +139,7 @@ class _NotesScreenState extends State<NotesScreen> {
     final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      backgroundColor: AppColors.obsidianDark,
+      backgroundColor: AppColors.obsidianBlack,
       extendBodyBehindAppBar: true,
       body: Stack(
         children: [
@@ -270,7 +270,7 @@ class _NotesScreenState extends State<NotesScreen> {
         padding: const EdgeInsets.all(16.0),
         child: VisionGlassCard(
           borderRadius: 24,
-          color: AppColors.obsidianDark.withValues(alpha: 0.9),
+          color: AppColors.obsidianBlack.withValues(alpha: 0.9),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -397,7 +397,7 @@ class _NotesScreenState extends State<NotesScreen> {
         padding: const EdgeInsets.all(16.0),
         child: VisionGlassCard(
           borderRadius: 24,
-          color: AppColors.obsidianDark.withValues(alpha: 0.9),
+          color: AppColors.obsidianBlack.withValues(alpha: 0.9),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -806,7 +806,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
   }
 
   void _showSnackBar(String message, {bool isError = false}) {
-    if (!mounted) return;
+    if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
@@ -849,7 +849,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
       child: Container(
         height: size.height * 0.85,
         decoration: BoxDecoration(
-          color: AppColors.obsidianDark.withValues(alpha: 0.9),
+          color: AppColors.obsidianBlack.withValues(alpha: 0.9),
           borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
           border: Border.all(color: Colors.white.withValues(alpha: 0.15), width: 1),
         ),
@@ -893,7 +893,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                                   final updatedNote = widget.note.copyWith(isPinned: !widget.note.isPinned);
                                   try {
                                     await widget.storage.save(updatedNote);
-                                    if (mounted) setState(() {});
+                                    if (context.mounted) setState(() {});
                                   } catch (e) {
                                     _showSnackBar('${l10n?.pinError ?? 'Pin error'}: $e', isError: true);
                                   }
@@ -907,7 +907,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                                   if (widget.note.id.isNotEmpty) {
                                     try {
                                       await widget.storage.delete(widget.note.id);
-                                      if (mounted) Navigator.pop(context);
+                                      if (context.mounted) Navigator.pop(context);
                                     } catch (e) {
                                       _showSnackBar('${l10n?.deleteError ?? 'Delete error'}: $e', isError: true);
                                     }
@@ -1000,7 +1000,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                     ),
                     onPressed: () {
                       HapticFeedback.lightImpact();
-                      if (mounted) {
+                      if (context.mounted) {
                         setState(() {
                           _img = null;
                           _decodedImage = null;
@@ -1027,7 +1027,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                     icon: const Icon(CupertinoIcons.photo, color: Colors.white70, shadows: AppColors.iconShadows),
                     onPressed: _isLoading ? null : () async {
                       HapticFeedback.lightImpact();
-                      if (mounted) setState(() => _isLoading = true);
+                      if (context.mounted) setState(() => _isLoading = true);
                       try {
                         final XFile? image = await _picker.pickImage(
                           source: ImageSource.gallery,
@@ -1035,12 +1035,12 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                           maxHeight: 1200,
                           imageQuality: 85,
                         );
-                        if (!mounted) return;
+                        if (!context.mounted) return;
                         if (image != null) {
                           final bytes = await image.readAsBytes();
                           // Process in microtask to avoid blocking UI
                           await Future.microtask(() {
-                            if (mounted) {
+                            if (context.mounted) {
                               setState(() {
                                 _img = base64Encode(bytes);
                                 _decodedImage = bytes;
@@ -1049,7 +1049,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                           });
                         }
                       } finally {
-                        if (mounted) {
+                        if (context.mounted) {
                           setState(() => _isLoading = false);
                         }
                       }
@@ -1060,9 +1060,9 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                     HapticFeedback.lightImpact();
                     final now = DateTime.now();
                     final d = await showDatePicker(context: context, initialDate: now, firstDate: now, lastDate: now.add(const Duration(days: 365)));
-                    if (d == null || !mounted) return;
+                    if (d == null || !context.mounted) return;
                     final t = await showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(now));
-                    if (!mounted) return;
+                    if (!context.mounted) return;
                     if (t != null) setState(() => _rem = DateTime(d.year, d.month, d.day, t.hour, t.minute));
                   }),
                   if (reminder != null) ...[
@@ -1107,7 +1107,7 @@ class _TrashScreenState extends State<TrashScreen> {
   }
 
   void _showSnackBar(String message, {bool isError = false}) {
-    if (!mounted) return;
+    if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
@@ -1126,7 +1126,7 @@ class _TrashScreenState extends State<TrashScreen> {
     final paddingH = size.width * 0.04;
 
     return Scaffold(
-      backgroundColor: AppColors.obsidianDark,
+      backgroundColor: AppColors.obsidianBlack,
       body: Stack(
         children: [
           const Positioned.fill(child: VisionBackground()),
@@ -1314,7 +1314,7 @@ class _BiometricToggleState extends State<_BiometricToggle> {
   Future<void> _loadStatus() async {
     final available = await _biometricService.isBiometricsAvailable();
     final enabled = await _biometricService.isEnabled();
-    if (mounted) {
+    if (context.mounted) {
       setState(() {
         _isAvailable = available;
         _isEnabled = enabled;
@@ -1351,11 +1351,11 @@ class _BiometricToggleState extends State<_BiometricToggle> {
                 final authenticated = await _biometricService.authenticate();
                 if (authenticated) {
                   await _biometricService.setEnabled(true);
-                  if (mounted) setState(() => _isEnabled = true);
+                  if (context.mounted) setState(() => _isEnabled = true);
                 }
               } else {
                 await _biometricService.setEnabled(false);
-                if (mounted) setState(() => _isEnabled = false);
+                if (context.mounted) setState(() => _isEnabled = false);
               }
             },
           ),

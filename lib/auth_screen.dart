@@ -104,7 +104,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             end: Alignment.bottomRight,
                             colors: [
                               AppColors.accentBlue.withValues(alpha: 0.8),
-                              AppColors.accentPurple.withValues(alpha: 0.8),
+                              AppColors.accentDeepPurple.withValues(alpha: 0.8),
                             ],
                           ),
                           borderRadius: BorderRadius.circular(20),
