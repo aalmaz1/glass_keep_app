@@ -36,11 +36,16 @@ class GlassAnimationProvider extends InheritedWidget {
   static final ValueNotifier<Offset> defaultOffset = ValueNotifier(Offset.zero);
 
   @override
-  bool updateShouldNotify(GlassAnimationProvider oldWidget) =>
-      oldWidget.locale != locale ||
+  bool updateShouldNotify(GlassAnimationProvider oldWidget) {
+    final shouldNotify = oldWidget.locale != locale ||
       oldWidget.grainProgram != grainProgram ||
       oldWidget.themeColor != themeColor ||
       oldWidget.blobColors != blobColors;
+    if (shouldNotify) {
+      debugPrint('[SYSTEM-REBORN] GlassAnimationProvider.updateShouldNotify: themeColor changed from ${oldWidget.themeColor} to $themeColor, blobColors from ${oldWidget.blobColors} to $blobColors');
+    }
+    return shouldNotify;
+  }
 }
 
 /// Helper for listening to two ValueNotifiers

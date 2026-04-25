@@ -236,9 +236,16 @@ class _VisionBackgroundState extends State<VisionBackground> {
     // Rebuild when theme changes by depending on InheritedWidget
     final animationProvider = GlassAnimationProvider.of(context);
     
+    debugPrint('[SYSTEM-REBORN] VisionBackground.build: animationProvider found=${animationProvider != null}');
+    if (animationProvider != null) {
+      debugPrint('[SYSTEM-REBORN] VisionBackground.build: provider.themeColor=${animationProvider.themeColor}, provider.blobColors=${animationProvider.blobColors}');
+    }
+    
     // Use theme color if available, otherwise default to obsidian black
     final bg = widget.backgroundColor ?? animationProvider?.themeColor ?? AppColors.obsidianBlack;
     final blobs = widget.blobColors ?? animationProvider?.blobColors ?? [AppColors.accentBlue, AppColors.accentIndigo, AppColors.accentDeepPurple];
+    
+    debugPrint('[SYSTEM-REBORN] VisionBackground.build: final bg=$bg, blobs count=${blobs.length}');
 
     return Container(
       width: double.infinity,

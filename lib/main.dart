@@ -121,10 +121,12 @@ class _GlassKeepAppState extends State<GlassKeepApp>
   }
 
   void _changeTheme(Color? color, List<Color>? blobs) {
+    debugPrint('[SYSTEM-REBORN] _changeTheme called: color=$color, blobs=${blobs?.map((c) => c.value).toList()}');
     setState(() {
       _themeColor = color;
       _blobColors = blobs;
     });
+    debugPrint('[SYSTEM-REBORN] _changeTheme completed: new themeColor=$_themeColor, new blobColors=$_blobColors');
   }
 
   @override
