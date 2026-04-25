@@ -52,16 +52,29 @@ void main() async {
 
     FlutterError.onError = (FlutterErrorDetails details) {
       FlutterError.presentError(details);
+      final stackTrace = details.stack.toString();
+      final isNullCheckError = details.exception.toString().contains('Null check operator used on a null value');
+      
       debugPrint('----------------------------------------');
       debugPrint('FLUTTER ERROR DETECTED');
+      if (isNullCheckError) {
+        debugPrint('CRITICAL: NULL CHECK OPERATOR ERROR');
+      }
       debugPrint('Exception: ${details.exception}');
-      debugPrint('Stack Trace:\n${details.stack}');
+      debugPrint('Context: ${details.context}');
+      debugPrint('Stack Trace:\n$stackTrace');
       debugPrint('----------------------------------------');
     };
 
     ui.PlatformDispatcher.instance.onError = (error, stack) {
+      final errorStr = error.toString();
+      final isNullCheckError = errorStr.contains('Null check operator used on a null value');
+
       debugPrint('----------------------------------------');
       debugPrint('PLATFORM DISPATCHER ERROR');
+      if (isNullCheckError) {
+        debugPrint('CRITICAL: NULL CHECK OPERATOR ERROR');
+      }
       debugPrint('Error: $error');
       debugPrint('Stack Trace:\n$stack');
       debugPrint('----------------------------------------');
