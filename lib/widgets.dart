@@ -426,41 +426,52 @@ class _ShaderNoisePainter extends CustomPainter {
   // Cache for fallback noise to avoid generating it every frame
   static ui.Picture? _cachedFallback;
   static Size? _cachedSize;
+  static bool _shaderFailed = false;
 
   const _ShaderNoisePainter({this.program, required this.time});
 
   @override
   void paint(Canvas canvas, Size size) {
     final prog = program;
-    if (prog == null) {
-      if (_cachedFallback == null || _cachedSize != size) {
-        final recorder = ui.PictureRecorder();
-        final c = Canvas(recorder);
-        final random = math.Random(42);
-        final paint = Paint()..color = Colors.white.withValues(alpha: 0.012);
-
-        for (int i = 0; i < 800; i++) {
-          final x = random.nextDouble() * size.width;
-          final y = random.nextDouble() * size.height;
-          c.drawRect(Rect.fromLTWH(x, y, 1.2, 1.2), paint);
-        }
-        _cachedFallback = recorder.endRecording();
-        _cachedSize = size;
-      }
-      final fallback = _cachedFallback;
-      if (fallback != null) {
-        canvas.drawPicture(fallback);
-      }
+    if (prog == null || _shaderFailed || kIsWeb) {
+      _drawFallbackNoise(canvas, size);
       return;
     }
 
-    final shader = prog.fragmentShader();
-    shader.setFloat(0, size.width);
-    shader.setFloat(1, size.height);
-    shader.setFloat(2, time);
+    try {
+      final shader = prog.fragmentShader();
+      shader.setFloat(0, size.width);
+      shader.setFloat(1, size.height);
+      shader.setFloat(2, time);
 
-    final paint = Paint()..shader = shader;
-    canvas.drawRect(Offset.zero & size, paint);
+      final paint = Paint()..shader = shader;
+      canvas.drawRect(Offset.zero & size, paint);
+    } catch (e) {
+      _shaderFailed = true;
+      debugPrint('[SYSTEM-REBORN] Noise shader paint failed. Fallback active: $e');
+      _drawFallbackNoise(canvas, size);
+    }
+  }
+
+  void _drawFallbackNoise(Canvas canvas, Size size) {
+    if (_cachedFallback == null || _cachedSize != size) {
+      final recorder = ui.PictureRecorder();
+      final c = Canvas(recorder);
+      final random = math.Random(42);
+      final paint = Paint()..color = Colors.white.withValues(alpha: 0.012);
+
+      for (int i = 0; i < 800; i++) {
+        final x = random.nextDouble() * size.width;
+        final y = random.nextDouble() * size.height;
+        c.drawRect(Rect.fromLTWH(x, y, 1.2, 1.2), paint);
+      }
+      _cachedFallback = recorder.endRecording();
+      _cachedSize = size;
+    }
+    final fallback = _cachedFallback;
+    if (fallback != null) {
+      canvas.drawPicture(fallback);
+    }
   }
 
   @override

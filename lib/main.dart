@@ -141,10 +141,16 @@ class _GlassKeepAppState extends State<GlassKeepApp>
     )..repeat();
 
     _initSensors();
-    // Defer heavy shader loading to improve initial performance
-    Future.delayed(const Duration(milliseconds: 300), () {
-      if (context.mounted) _loadShaders();
-    });
+    if (kIsWeb) {
+      debugPrint(
+        '[SYSTEM-REBORN] Runtime shaders disabled on Web. Using safe fallback noise.',
+      );
+    } else {
+      // Defer heavy shader loading to improve initial performance
+      Future.delayed(const Duration(milliseconds: 300), () {
+        if (context.mounted) _loadShaders();
+      });
+    }
   }
 
   Future<void> _loadShaders() async {
@@ -160,7 +166,12 @@ class _GlassKeepAppState extends State<GlassKeepApp>
       }
       debugPrint('[SYSTEM-REBORN] Shaders loaded successfully');
     } catch (e) {
-      debugPrint('[SYSTEM-REBORN] Error loading shaders: $e');
+      if (context.mounted) {
+        setState(() {
+          _grainProgram = null;
+        });
+      }
+      debugPrint('[SYSTEM-REBORN] Shader fallback activated: $e');
     }
   }
 
