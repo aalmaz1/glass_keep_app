@@ -38,12 +38,8 @@ jobs:
         "FIREBASE_MEASUREMENT_ID": "${{ secrets.FIREBASE_MEASUREMENT_ID }}"          
         }' > config.json      
   - name: Build Web (Optimized for Size & Performance)        # ВАЖНО: Убран флаг --wasm. Он слишком тяжелый для простого приложения.        # --csp: убирает eval() для безопасности и совместимости        # --no-source-maps: уменьшает размер файлов        
-    run: |          
-        flutter build web --release \            
-        --base-href="/${{ github.event.repository.name }}/" \            
-        --dart-define-from-file=config.json \            
-        --csp \            
-        --no-source-maps      
+    run: flutter build web --release --base-href /${{ github.event.repository.name }}/ --dart-define-from-file=config.json  --csp --no-source-maps    
+
   - name: Deploy to GitHub Pages        
     uses: peaceiris/actions-gh-pages@v4        
     with:          
