@@ -1,72 +1,53 @@
-# Miscellaneous
-*.class
-*.log
-*.pyc
-*.swp
-.DS_Store
-.atom/
-.buildlog/
-.history
-.svn/
+```
+# Dependencies
+node_modules/
 
-# IntelliJ related
-*.iml
-*.ipr
-*.iws
+# Environment
+.env
+.env.local
+*.env.*
+
+# Logs and temp files
+*.log
+*.tmp
+
+# Editors
+.vscode/
 .idea/
 
-# The .vscode/ directory contains settings for Visual Studio Code
-.vscode/
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
 
-# Flutter/Dart/Pub related
-**/doc/api/
-**/ios/Flutter/.last_build_id
-.dart_tool/
-.flutter-plugins
-.flutter-plugins-dependencies
-.packages
-.pub-cache/
-.pub/
-/build/
+# Build outputs
+dist/
+build/
+*.so
+*.egg-info/
 
-# Android related
-**/android/app/src/main/res/generated/
-**/android/gen/
-**/android/out/
-
-# iOS related
-**/ios/Flutter/App.framework
-**/ios/Flutter/Flutter.framework
-**/ios/Flutter/Generated.xcconfig
-**/ios/Flutter/flutter_export_environment.sh
-**/ios/Flutter/flutter_tools_bundle_resources.sh
-**/ios/ServiceDefinitions.json
-**/ios/Runner/GeneratedPluginRegistrant.[mh]
-
-# Symbolication related
-/app.*.symbols
-
-# Bndl related
-/*.release.bundle
-
-# Windows related
-/windows/flutter/ephemeral/
-
-# Linux related
-/linux/flutter/ephemeral/
-
-# macOS related
-/macos/flutter/ephemeral/
-
-# Web related
-/web/stack_trace_mapper.js
-/web/main.dart.js
-/docs/main.dart.js
-flutter_service_worker.js
-*.dart.js
-*.part.js
-*.js.deps
-*.js.map
-
-# Local configuration
-config.json
+# Compression files
+*.zip
+*.gz
+*.tar
+*.tgz
+*.bz2
+*.xz
+*.7z
+*.rar
+*.zst
+*.lz4
+*.lzh
+*.cab
+*.arj
+*.rpm
+*.deb
+*.Z
+*.lz
+*.lzo
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst
+```
