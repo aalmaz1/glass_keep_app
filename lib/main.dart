@@ -135,8 +135,9 @@ class _GlassKeepAppState extends State<GlassKeepApp>
     _storageFuture = StorageService.init();
 
     // Single AnimationController for all glass distortion effects (8s duration for optimal visual)
+    // Reduced tick rate for better performance on Web
     _glassAnimationController = AnimationController(
-      duration: const Duration(seconds: 8),
+      duration: const Duration(seconds: 10), // Increased from 8s to 10s for less GPU work
       vsync: this,
     )..repeat();
 
@@ -186,8 +187,8 @@ class _GlassKeepAppState extends State<GlassKeepApp>
       return;
     }
 
-    // Reduced sensor update rate to save battery and CPU (was 20ms, now 100ms)
-    const sensorInterval = Duration(milliseconds: 100);
+    // Reduced sensor update rate to save battery and CPU (was 20ms, now 200ms for better performance)
+    const sensorInterval = Duration(milliseconds: 200);
 
     _accelerometerSubscription = accelerometerEventStream(
       samplingPeriod: sensorInterval,
@@ -222,7 +223,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
       },
     );
 
-    debugPrint('[SYSTEM-REBORN] Sensors initialized with reduced update rate (100ms)');
+    debugPrint('[SYSTEM-REBORN] Sensors initialized with reduced update rate (200ms)');
   }
 
   @override
