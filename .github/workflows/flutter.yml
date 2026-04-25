@@ -1,14 +1,16 @@
 name: Flutter CI and Deploy
 on:  
-push:    
-branches: ["main"]  
-workflow_dispatch:
+  push:    
+    branches:
+     - main
+  workflow_dispatch:
+
 permissions:  
-contents: write
+ contents: write
 jobs:  
-build-and-deploy:    
-runs-on: ubuntu-latest    
-steps:      
+ build-and-deploy:    
+  runs-on: ubuntu-latest    
+  steps:      
   - name: Checkout        
     uses: actions/checkout@v4 
     
