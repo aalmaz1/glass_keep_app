@@ -326,6 +326,7 @@ class _NotesScreenState extends State<NotesScreen> {
                     ),
                   );
                 } catch (e) {
+                  if (!outerContext.mounted) return;
                   scaffoldMessenger.showSnackBar(
                     SnackBar(
                       content: Text('${exportL10n.exportError}: $e'),
@@ -354,6 +355,7 @@ class _NotesScreenState extends State<NotesScreen> {
                     ),
                   );
                 } catch (e) {
+                  if (!outerContext.mounted) return;
                   scaffoldMessenger.showSnackBar(
                     SnackBar(
                       content: Text('${importL10n.importError}: $e'),
@@ -1095,7 +1097,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                     Expanded(child: Text(DateFormat('dd.MM HH:mm').format(_rem!), style: const TextStyle(fontSize: 12, color: AppColors.accentBlue, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)),
                     CupertinoButton(
                       padding: EdgeInsets.zero,
-                      minSize: 0.0,
+                      minimumSize: 0.0,
                       child: const Icon(CupertinoIcons.xmark_circle_fill, size: 18, color: Colors.white54),
                       onPressed: () => setState(() => _rem = null),
                     ),
