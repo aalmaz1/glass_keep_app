@@ -394,14 +394,15 @@ class _NotesScreenState extends State<NotesScreen> {
         builder: (context) => SettingsScreen(
           storage: widget.storage,
           onThemeChanged: (Color? color, List<Color>? blobs, Decoration? decoration) {
-          if (mounted) {
-            setState(() {
-              _backgroundColor = color;
-              _blobColors = blobs;
-              _backgroundDecoration = decoration;
-            });
-          }
-        },
+            if (mounted) {
+              GlassAnimationProvider.of(context)?.onThemeChanged?.call(color, blobs);
+              setState(() {
+                _backgroundColor = color;
+                _blobColors = blobs;
+                _backgroundDecoration = decoration;
+              });
+            }
+          },
         ),
       ),
     );
@@ -635,7 +636,6 @@ class NoteCard extends StatefulWidget {
 
 class _NoteCardState extends State<NoteCard> with AutomaticKeepAliveClientMixin {
   Uint8List? _decodedImage;
-  bool _isHovered = false;
 
   @override
   bool get wantKeepAlive => true;
@@ -664,24 +664,10 @@ class _NoteCardState extends State<NoteCard> with AutomaticKeepAliveClientMixin 
     super.build(context);
     final image = _decodedImage;
     return RepaintBoundary(
-      child: MouseRegion(
-        onEnter: (_) => setState(() => _isHovered = true),
-        onExit: (_) => setState(() => _isHovered = false),
-        child: AnimatedScale(
-          scale: _isHovered ? 1.01 : 1.0,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOutCubic,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeOutCubic,
-            transform: Matrix4.translationValues(0, _isHovered ? -6 : 0, 0),
-            child: _NoteCardContent(
-              note: widget.note,
-              decodedImage: image,
-              onTap: widget.onTap,
-            ),
-          ),
-        ),
+      child: _NoteCardContent(
+        note: widget.note,
+        decodedImage: image,
+        onTap: widget.onTap,
       ),
     );
   }

@@ -11,6 +11,9 @@ class GlassAnimationProvider extends InheritedWidget {
   final ValueNotifier<Offset> pointerPosition;
   final ValueNotifier<Offset> tilt;
   final ui.FragmentProgram? grainProgram;
+  final Color? themeColor;
+  final List<Color>? blobColors;
+  final Function(Color?, List<Color>?)? onThemeChanged;
 
   const GlassAnimationProvider({
     super.key,
@@ -20,6 +23,9 @@ class GlassAnimationProvider extends InheritedWidget {
     required this.pointerPosition,
     required this.tilt,
     this.grainProgram,
+    this.themeColor,
+    this.blobColors,
+    this.onThemeChanged,
     required super.child,
   });
 
@@ -32,7 +38,9 @@ class GlassAnimationProvider extends InheritedWidget {
   @override
   bool updateShouldNotify(GlassAnimationProvider oldWidget) =>
       oldWidget.locale != locale ||
-      oldWidget.grainProgram != grainProgram;
+      oldWidget.grainProgram != grainProgram ||
+      oldWidget.themeColor != themeColor ||
+      oldWidget.blobColors != blobColors;
 }
 
 /// Helper for listening to two ValueNotifiers

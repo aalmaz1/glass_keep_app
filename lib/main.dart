@@ -73,6 +73,8 @@ class _GlassKeepAppState extends State<GlassKeepApp>
   late Future<StorageService> _storageFuture;
   late AnimationController _glassAnimationController;
   Locale _locale = const Locale('en');
+  Color? _themeColor;
+  List<Color>? _blobColors;
 
   final ValueNotifier<Offset> _pointerPosition =
       ValueNotifier<Offset>(const Offset(-1000, -1000));
@@ -84,6 +86,13 @@ class _GlassKeepAppState extends State<GlassKeepApp>
 
   void _changeLocale(Locale newLocale) {
     setState(() => _locale = newLocale);
+  }
+
+  void _changeTheme(Color? color, List<Color>? blobs) {
+    setState(() {
+      _themeColor = color;
+      _blobColors = blobs;
+    });
   }
 
   @override
@@ -174,6 +183,9 @@ class _GlassKeepAppState extends State<GlassKeepApp>
       pointerPosition: _pointerPosition,
       tilt: _tilt,
       grainProgram: _grainProgram,
+      themeColor: _themeColor,
+      blobColors: _blobColors,
+      onThemeChanged: _changeTheme,
       child: Stack(
         children: [
           Listener(
