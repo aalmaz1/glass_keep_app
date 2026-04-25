@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:glass_keep/providers.dart';
 import 'package:fast_noise/fast_noise.dart';
 
