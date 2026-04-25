@@ -9,12 +9,13 @@ import 'package:fast_noise/fast_noise.dart';
 /// Optimized for minimal noise calculations
 class GlassDistortionPainter extends CustomPainter {
   static final _noise = PerlinNoise();
-  // Slightly increased grid resolution for smoother high-end distortion
-  // Reduced significantly on Web for performance
-  static const int _gridResolution = kIsWeb ? 4 : 8; // Reduced from 6/12 for better performance
+  // Reduced grid resolution for better performance on all platforms
+  static const int _gridResolution = 4; // Reduced from 4/8 for better performance
 
   // Cache for noise values to reduce redundant calculations
   static final Map<int, double> _noiseCache = {};
+  // Limit cache size to prevent memory bloat
+  static const int _maxCacheSize = 500;
 
   final double time;
   final double strength;
@@ -36,15 +37,15 @@ class GlassDistortionPainter extends CustomPainter {
     final cellWidth = size.width / _gridResolution;
     final cellHeight = size.height / _gridResolution;
 
-    // Shimmering effect by varying opacity based on time
-    final shimmer = (math.sin(time * 1.2) + 1) / 2 * 0.02;
+    // Reduced shimmer intensity for less GPU work
+    final shimmer = (math.sin(time * 0.6) + 1) / 2 * 0.015;
     final paint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.03 + shimmer)
+      ..color = Colors.white.withValues(alpha: 0.025 + shimmer)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.3;
+      ..strokeWidth = 0.25;
 
-    // Optimized cache clearing
-    if (_noiseCache.length > 2000) {
+    // Optimized cache clearing with size limit
+    if (_noiseCache.length > _maxCacheSize) {
       _noiseCache.clear();
     }
 
@@ -64,7 +65,7 @@ class GlassDistortionPainter extends CustomPainter {
         );
 
         final px = x * cellWidth + noiseVal;
-        final py = y * cellHeight + (math.sin(time * 0.8 + x * 0.5) * 0.8);
+        final py = y * cellHeight + (math.sin(time * 0.5 + x * 0.4) * 0.6);
 
         if (isFirstPoint) {
           path.moveTo(px, py);
@@ -89,7 +90,7 @@ class GlassDistortionPainter extends CustomPainter {
           cacheKey,
         );
 
-        final px = x * cellWidth + (math.cos(time * 0.8 + y * 0.5) * 0.8);
+        final px = x * cellWidth + (math.cos(time * 0.5 + y * 0.4) * 0.6);
         final py = y * cellHeight + noiseVal;
 
         if (isFirstPoint) {
@@ -116,9 +117,9 @@ class GlassDistortionPainter extends CustomPainter {
 
   /// Sample Perlin noise with single octave for better performance
   double _getNoiseOffset(double x, double y) {
-    final sampleX = (x * scale + time * 0.15) / _gridResolution;
+    final sampleX = (x * scale + time * 0.1) / _gridResolution;
     final sampleY = (y * scale) / _gridResolution;
-    return _noise.getNoise2(sampleX, sampleY) * strength;
+    return _noise.getNoise2(sampleX, sampleY) * strength * 0.8; // Reduced strength multiplier
   }
 
   @override

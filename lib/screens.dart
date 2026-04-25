@@ -653,6 +653,7 @@ class _NoteCardState extends State<NoteCard> with AutomaticKeepAliveClientMixin 
     final image = _decodedImage;
     return RepaintBoundary(
       child: _NoteCardContent(
+        key: ValueKey('note_content_${widget.note.id}_${widget.note.updatedAt.millisecondsSinceEpoch}'),
         note: widget.note,
         decodedImage: image,
         onTap: widget.onTap,
@@ -1072,8 +1073,8 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                     final d = await showDatePicker(context: context, initialDate: now, firstDate: now, lastDate: now.add(const Duration(days: 365)));
                     if (d == null || !context.mounted) return;
                     final t = await showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(now));
-                    if (!context.mounted) return;
-                    if (t != null) setState(() => _rem = DateTime(d.year, d.month, d.day, t.hour, t.minute));
+                    if (t == null || !context.mounted) return;
+                    setState(() => _rem = DateTime(d.year, d.month, d.day, t.hour, t.minute));
                   }),
                   if (reminder != null) ...[
                     const SizedBox(width: 8),
