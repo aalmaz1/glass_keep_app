@@ -11,7 +11,7 @@ class GlassDistortionPainter extends CustomPainter {
   static final _noise = PerlinNoise();
   // Slightly increased grid resolution for smoother high-end distortion
   // Reduced significantly on Web for performance
-  static const int _gridResolution = kIsWeb ? 6 : 12;
+  static const int _gridResolution = kIsWeb ? 4 : 8; // Reduced from 6/12 for better performance
 
   // Cache for noise values to reduce redundant calculations
   static final Map<int, double> _noiseCache = {};
@@ -123,7 +123,7 @@ class GlassDistortionPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(GlassDistortionPainter oldDelegate) =>
-      oldDelegate.time != time;
+      oldDelegate.time != time || oldDelegate.strength != strength;
 
   @override
   bool shouldRebuildSemantics(GlassDistortionPainter oldDelegate) => false;

@@ -198,6 +198,21 @@ class StorageService {
       final noteId = data['id']?.toString() ?? '';
       final updatedAt = data['updatedAt'] is int ? data['updatedAt'] as int : 0;
 
+      // Skip cache check for new notes (they won't be in cache yet)
+      // This ensures new notes are always processed
+      if (updatedAt == 0) {
+        try {
+          final note = Note.fromMap(data);
+          return note.copyWith(
+            title: EncryptionService().decryptText(note.title),
+            content: EncryptionService().decryptText(note.content),
+          );
+        } catch (e) {
+          debugPrint('[SYSTEM-REBORN] Skipping corrupted note $noteId: $e');
+          return null;
+        }
+      }
+
       final existingNote = _findCachedNote(oldNotes, noteId, updatedAt);
       if (existingNote != null) {
         return existingNote;

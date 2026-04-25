@@ -111,7 +111,7 @@ class _VisionGlassCardState extends State<VisionGlassCard> with SingleTickerProv
           if (widget.useDistortion) {
             mainContent = GlassDistortionEffect(
               borderRadius: widget.borderRadius,
-              distortionStrength: hoverValue * 1.5, // Animate distortion strength from 0.0 to 1.5 on hover
+              distortionStrength: hoverValue * 0.8, // Reduced from 1.5 to 0.8 for better performance
               child: mainContent,
             );
           }
