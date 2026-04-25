@@ -366,13 +366,15 @@ class _ShaderNoisePainter extends CustomPainter {
     if (_cachedFallback == null || _cachedSize != size) {
       final recorder = ui.PictureRecorder();
       final c = Canvas(recorder);
-      final random = math.Random(42);
       final paint = Paint()..color = Colors.white.withValues(alpha: 0.012);
 
-      for (int i = 0; i < 800; i++) {
-        final x = random.nextDouble() * size.width;
-        final y = random.nextDouble() * size.height;
-        c.drawRect(Rect.fromLTWH(x, y, 1.2, 1.2), paint);
+      // Use a simple deterministic pattern instead of random
+      for (int y = 0; y < size.height; y += 3) {
+        for (int x = 0; x < size.width; x += 3) {
+          if ((x + y) % 7 == 0) {
+            c.drawRect(Rect.fromLTWH(x.toDouble(), y.toDouble(), 1.2, 1.2), paint);
+          }
+        }
       }
       _cachedFallback = recorder.endRecording();
       _cachedSize = size;
