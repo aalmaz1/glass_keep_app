@@ -682,7 +682,7 @@ class _NoteCardContent extends StatelessWidget {
 
     return VisionGlassCard(
       padding: EdgeInsets.zero,
-      useDistortion: true,
+      useDistortion: false, // Отключаем искажение для карточек заметок для производительности
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(20),
@@ -831,7 +831,10 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
   }
 
   void _save() async {
-    if (_t.text.trim().isEmpty && _c.text.trim().isEmpty && _img == null) return;
+    if (_t.text.trim().isEmpty && _c.text.trim().isEmpty && _img == null) {
+      if (context.mounted) Navigator.pop(context);
+      return;
+    }
     final l10n = AppLocalizations.of(context);
 
     final updatedNote = widget.note.copyWith(
@@ -844,9 +847,14 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
     );
     try {
       await widget.storage.save(updatedNote);
-      _showSnackBar(l10n?.saveSuccess ?? 'Saved');
+      if (context.mounted) {
+        _showSnackBar(l10n?.saveSuccess ?? 'Saved');
+        Navigator.pop(context);
+      }
     } catch (e) {
-      _showSnackBar('${l10n?.saveError ?? 'Save error'}: $e', isError: true);
+      if (context.mounted) {
+        _showSnackBar('${l10n?.saveError ?? 'Save error'}: $e', isError: true);
+      }
     }
   }
 
@@ -944,7 +952,6 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                           onTap: () {
                             HapticFeedback.mediumImpact();
                             _save();
-                            Navigator.pop(context);
                           },
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),

@@ -33,27 +33,16 @@ class VisionGlassCard extends StatefulWidget {
   State<VisionGlassCard> createState() => _VisionGlassCardState();
 }
 
-class _VisionGlassCardState extends State<VisionGlassCard> with SingleTickerProviderStateMixin {
-  late AnimationController _hoverController;
-  late Animation<double> _hoverAnimation;
+class _VisionGlassCardState extends State<VisionGlassCard> {
   bool _isHovered = false;
 
   @override
   void initState() {
     super.initState();
-    _hoverController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 400),
-    );
-    _hoverAnimation = CurvedAnimation(
-      parent: _hoverController,
-      curve: Curves.easeInOutCubic,
-    );
   }
 
   @override
   void dispose() {
-    _hoverController.dispose();
     super.dispose();
   }
 
@@ -62,11 +51,6 @@ class _VisionGlassCardState extends State<VisionGlassCard> with SingleTickerProv
     setState(() {
       _isHovered = isHovered;
     });
-    if (isHovered) {
-      _hoverController.forward();
-    } else {
-      _hoverController.reverse();
-    }
   }
 
   @override
@@ -76,87 +60,82 @@ class _VisionGlassCardState extends State<VisionGlassCard> with SingleTickerProv
       debugPrint('[SYSTEM-REBORN] VisionGlassCard failed to find GlassAnimationProvider');
     }
 
+    // Simple hover value without animation controller
+    final hoverValue = _isHovered ? 1.0 : 0.0;
+    
+    Widget mainContent = Stack(
+      children: [
+        // Specular border highlights
+        Positioned.fill(
+          child: ValueListenableBuilder<Offset>(
+            valueListenable: animationProvider?.tilt ?? GlassAnimationProvider.defaultOffset,
+            builder: (context, currentTilt, _) {
+              return CustomPaint(
+                painter: _SpecularBorderPainter(
+                  borderRadius: widget.borderRadius,
+                  tilt: currentTilt,
+                  hoverIntensity: hoverValue,
+                ),
+              );
+            },
+          ),
+        ),
+        Padding(
+          padding: widget.padding ?? EdgeInsets.zero,
+          child: widget.child,
+        ),
+      ],
+    );
+
+    if (widget.useDistortion) {
+      mainContent = GlassDistortionEffect(
+        borderRadius: widget.borderRadius,
+        distortionStrength: hoverValue * 0.5,
+        child: mainContent,
+      );
+    }
+
+    final blurFilter = ui.ImageFilter.blur(
+      sigmaX: widget.blur + (hoverValue * 4),
+      sigmaY: widget.blur + (hoverValue * 4)
+    );
+    
+    Widget cardContent = Container(
+      decoration: BoxDecoration(
+        color: widget.color ?? AppColors.obsidianBlack.withValues(alpha: 0.5 + (hoverValue * 0.1)),
+        borderRadius: BorderRadius.circular(widget.borderRadius),
+        border: widget.border,
+      ),
+      child: mainContent,
+    );
+
     return MouseRegion(
       onEnter: (_) => _handleHover(true),
       onExit: (_) => _handleHover(false),
-      child: AnimatedBuilder(
-        animation: _hoverAnimation,
-        builder: (context, child) {
-          final hoverValue = _hoverAnimation.value;
-          
-          Widget mainContent = Stack(
-            children: [
-              // Specular border highlights
-              Positioned.fill(
-                child: ValueListenableBuilder<Offset>(
-                  valueListenable: animationProvider?.tilt ?? GlassAnimationProvider.defaultOffset,
-                  builder: (context, currentTilt, _) {
-                    return CustomPaint(
-                      painter: _SpecularBorderPainter(
-                        borderRadius: widget.borderRadius,
-                        tilt: currentTilt,
-                        hoverIntensity: hoverValue,
-                      ),
-                    );
-                  },
-                ),
-              ),
-              Padding(
-                padding: widget.padding ?? EdgeInsets.zero,
-                child: widget.child,
-              ),
-            ],
-          );
-
-          if (widget.useDistortion) {
-            mainContent = GlassDistortionEffect(
-              borderRadius: widget.borderRadius,
-              distortionStrength: hoverValue * 0.5, // Reduced from 0.8 to 0.5 for better performance
-              child: mainContent,
-            );
-          }
-
-          final blurFilter = ui.ImageFilter.blur(
-            sigmaX: widget.blur + (hoverValue * 4), // Reduced from 8 to 4 for better performance
-            sigmaY: widget.blur + (hoverValue * 4)
-          );
-          
-          Widget cardContent = Container(
-            decoration: BoxDecoration(
-              color: widget.color ?? AppColors.obsidianBlack.withValues(alpha: 0.5 + (hoverValue * 0.1)),
-              borderRadius: BorderRadius.circular(widget.borderRadius),
-              border: widget.border,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(widget.borderRadius),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.4 + (hoverValue * 0.1)),
+              blurRadius: 40 + (hoverValue * 20),
+              offset: Offset(0, 20 + (hoverValue * 10)),
+              spreadRadius: -10,
             ),
-            child: mainContent,
-          );
-
-          return Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(widget.borderRadius),
-              boxShadow: [
-                // Simplified shadow layers for better performance
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.4 + (hoverValue * 0.1)),
-                  blurRadius: 40 + (hoverValue * 20),
-                  offset: Offset(0, 20 + (hoverValue * 10)),
-                  spreadRadius: -10,
-                ),
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.2),
-                  blurRadius: 15,
-                  offset: const Offset(0, 8),
-                ),
-              ],
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.2),
+              blurRadius: 15,
+              offset: const Offset(0, 8),
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(widget.borderRadius),
-              child: BackdropFilter(
-                filter: blurFilter,
-                child: cardContent,
-              ),
-            ),
-          );
-        },
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(widget.borderRadius),
+          child: BackdropFilter(
+            filter: blurFilter,
+            child: cardContent,
+          ),
+        ),
       ),
     );
   }
@@ -180,19 +159,19 @@ class _SpecularBorderPainter extends CustomPainter {
     final rect = Offset.zero & size;
     final rrect = RRect.fromRectAndRadius(rect, Radius.circular(borderRadius));
 
-    // Single simplified border highlight for better performance
+    // Single simplified border highlight for better performance - no hover animation
     final paint1 = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.2 + (hoverIntensity * 0.4)
+      ..strokeWidth = 1.2
       ..shader = ui.Gradient.linear(
         Offset(tilt.dx * 15, tilt.dy * 15),
         Offset(size.width, size.height) + Offset(tilt.dx * 15, tilt.dy * 15),
         [
-          Colors.white.withValues(alpha: 0.7 + (hoverIntensity * 0.1)),
+          Colors.white.withValues(alpha: 0.7),
           Colors.white.withValues(alpha: 0.15),
-          Colors.white.withValues(alpha: 0.5 + (hoverIntensity * 0.15)),
+          Colors.white.withValues(alpha: 0.5),
           Colors.white.withValues(alpha: 0.08),
-          Colors.white.withValues(alpha: 0.6 + (hoverIntensity * 0.1)),
+          Colors.white.withValues(alpha: 0.6),
         ],
         const [0.0, 0.25, 0.5, 0.75, 1.0],
       );
@@ -203,8 +182,7 @@ class _SpecularBorderPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _SpecularBorderPainter oldDelegate) =>
       oldDelegate.borderRadius != borderRadius || 
-      oldDelegate.tilt != tilt || 
-      oldDelegate.hoverIntensity != hoverIntensity;
+      oldDelegate.tilt != tilt; // Removed hoverIntensity from repaint check for better performance
 }
 
 /// Premium static background with elegant gradient and noise texture
