@@ -182,11 +182,12 @@ class _GlassKeepAppState extends State<GlassKeepApp>
         defaultTargetPlatform == TargetPlatform.iOS;
 
     if (!isMobile) {
-      debugPrint('[SYSTEM-REBORN] Sensors not supported on this platform');
+      debugPrint('[SYSTEM-REBORN] Sensors not supported on this platform - skipping');
       return;
     }
 
-    const sensorInterval = Duration(milliseconds: 20);
+    // Reduced sensor update rate to save battery and CPU (was 20ms, now 100ms)
+    const sensorInterval = Duration(milliseconds: 100);
 
     _accelerometerSubscription = accelerometerEventStream(
       samplingPeriod: sensorInterval,
@@ -221,7 +222,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
       },
     );
 
-    debugPrint('[SYSTEM-REBORN] Sensors initialized successfully');
+    debugPrint('[SYSTEM-REBORN] Sensors initialized with reduced update rate (100ms)');
   }
 
   @override
