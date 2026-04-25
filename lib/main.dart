@@ -166,40 +166,51 @@ class _GlassKeepAppState extends State<GlassKeepApp>
 
   void _initSensors() {
     debugPrint('[SYSTEM-REBORN] Initializing sensors...');
-    if (defaultTargetPlatform == TargetPlatform.android ||
-        defaultTargetPlatform == TargetPlatform.iOS ||
-        kIsWeb) {
-      // Use longer sampling rate on Web to reduce overhead
-      final sensorInterval = kIsWeb 
-          ? const Duration(milliseconds: 100) 
-          : const Duration(milliseconds: 20);
+    final isMobile =
+        defaultTargetPlatform == TargetPlatform.android ||
+        defaultTargetPlatform == TargetPlatform.iOS;
 
-      _accelerometerSubscription =
-          accelerometerEventStream(samplingPeriod: sensorInterval).listen((AccelerometerEvent event) {
-        // Low-pass filter for smooth movement
+    if (!isMobile) {
+      debugPrint('[SYSTEM-REBORN] Sensors not supported on this platform');
+      return;
+    }
+
+    const sensorInterval = Duration(milliseconds: 20);
+
+    _accelerometerSubscription = accelerometerEventStream(
+      samplingPeriod: sensorInterval,
+    ).listen(
+      (AccelerometerEvent event) {
         final newTilt = Offset(
-          -event.x / 10.0, // Invert X for more natural tilt
+          -event.x / 10.0,
           event.y / 10.0,
         );
         _tilt.value = Offset(
           _tilt.value.dx * 0.9 + newTilt.dx * 0.1,
           _tilt.value.dy * 0.9 + newTilt.dy * 0.1,
         );
-      });
+      },
+      onError: (Object error, StackTrace _) {
+        debugPrint('[SYSTEM-REBORN] Accelerometer stream error: $error');
+      },
+    );
 
-      // Properly initialize gyroscope stream for Web and Mobile
-      _gyroscopeSubscription = gyroscopeEventStream(samplingPeriod: sensorInterval).listen((GyroscopeEvent event) {
-        // Integrate gyroscope for immediate responsiveness
+    _gyroscopeSubscription = gyroscopeEventStream(
+      samplingPeriod: sensorInterval,
+    ).listen(
+      (GyroscopeEvent event) {
         final kick = Offset(event.y * 0.015, event.x * 0.015);
         _tilt.value = Offset(
           (_tilt.value.dx + kick.dx).clamp(-1.5, 1.5),
           (_tilt.value.dy + kick.dy).clamp(-1.5, 1.5),
         );
-      });
-      debugPrint('[SYSTEM-REBORN] Sensors initialized successfully');
-    } else {
-      debugPrint('[SYSTEM-REBORN] Sensors not supported on this platform');
-    }
+      },
+      onError: (Object error, StackTrace _) {
+        debugPrint('[SYSTEM-REBORN] Gyroscope stream error: $error');
+      },
+    );
+
+    debugPrint('[SYSTEM-REBORN] Sensors initialized successfully');
   }
 
   @override
@@ -224,174 +235,171 @@ class _GlassKeepAppState extends State<GlassKeepApp>
       themeColor: _themeColor,
       blobColors: _blobColors,
       onThemeChanged: _changeTheme,
-      child: Stack(
-        children: [
-          const Positioned.fill(child: VisionBackground()),
-          Listener(
-            behavior: HitTestBehavior.translucent,
-            onPointerHover: (event) {
-              _pointerPosition.value = event.position;
-            },
-            onPointerMove: (event) {
-              _pointerPosition.value = event.position;
-            },
-            child: Container(
-              color: Colors.transparent,
-              child: MaterialApp(
-                title: 'Glass Keep',
-                debugShowCheckedModeBanner: false,
-                locale: _locale,
-                theme: ThemeData(
-                  brightness: Brightness.dark,
-                  useMaterial3: true,
-                  scaffoldBackgroundColor: AppColors.obsidianBlack,
-                  colorSchemeSeed: AppColors.accentDeepPurple,
-                  fontFamily: kIsWeb ? 'Roboto' : 'Noto Sans',
-                  fontFamilyFallback: const ['Roboto', 'Arial'],
-                  cupertinoOverrideTheme: const CupertinoThemeData(
-                    brightness: Brightness.dark,
-                    primaryColor: AppColors.accentDeepPurple,
-                  ),
-                  appBarTheme: const AppBarTheme(
-                    backgroundColor: Colors.transparent,
-                    elevation: 0,
-                    centerTitle: true,
-                    titleTextStyle: TextStyle(
-                      color: Colors.white,
-                      fontSize: 17,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: -0.4,
-                    ),
-                  ),
-                  inputDecorationTheme: InputDecorationTheme(
-                    filled: true,
-                    fillColor: Colors.transparent,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 14,
+      child: Listener(
+        behavior: HitTestBehavior.translucent,
+        onPointerHover: (event) {
+          _pointerPosition.value = event.position;
+        },
+        onPointerMove: (event) {
+          _pointerPosition.value = event.position;
+        },
+        child: MaterialApp(
+          title: 'Glass Keep',
+          debugShowCheckedModeBanner: false,
+          locale: _locale,
+          theme: ThemeData(
+            brightness: Brightness.dark,
+            useMaterial3: true,
+            scaffoldBackgroundColor: AppColors.obsidianBlack,
+            colorSchemeSeed: AppColors.accentDeepPurple,
+            fontFamily: kIsWeb ? 'Roboto' : 'Noto Sans',
+            fontFamilyFallback: const ['Roboto', 'Arial'],
+            cupertinoOverrideTheme: const CupertinoThemeData(
+              brightness: Brightness.dark,
+              primaryColor: AppColors.accentDeepPurple,
+            ),
+            appBarTheme: const AppBarTheme(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              centerTitle: true,
+              titleTextStyle: TextStyle(
+                color: Colors.white,
+                fontSize: 17,
+                fontWeight: FontWeight.w600,
+                letterSpacing: -0.4,
+              ),
+            ),
+            inputDecorationTheme: InputDecorationTheme(
+              filled: true,
+              fillColor: Colors.transparent,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 14,
+              ),
+            ),
+          ),
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          builder: (context, child) {
+            return Stack(
+              children: [
+                if (child != null) child,
+                const Positioned(
+                  bottom: 20,
+                  left: 0,
+                  right: 0,
+                  child: IgnorePointer(
+                    child: Center(
+                      child: Text(
+                        'SYSTEM-REBORN-V1.6.0',
+                        style: TextStyle(
+                          color: Colors.white54,
+                          fontSize: 10,
+                          letterSpacing: 1.2,
+                          fontWeight: FontWeight.w300,
+                        ),
+                      ),
                     ),
                   ),
                 ),
-                localizationsDelegates: const [
-                  AppLocalizations.delegate,
-                  GlobalMaterialLocalizations.delegate,
-                  GlobalWidgetsLocalizations.delegate,
-                  GlobalCupertinoLocalizations.delegate,
-                ],
-                supportedLocales: AppLocalizations.supportedLocales,
-                home: StreamBuilder<User?>(
-                  stream: _authStream,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.active) {
-                      debugPrint('[SYSTEM-REBORN] Auth state changed: ${snapshot.hasData ? "LOGGED_IN" : "LOGGED_OUT"}');
-                    }
-                    if (snapshot.hasError) {
+              ],
+            );
+          },
+          home: StreamBuilder<User?>(
+            stream: _authStream,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.active) {
+                debugPrint('[SYSTEM-REBORN] Auth state changed: ${snapshot.hasData ? "LOGGED_IN" : "LOGGED_OUT"}');
+              }
+              if (snapshot.hasError) {
+                return Scaffold(
+                  backgroundColor: AppColors.obsidianBlack,
+                  body: Stack(
+                    children: [
+                      const Positioned.fill(child: VisionBackground()),
+                      Center(
+                        child: Text('Auth Error: ${snapshot.error}', style: const TextStyle(color: Colors.white)),
+                      ),
+                    ],
+                  ),
+                );
+              }
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Scaffold(
+                  backgroundColor: AppColors.obsidianBlack,
+                  body: Stack(
+                    children: [
+                      const Positioned.fill(child: VisionBackground()),
+                      const Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            _LoadingLogo(),
+                            SizedBox(height: 24),
+                            CupertinoActivityIndicator(
+                              color: AppColors.accentDeepPurple,
+                              radius: 14,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              if (snapshot.hasData) {
+                return FutureBuilder<StorageService>(
+                  future: _storageFuture,
+                  builder: (context, storeSnapshot) {
+                    if (storeSnapshot.hasError) {
                       return Scaffold(
                         backgroundColor: AppColors.obsidianBlack,
                         body: Stack(
                           children: [
                             const Positioned.fill(child: VisionBackground()),
                             Center(
-                              child: Text('Auth Error: ${snapshot.error}', style: const TextStyle(color: Colors.white)),
+                              child: Text('Storage Error: ${storeSnapshot.error}', style: const TextStyle(color: Colors.white)),
                             ),
                           ],
                         ),
                       );
                     }
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Scaffold(
-                        backgroundColor: AppColors.obsidianBlack,
-                        body: Stack(
-                          children: [
-                            const Positioned.fill(child: VisionBackground()),
-                            const Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  _LoadingLogo(),
-                                  SizedBox(height: 24),
-                                  CupertinoActivityIndicator(
-                                    color: AppColors.accentDeepPurple,
-                                    radius: 14,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
+                    final storage = storeSnapshot.data;
+                    if (storage != null) {
+                      return BiometricAuthWrapper(
+                        child: NotesScreen(storage: storage),
                       );
                     }
-
-                    if (snapshot.hasData) {
-                      return FutureBuilder<StorageService>(
-                        future: _storageFuture,
-                        builder: (context, storeSnapshot) {
-                          if (storeSnapshot.hasError) {
-                            return Scaffold(
-                              backgroundColor: AppColors.obsidianBlack,
-                              body: Stack(
-                                children: [
-                                  const Positioned.fill(child: VisionBackground()),
-                                  Center(
-                                    child: Text('Storage Error: ${storeSnapshot.error}', style: const TextStyle(color: Colors.white)),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }
-                          final storage = storeSnapshot.data;
-                          if (storage != null) {
-                            return BiometricAuthWrapper(
-                              child: NotesScreen(storage: storage),
-                            );
-                          }
-                          return Scaffold(
-                            backgroundColor: AppColors.obsidianBlack,
-                            body: Stack(
-                              children: [
-                                const Positioned.fill(child: VisionBackground()),
-                                const Center(
-                                  child: CupertinoActivityIndicator(
-                                    color: AppColors.accentDeepPurple,
-                                  ),
-                                ),
-                              ],
+                    return Scaffold(
+                      backgroundColor: AppColors.obsidianBlack,
+                      body: Stack(
+                        children: [
+                          const Positioned.fill(child: VisionBackground()),
+                          const Center(
+                            child: CupertinoActivityIndicator(
+                              color: AppColors.accentDeepPurple,
                             ),
-                          );
-                        },
-                      );
-                    }
-                    return const AuthScreen();
+                          ),
+                        ],
+                      ),
+                    );
                   },
-                ),
-              ),
-            ),
+                );
+              }
+              return const AuthScreen();
+            },
           ),
-
-          // Deployment verification text - always at the bottom of the stack
-          const Positioned(
-            bottom: 20,
-            left: 0,
-            right: 0,
-            child: IgnorePointer(
-              child: Center(
-                child: Text(
-                  'SYSTEM-REBORN-V1.6.0',
-                  style: TextStyle(
-                    color: Colors.white54,
-                    fontSize: 10,
-                    letterSpacing: 1.2,
-                    fontWeight: FontWeight.w300,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
