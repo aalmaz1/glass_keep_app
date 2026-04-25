@@ -36,9 +36,9 @@ void main() async {
             defaultTargetPlatform == TargetPlatform.linux ||
             defaultTargetPlatform == TargetPlatform.macOS)) {
       await windowManager.ensureInitialized();
-      const WindowOptions windowOptions = WindowOptions(
-        size: Size(1200, 800),
-        minimumSize: Size(400, 600),
+      final WindowOptions windowOptions = WindowOptions(
+        size: const Size(1200, 800),
+        minimumSize: const Size(400, 600),
         center: true,
         backgroundColor: Colors.transparent,
         skipTaskbar: false,
@@ -52,11 +52,13 @@ void main() async {
 
     FlutterError.onError = (FlutterErrorDetails details) {
       debugPrint('FlutterError: ${details.exception}');
+      debugPrint('Stack trace: ${details.stack}');
     };
 
     runApp(const GlassKeepApp());
   }, (error, stack) {
     debugPrint('Uncaught error: $error');
+    debugPrint('Stack trace: $stack');
   });
 }
 
@@ -139,9 +141,9 @@ class _GlassKeepAppState extends State<GlassKeepApp>
         defaultTargetPlatform == TargetPlatform.iOS ||
         kIsWeb) {
       // Use longer sampling rate on Web to reduce overhead
-      const sensorInterval = kIsWeb 
-          ? Duration(milliseconds: 100) 
-          : Duration(milliseconds: 20);
+      final sensorInterval = kIsWeb 
+          ? const Duration(milliseconds: 100) 
+          : const Duration(milliseconds: 20);
 
       _accelerometerSubscription =
           accelerometerEventStream(samplingPeriod: sensorInterval).listen((AccelerometerEvent event) {
@@ -260,22 +262,24 @@ class _GlassKeepAppState extends State<GlassKeepApp>
                     }
                     if (snapshot.hasError) {
                       return Scaffold(
+                        backgroundColor: AppColors.obsidianBlack,
                         body: Stack(
                           children: [
                             const Positioned.fill(child: VisionBackground()),
                             Center(
-                              child: Text('Auth Error: ${snapshot.error}'),
+                              child: Text('Auth Error: ${snapshot.error}', style: const TextStyle(color: Colors.white)),
                             ),
                           ],
                         ),
                       );
                     }
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Scaffold(
+                      return Scaffold(
+                        backgroundColor: AppColors.obsidianBlack,
                         body: Stack(
                           children: [
                             const Positioned.fill(child: VisionBackground()),
-                            Center(
+                            const Center(
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
@@ -299,11 +303,12 @@ class _GlassKeepAppState extends State<GlassKeepApp>
                         builder: (context, storeSnapshot) {
                           if (storeSnapshot.hasError) {
                             return Scaffold(
+                              backgroundColor: AppColors.obsidianBlack,
                               body: Stack(
                                 children: [
                                   const Positioned.fill(child: VisionBackground()),
                                   Center(
-                                    child: Text('Storage Error: ${storeSnapshot.error}'),
+                                    child: Text('Storage Error: ${storeSnapshot.error}', style: const TextStyle(color: Colors.white)),
                                   ),
                                 ],
                               ),
@@ -315,11 +320,12 @@ class _GlassKeepAppState extends State<GlassKeepApp>
                               child: NotesScreen(storage: storage),
                             );
                           }
-                          return const Scaffold(
+                          return Scaffold(
+                            backgroundColor: AppColors.obsidianBlack,
                             body: Stack(
                               children: [
                                 const Positioned.fill(child: VisionBackground()),
-                                Center(
+                                const Center(
                                   child: CupertinoActivityIndicator(
                                     color: AppColors.accentDeepPurple,
                                   ),
@@ -377,14 +383,14 @@ class _LoadingLogo extends StatelessWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              AppColors.accentBlue.withValues(alpha: 0.8),
-              AppColors.accentDeepPurple.withValues(alpha: 0.8),
+              AppColors.accentBlue.withOpacity(0.8),
+              AppColors.accentDeepPurple.withOpacity(0.8),
             ],
           ),
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: AppColors.accentDeepPurple.withValues(alpha: 0.3),
+              color: AppColors.accentDeepPurple.withOpacity(0.3),
               blurRadius: 20,
               offset: const Offset(0, 10),
             ),
@@ -475,6 +481,7 @@ class _BiometricAuthWrapperState extends State<BiometricAuthWrapper> {
     final unlockStr = l10n?.unlock ?? 'Unlock';
 
     return Scaffold(
+      backgroundColor: AppColors.obsidianBlack,
       body: Stack(
         children: [
           const Positioned.fill(child: VisionBackground()),
@@ -505,13 +512,13 @@ class _BiometricAuthWrapperState extends State<BiometricAuthWrapper> {
                           authenticateStr,
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.7),
+                            color: Colors.white.withOpacity(0.7),
                           ),
                         ),
                         const SizedBox(height: 32),
                         GlassButton(
                           onTap: _authenticate,
-                          color: AppColors.accentDeepPurple.withValues(alpha: 0.2),
+                          color: AppColors.accentDeepPurple.withOpacity(0.2),
                           borderRadius: 16,
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),

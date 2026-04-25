@@ -39,7 +39,7 @@ class GlassDistortionPainter extends CustomPainter {
     // Shimmering effect by varying opacity based on time
     final shimmer = (math.sin(time * 1.2) + 1) / 2 * 0.02;
     final paint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.03 + shimmer)
+      ..color = Colors.white.withOpacity(0.03 + shimmer)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 0.3;
 

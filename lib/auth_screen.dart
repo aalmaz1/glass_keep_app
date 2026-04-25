@@ -103,14 +103,14 @@ class _AuthScreenState extends State<AuthScreen> {
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                             colors: [
-                              AppColors.accentBlue.withValues(alpha: 0.8),
-                              AppColors.accentDeepPurple.withValues(alpha: 0.8),
+                              AppColors.accentBlue.withOpacity(0.8),
+                              AppColors.accentDeepPurple.withOpacity(0.8),
                             ],
                           ),
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                              color: AppColors.accentBlue.withValues(alpha: 0.3),
+                              color: AppColors.accentBlue.withOpacity(0.3),
                               blurRadius: 20,
                               offset: const Offset(0, 10),
                             ),
@@ -150,7 +150,7 @@ class _AuthScreenState extends State<AuthScreen> {
                         ? 'Sign in to sync your notes' 
                         : 'Join us to keep your thoughts safe',
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.6),
+                        color: Colors.white.withOpacity(0.6),
                         fontSize: 15,
                       ),
                     ),
@@ -167,7 +167,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             style: const TextStyle(color: Colors.white),
                             decoration: InputDecoration(
                               labelText: 'Email',
-                              labelStyle: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
+                              labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
                               prefixIcon: const Icon(
                                 CupertinoIcons.envelope_fill, 
                                 color: Colors.white, 
@@ -176,7 +176,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.3)),
+                                borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
@@ -184,7 +184,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               ),
                               errorBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: Colors.red.withValues(alpha: 0.5)),
+                                borderSide: BorderSide(color: Colors.red.withOpacity(0.5)),
                               ),
                               focusedErrorBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
@@ -210,7 +210,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             style: const TextStyle(color: Colors.white),
                             decoration: InputDecoration(
                               labelText: 'Password',
-                              labelStyle: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
+                              labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
                               prefixIcon: const Icon(
                                 CupertinoIcons.lock_fill, 
                                 color: Colors.white, 
@@ -220,7 +220,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               suffixIcon: IconButton(
                                 icon: Icon(
                                   _obscurePassword ? CupertinoIcons.eye_fill : CupertinoIcons.eye_slash_fill,
-                                  color: Colors.white.withValues(alpha: 0.5),
+                                  color: Colors.white.withOpacity(0.5),
                                   size: 20,
                                 ),
                                 onPressed: () {
@@ -230,7 +230,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.3)),
+                                borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
@@ -238,7 +238,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               ),
                               errorBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: Colors.red.withValues(alpha: 0.5)),
+                                borderSide: BorderSide(color: Colors.red.withOpacity(0.5)),
                               ),
                               focusedErrorBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
@@ -266,10 +266,10 @@ class _AuthScreenState extends State<AuthScreen> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.red.withValues(alpha: 0.2),
+                          color: Colors.red.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: Colors.red.withValues(alpha: 0.5),
+                            color: Colors.red.withOpacity(0.5),
                           ),
                         ),
                         child: Text(
