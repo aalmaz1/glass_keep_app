@@ -195,7 +195,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
       onThemeChanged: _changeTheme,
       child: Stack(
         children: [
-          const Positioned.fill(child: ColoredBox(color: AppColors.obsidianBlack)),
+          const Positioned.fill(child: VisionBackground()),
           Listener(
             behavior: HitTestBehavior.translucent,
             onPointerHover: (event) {
@@ -205,7 +205,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
               _pointerPosition.value = event.position;
             },
             child: Container(
-              color: AppColors.obsidianBlack,
+              color: Colors.transparent,
               child: MaterialApp(
                 title: 'Glass Keep',
                 debugShowCheckedModeBanner: false,
@@ -260,8 +260,13 @@ class _GlassKeepAppState extends State<GlassKeepApp>
                     }
                     if (snapshot.hasError) {
                       return Scaffold(
-                        body: Center(
-                          child: Text('Auth Error: ${snapshot.error}'),
+                        body: Stack(
+                          children: [
+                            const Positioned.fill(child: VisionBackground()),
+                            Center(
+                              child: Text('Auth Error: ${snapshot.error}'),
+                            ),
+                          ],
                         ),
                       );
                     }
@@ -269,7 +274,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
                       return const Scaffold(
                         body: Stack(
                           children: [
-                            Positioned.fill(child: VisionBackground()),
+                            const Positioned.fill(child: VisionBackground()),
                             Center(
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -294,8 +299,13 @@ class _GlassKeepAppState extends State<GlassKeepApp>
                         builder: (context, storeSnapshot) {
                           if (storeSnapshot.hasError) {
                             return Scaffold(
-                              body: Center(
-                                child: Text('Storage Error: ${storeSnapshot.error}'),
+                              body: Stack(
+                                children: [
+                                  const Positioned.fill(child: VisionBackground()),
+                                  Center(
+                                    child: Text('Storage Error: ${storeSnapshot.error}'),
+                                  ),
+                                ],
                               ),
                             );
                           }
@@ -308,7 +318,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
                           return const Scaffold(
                             body: Stack(
                               children: [
-                                Positioned.fill(child: VisionBackground()),
+                                const Positioned.fill(child: VisionBackground()),
                                 Center(
                                   child: CupertinoActivityIndicator(
                                     color: AppColors.accentDeepPurple,

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'glass-keep-v1';
+const CACHE_NAME = 'glass-keep-v1.6.0';
 const urlsToCache = [
   '/',
   '/index.html',
