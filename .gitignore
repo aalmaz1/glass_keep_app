@@ -67,3 +67,6 @@ flutter_service_worker.js
 *.part.js
 *.js.deps
 *.js.map
+
+# Local configuration
+config.json
