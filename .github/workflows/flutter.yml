@@ -36,7 +36,7 @@ jobs:
 
       - name: Build Web
         run: |
-          flutter build web --release --web-renderer auto --base-href="./" --dart-define-from-file=config.json
+          flutter build web --release --renderer auto --base-href="./" --dart-define-from-file=config.json
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4

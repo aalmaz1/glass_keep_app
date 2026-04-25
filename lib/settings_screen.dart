@@ -177,7 +177,7 @@ class SettingsScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppColors.accentDeepPurple.withOpacity(0.1),
+                color: AppColors.accentDeepPurple.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(icon, color: AppColors.accentDeepPurple, size: 20, shadows: AppColors.iconShadows),

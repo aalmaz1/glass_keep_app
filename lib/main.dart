@@ -51,14 +51,30 @@ void main() async {
     }
 
     FlutterError.onError = (FlutterErrorDetails details) {
-      debugPrint('FlutterError: ${details.exception}');
-      debugPrint('Stack trace: ${details.stack}');
+      FlutterError.presentError(details);
+      debugPrint('----------------------------------------');
+      debugPrint('FLUTTER ERROR DETECTED');
+      debugPrint('Exception: ${details.exception}');
+      debugPrint('Stack Trace:\n${details.stack}');
+      debugPrint('----------------------------------------');
+    };
+
+    ui.PlatformDispatcher.instance.onError = (error, stack) {
+      debugPrint('----------------------------------------');
+      debugPrint('PLATFORM DISPATCHER ERROR');
+      debugPrint('Error: $error');
+      debugPrint('Stack Trace:\n$stack');
+      debugPrint('----------------------------------------');
+      return true;
     };
 
     runApp(const GlassKeepApp());
   }, (error, stack) {
-    debugPrint('Uncaught error: $error');
-    debugPrint('Stack trace: $stack');
+    debugPrint('----------------------------------------');
+    debugPrint('ZONED GUARDED ERROR');
+    debugPrint('Error: $error');
+    debugPrint('Stack Trace:\n$stack');
+    debugPrint('----------------------------------------');
   });
 }
 
@@ -383,14 +399,14 @@ class _LoadingLogo extends StatelessWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              AppColors.accentBlue.withOpacity(0.8),
-              AppColors.accentDeepPurple.withOpacity(0.8),
+              AppColors.accentBlue.withValues(alpha: 0.8),
+              AppColors.accentDeepPurple.withValues(alpha: 0.8),
             ],
           ),
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: AppColors.accentDeepPurple.withOpacity(0.3),
+              color: AppColors.accentDeepPurple.withValues(alpha: 0.3),
               blurRadius: 20,
               offset: const Offset(0, 10),
             ),
@@ -512,13 +528,13 @@ class _BiometricAuthWrapperState extends State<BiometricAuthWrapper> {
                           authenticateStr,
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.7),
+                            color: Colors.white.withValues(alpha: 0.7),
                           ),
                         ),
                         const SizedBox(height: 32),
                         GlassButton(
                           onTap: _authenticate,
-                          color: AppColors.accentDeepPurple.withOpacity(0.2),
+                          color: AppColors.accentDeepPurple.withValues(alpha: 0.2),
                           borderRadius: 16,
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
