@@ -214,12 +214,12 @@ class _GlassKeepAppState extends State<GlassKeepApp>
                   brightness: Brightness.dark,
                   useMaterial3: true,
                   scaffoldBackgroundColor: AppColors.obsidianBlack,
-                  colorSchemeSeed: AppColors.accentBlue,
+                  colorSchemeSeed: AppColors.accentDeepPurple,
                   fontFamily: kIsWeb ? 'Roboto' : 'Noto Sans',
                   fontFamilyFallback: const ['Roboto', 'Arial'],
                   cupertinoOverrideTheme: const CupertinoThemeData(
                     brightness: Brightness.dark,
-                    primaryColor: AppColors.accentBlue,
+                    primaryColor: AppColors.accentDeepPurple,
                   ),
                   appBarTheme: const AppBarTheme(
                     backgroundColor: Colors.transparent,
@@ -277,7 +277,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
                                   _LoadingLogo(),
                                   SizedBox(height: 24),
                                   CupertinoActivityIndicator(
-                                    color: AppColors.accentBlue,
+                                    color: AppColors.accentDeepPurple,
                                     radius: 14,
                                   ),
                                 ],
@@ -311,7 +311,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
                                 Positioned.fill(child: VisionBackground()),
                                 Center(
                                   child: CupertinoActivityIndicator(
-                                    color: AppColors.accentBlue,
+                                    color: AppColors.accentDeepPurple,
                                   ),
                                 ),
                               ],
@@ -325,6 +325,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
                 ),
               ),
             ),
+          ),
 
           // Deployment verification text - always at the bottom of the stack
           const Positioned(
@@ -373,7 +374,7 @@ class _LoadingLogo extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: AppColors.accentBlue.withValues(alpha: 0.3),
+              color: AppColors.accentDeepPurple.withValues(alpha: 0.3),
               blurRadius: 20,
               offset: const Offset(0, 10),
             ),
@@ -469,7 +470,7 @@ class _BiometricAuthWrapperState extends State<BiometricAuthWrapper> {
           const Positioned.fill(child: VisionBackground()),
           Center(
             child: _isChecking
-                ? const CupertinoActivityIndicator(color: AppColors.accentBlue)
+                ? const CupertinoActivityIndicator(color: AppColors.accentDeepPurple)
                 : VisionGlassCard(
                     padding: const EdgeInsets.all(32),
                     child: Column(
@@ -478,7 +479,7 @@ class _BiometricAuthWrapperState extends State<BiometricAuthWrapper> {
                         const Icon(
                           CupertinoIcons.lock_shield_fill,
                           size: 64,
-                          color: AppColors.accentBlue,
+                          color: AppColors.accentDeepPurple,
                         ),
                         const SizedBox(height: 24),
                         Text(
@@ -500,7 +501,7 @@ class _BiometricAuthWrapperState extends State<BiometricAuthWrapper> {
                         const SizedBox(height: 32),
                         GlassButton(
                           onTap: _authenticate,
-                          color: AppColors.accentBlue.withValues(alpha: 0.2),
+                          color: AppColors.accentDeepPurple.withValues(alpha: 0.2),
                           borderRadius: 16,
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),

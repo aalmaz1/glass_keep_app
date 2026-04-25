@@ -1,5 +1,6 @@
 import 'package:encrypt/encrypt.dart' as encrypt_lib;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter/foundation.dart';
 
 class EncryptionService {
   static final EncryptionService _instance = EncryptionService._internal();
@@ -13,6 +14,7 @@ class EncryptionService {
   encrypt_lib.Key? _key;
 
   Future<void> init() async {
+    debugPrint('[SYSTEM-REBORN] Initializing EncryptionService...');
     String? base64Key = await _storage.read(key: _keyAlias);
     if (base64Key == null) {
       final newKey = encrypt_lib.Key.fromSecureRandom(32);
@@ -21,6 +23,7 @@ class EncryptionService {
     } else {
       _key = encrypt_lib.Key.fromBase64(base64Key);
     }
+    debugPrint('[SYSTEM-REBORN] EncryptionService initialized');
   }
 
   String encryptText(String text) {

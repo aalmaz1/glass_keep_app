@@ -524,17 +524,17 @@ class LabelChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: AppColors.accentBlue.withValues(alpha: 0.15),
+        color: AppColors.accentDeepPurple.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(6),
         border: Border.all(
-          color: AppColors.accentBlue.withValues(alpha: 0.2),
+          color: AppColors.accentDeepPurple.withValues(alpha: 0.2),
           width: 0.5,
         ),
       ),
       child: Text(
         label,
         style: const TextStyle(
-          color: AppColors.accentBlue,
+          color: AppColors.accentDeepPurple,
           fontSize: 11,
           fontWeight: FontWeight.w500,
         ),

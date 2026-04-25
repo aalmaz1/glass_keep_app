@@ -560,11 +560,11 @@ class _NewNoteButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
         decoration: BoxDecoration(
-          color: AppColors.accentBlue.withValues(alpha: 0.9),
+          color: AppColors.accentDeepPurple.withValues(alpha: 0.9),
           borderRadius: BorderRadius.circular(30),
           boxShadow: [
             BoxShadow(
-              color: AppColors.accentBlue.withValues(alpha: 0.3),
+              color: AppColors.accentDeepPurple.withValues(alpha: 0.3),
               blurRadius: 16,
               offset: const Offset(0, 6),
             ),
@@ -706,7 +706,7 @@ class _NoteCardContent extends StatelessWidget {
                     const Icon(
                       CupertinoIcons.pin,
                       size: 14,
-                      color: AppColors.accentBlue,
+                      color: AppColors.accentDeepPurple,
                       shadows: AppColors.iconShadows,
                     ),
                   if (note.isPinned) const SizedBox(width: 6),
@@ -752,7 +752,7 @@ class _NoteCardContent extends StatelessWidget {
                     const Icon(
                       CupertinoIcons.alarm,
                       size: 14,
-                      color: AppColors.accentBlue,
+                      color: AppColors.accentDeepPurple,
                       shadows: AppColors.iconShadows,
                     ),
                     const SizedBox(width: 4),
@@ -760,7 +760,7 @@ class _NoteCardContent extends StatelessWidget {
                       DateFormat('dd.MM HH:mm').format(reminder),
                       style: const TextStyle(
                         fontSize: 12,
-                        color: AppColors.accentBlue,
+                        color: AppColors.accentDeepPurple,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -818,7 +818,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: isError ? AppColors.accentRed : AppColors.accentBlue,
+        backgroundColor: isError ? AppColors.accentRed : AppColors.accentDeepPurple,
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.all(16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -892,7 +892,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                                 padding: EdgeInsets.zero,
                                 child: Icon(
                                   CupertinoIcons.pin,
-                                  color: widget.note.isPinned ? AppColors.accentBlue : AppColors.accentBlue.withValues(alpha: 0.3),
+                                  color: widget.note.isPinned ? AppColors.accentDeepPurple : AppColors.accentDeepPurple.withValues(alpha: 0.3),
                                   size: 22,
                                   shadows: AppColors.iconShadows,
                                 ),
@@ -945,9 +945,9 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                             decoration: BoxDecoration(
-                              color: AppColors.accentBlue.withValues(alpha: 0.9),
+                              color: AppColors.accentDeepPurple.withValues(alpha: 0.9),
                               borderRadius: BorderRadius.circular(30),
-                              boxShadow: [BoxShadow(color: AppColors.accentBlue.withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 4))],
+                              boxShadow: [BoxShadow(color: AppColors.accentDeepPurple.withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 4))],
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -1075,7 +1075,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                   }),
                   if (reminder != null) ...[
                     const SizedBox(width: 8),
-                    Expanded(child: Text(DateFormat('dd.MM HH:mm').format(reminder), style: const TextStyle(fontSize: 12, color: AppColors.accentBlue, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)),
+                    Expanded(child: Text(DateFormat('dd.MM HH:mm').format(reminder), style: const TextStyle(fontSize: 12, color: AppColors.accentDeepPurple, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)),
                     CupertinoButton(
                       padding: EdgeInsets.zero,
                       minimumSize: Size.zero,
@@ -1119,7 +1119,7 @@ class _TrashScreenState extends State<TrashScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: isError ? AppColors.accentRed : AppColors.accentBlue,
+        backgroundColor: isError ? AppColors.accentRed : AppColors.accentDeepPurple,
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.all(16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
