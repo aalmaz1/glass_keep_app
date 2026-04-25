@@ -1,5 +1,4 @@
 import 'dart:ui' as ui;
-import 'dart:math' as math;
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -231,8 +230,8 @@ class _SpecularBorderPainter extends CustomPainter {
       oldDelegate.hoverIntensity != hoverIntensity;
 }
 
-/// Premium animated background with moving aurora blobs and noise texture
-/// Enhanced in V1.6.0 with more layers and support for theme-specific colors.
+/// Premium static background with elegant gradient and noise texture
+/// V1.7.0: Removed animated blobs for clean glassmorphism aesthetic
 class VisionBackground extends StatelessWidget {
   final Color? backgroundColor;
   final List<Color>? blobColors;
@@ -249,170 +248,80 @@ class VisionBackground extends StatelessWidget {
     if (animationProvider == null) {
       debugPrint('[SYSTEM-REBORN] VisionBackground failed to find GlassAnimationProvider');
     }
-    final animation = animationProvider?.animationController;
     
-    // Default colors if none provided - preferring provider state if available
+    // Use theme color if available, otherwise default to obsidian black
     final bg = backgroundColor ?? animationProvider?.themeColor ?? AppColors.obsidianBlack;
-    final colors = blobColors ?? animationProvider?.blobColors ?? [
-      AppColors.accentIndigo,
-      AppColors.accentTeal,
-      AppColors.accentDeepPurple,
-      AppColors.accentIndigo,
-      AppColors.accentTeal,
-      AppColors.accentDeepPurple,
-    ];
 
     return Container(
       width: double.infinity,
       height: double.infinity,
-      color: bg,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            bg,
+            bg.withValues(alpha: 0.95),
+            AppColors.accentDeepPurple.withValues(alpha: 0.08),
+            bg.withValues(alpha: 0.98),
+          ],
+          stops: const [0.0, 0.4, 0.7, 1.0],
+        ),
+      ),
       child: Stack(
         children: [
-          if (animation != null)
-            AnimatedBuilder(
-              animation: animation,
-              builder: (context, child) {
-                return Stack(
-                  children: [
-                    // 5 complex aurora layers with higher opacity and movement
-                    _AuroraBlob(
-                      color: colors[0 % colors.length].withValues(alpha: 0.45),
-                      size: kIsWeb ? 500 : 900,
-                      alignment: Alignment.topLeft,
-                      depth: 0.07,
-                      baseOffset: Offset(
-                        math.cos(animation.value * 2 * math.pi) * 300 - 150,
-                        math.sin(animation.value * 2 * math.pi) * 300 - 150,
-                      ),
-                    ),
-                    _AuroraBlob(
-                      color: colors[1 % colors.length].withValues(alpha: 0.4),
-                      size: kIsWeb ? 600 : 1000,
-                      alignment: Alignment.bottomRight,
-                      depth: 0.12,
-                      baseOffset: Offset(
-                        math.sin(animation.value * 2 * math.pi) * 400 + 150,
-                        math.cos(animation.value * 2 * math.pi) * 400 + 150,
-                      ),
-                    ),
-                    _AuroraBlob(
-                      color: colors[2 % colors.length].withValues(alpha: 0.35),
-                      size: kIsWeb ? 450 : 850,
-                      alignment: Alignment.topRight,
-                      depth: 0.09,
-                      baseOffset: Offset(
-                        math.cos(animation.value * 2 * math.pi + math.pi/3) * 350,
-                        math.sin(animation.value * 2 * math.pi + math.pi/3) * 350,
-                      ),
-                    ),
-                    _AuroraBlob(
-                      color: colors[3 % colors.length].withValues(alpha: 0.3),
-                      size: kIsWeb ? 550 : 750,
-                      alignment: Alignment.bottomLeft,
-                      depth: 0.06,
-                      baseOffset: Offset(
-                        math.sin(animation.value * 2 * math.pi + math.pi/2) * 250 - 100,
-                        math.cos(animation.value * 2 * math.pi + math.pi/2) * 250 + 100,
-                      ),
-                    ),
-                    _AuroraBlob(
-                      color: colors[4 % colors.length].withValues(alpha: 0.25),
-                      size: kIsWeb ? 500 : 800,
-                      alignment: Alignment.center,
-                      depth: 0.15,
-                      baseOffset: Offset(
-                        math.cos(animation.value * 4 * math.pi) * 200,
-                        math.sin(animation.value * 4 * math.pi) * 200,
-                      ),
-                    ),
-                    
-                    // Noise texture overlay for tactile feel
-                    Positioned.fill(
-                      child: IgnorePointer(
-                        child: CustomPaint(
-                          painter: _ShaderNoisePainter(
-                            program: animationProvider?.grainProgram,
-                            time: DateTime.now().millisecondsSinceEpoch / 1000.0,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                );
-              },
-            )
-          else
-            const ColoredBox(color: AppColors.obsidianBlack),
-        ],
-      ),
-    );
-  }
-}
-
-/// A blurred drifting color blob for the aurora effect using optimized RadialGradient
-/// with parallax and pointer interaction
-class _AuroraBlob extends StatelessWidget {
-  final Color color;
-  final double size;
-  final Offset baseOffset;
-  final Alignment alignment;
-  final double depth;
-
-  const _AuroraBlob({
-    required this.color,
-    required this.size,
-    required this.baseOffset,
-    this.alignment = Alignment.center,
-    this.depth = 0.05,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final animationProvider = GlassAnimationProvider.of(context);
-
-    return Align(
-      alignment: alignment,
-      child: ValueListenableBuilder2<Offset, Offset>(
-        first: animationProvider?.pointerPosition ?? GlassAnimationProvider.defaultOffset,
-        second: animationProvider?.tilt ?? GlassAnimationProvider.defaultOffset,
-        builder: (context, pointerPos, tilt, _) {
-          // Calculate interaction offset (repulsion)
-          Offset interactionOffset = Offset.zero;
-          if (pointerPos != Offset.zero && pointerPos.dx > -500) {
-            final screenSize = MediaQuery.sizeOf(context);
-            final center = Offset(screenSize.width / 2, screenSize.height / 2);
-            final relPos = pointerPos - center;
-            final dist = relPos.distance;
-            final maxDim = math.max(screenSize.width, screenSize.height);
-            
-            final normalizedDist = (dist / maxDim).clamp(0.0, 1.0);
-            final liquidFactor = math.sqrt(normalizedDist);
-
-            interactionOffset = relPos * (-0.1 - depth * 2.0) * liquidFactor;
-          }
-
-          // Calculate parallax offset based on tilt and depth
-          final parallaxOffset = tilt * (depth * 500);
-
-          return Transform.translate(
-            offset: baseOffset + parallaxOffset + interactionOffset,
+          // Subtle static accent glows for depth
+          Positioned(
+            top: -200,
+            right: -150,
             child: Container(
-              width: size,
-              height: size,
+              width: 400,
+              height: 400,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    color,
-                    color.withValues(alpha: color.a * 0.5),
-                    color.withValues(alpha: 0.0),
+                    AppColors.accentIndigo.withValues(alpha: 0.12),
+                    AppColors.accentIndigo.withValues(alpha: 0.03),
+                    Colors.transparent,
                   ],
-                  stops: const [0.0, 0.4, 1.0],
+                  stops: const [0.0, 0.5, 1.0],
                 ),
               ),
             ),
-          );
-        },
+          ),
+          Positioned(
+            bottom: -150,
+            left: -100,
+            child: Container(
+              width: 350,
+              height: 350,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    AppColors.accentTeal.withValues(alpha: 0.08),
+                    AppColors.accentTeal.withValues(alpha: 0.02),
+                    Colors.transparent,
+                  ],
+                  stops: const [0.0, 0.6, 1.0],
+                ),
+              ),
+            ),
+          ),
+          
+          // Noise texture overlay for tactile feel
+          Positioned.fill(
+            child: IgnorePointer(
+              child: CustomPaint(
+                painter: _ShaderNoisePainter(
+                  program: animationProvider?.grainProgram,
+                  time: DateTime.now().millisecondsSinceEpoch / 1000.0,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
