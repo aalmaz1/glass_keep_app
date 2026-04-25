@@ -22,55 +22,64 @@ class DefaultFirebaseOptions {
     }
   }
 
+  static const String _apiKey = String.fromEnvironment('FIREBASE_API_KEY');
+  static const String _appId = String.fromEnvironment('FIREBASE_APP_ID');
+  static const String _messagingSenderId = String.fromEnvironment('FIREBASE_MESSAGING_SENDER_ID');
+  static const String _projectId = String.fromEnvironment('FIREBASE_PROJECT_ID');
+  static const String _authDomain = String.fromEnvironment('FIREBASE_AUTH_DOMAIN');
+  static const String _storageBucket = String.fromEnvironment('FIREBASE_STORAGE_BUCKET');
+  static const String _measurementId = String.fromEnvironment('FIREBASE_MEASUREMENT_ID');
+  static const String _iosBundleId = String.fromEnvironment('FIREBASE_IOS_BUNDLE_ID', defaultValue: 'com.glasskeep.app');
+
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyBsrhKx5xHIi167LjVaMJ_HK3W-bBAdpyw',
-    appId: '1:585955210188:web:5f741583ef4e89ed192369',
-    messagingSenderId: '585955210188',
-    projectId: 'glasskeep-2a8e5',
-    authDomain: 'glasskeep-2a8e5.firebaseapp.com',
-    storageBucket: 'glasskeep-2a8e5.firebasestorage.app',
-    measurementId: 'G-GZE669316H',
+    apiKey: _apiKey,
+    appId: _appId,
+    messagingSenderId: _messagingSenderId,
+    projectId: _projectId,
+    authDomain: _authDomain,
+    storageBucket: _storageBucket,
+    measurementId: _measurementId,
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBsrhKx5xHIi167LjVaMJ_HK3W-bBAdpyw',
-    appId: '1:585955210188:web:5f741583ef4e89ed192369',
-    messagingSenderId: '585955210188',
-    projectId: 'glasskeep-2a8e5',
-    storageBucket: 'glasskeep-2a8e5.firebasestorage.app',
-    authDomain: 'glasskeep-2a8e5.firebaseapp.com',
-    measurementId: 'G-GZE669316H',
+    apiKey: _apiKey,
+    appId: _appId,
+    messagingSenderId: _messagingSenderId,
+    projectId: _projectId,
+    storageBucket: _storageBucket,
+    authDomain: _authDomain,
+    measurementId: _measurementId,
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBsrhKx5xHIi167LjVaMJ_HK3W-bBAdpyw',
-    appId: '1:585955210188:web:5f741583ef4e89ed192369',
-    messagingSenderId: '585955210188',
-    projectId: 'glasskeep-2a8e5',
-    storageBucket: 'glasskeep-2a8e5.firebasestorage.app',
-    authDomain: 'glasskeep-2a8e5.firebaseapp.com',
-    iosBundleId: 'com.glasskeep.app',
-    measurementId: 'G-GZE669316H',
+    apiKey: _apiKey,
+    appId: _appId,
+    messagingSenderId: _messagingSenderId,
+    projectId: _projectId,
+    storageBucket: _storageBucket,
+    authDomain: _authDomain,
+    iosBundleId: _iosBundleId,
+    measurementId: _measurementId,
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyBsrhKx5xHIi167LjVaMJ_HK3W-bBAdpyw',
-    appId: '1:585955210188:web:5f741583ef4e89ed192369',
-    messagingSenderId: '585955210188',
-    projectId: 'glasskeep-2a8e5',
-    storageBucket: 'glasskeep-2a8e5.firebasestorage.app',
-    authDomain: 'glasskeep-2a8e5.firebaseapp.com',
-    iosBundleId: 'com.glasskeep.app',
-    measurementId: 'G-GZE669316H',
+    apiKey: _apiKey,
+    appId: _appId,
+    messagingSenderId: _messagingSenderId,
+    projectId: _projectId,
+    storageBucket: _storageBucket,
+    authDomain: _authDomain,
+    iosBundleId: _iosBundleId,
+    measurementId: _measurementId,
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyBsrhKx5xHIi167LjVaMJ_HK3W-bBAdpyw',
-    appId: '1:585955210188:web:5f741583ef4e89ed192369',
-    messagingSenderId: '585955210188',
-    projectId: 'glasskeep-2a8e5',
-    authDomain: 'glasskeep-2a8e5.firebaseapp.com',
-    storageBucket: 'glasskeep-2a8e5.firebasestorage.app',
-    measurementId: 'G-GZE669316H',
+    apiKey: _apiKey,
+    appId: _appId,
+    messagingSenderId: _messagingSenderId,
+    projectId: _projectId,
+    authDomain: _authDomain,
+    storageBucket: _storageBucket,
+    measurementId: _measurementId,
   );
 }
