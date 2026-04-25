@@ -109,7 +109,7 @@ class _VisionGlassCardState extends State<VisionGlassCard> with SingleTickerProv
           if (widget.useDistortion) {
             mainContent = GlassDistortionEffect(
               borderRadius: widget.borderRadius,
-              distortionStrength: 1.0 + (hoverValue * 1.8), // Richer distortion on hover
+              distortionStrength: hoverValue * 1.5, // Animate distortion strength from 0.0 to 1.5 on hover
               child: mainContent,
             );
           }
@@ -121,7 +121,7 @@ class _VisionGlassCardState extends State<VisionGlassCard> with SingleTickerProv
           
           Widget cardContent = Container(
             decoration: BoxDecoration(
-              color: widget.color ?? AppColors.glassLight.withValues(alpha: AppColors.glassLight.a + (hoverValue * 0.08)),
+              color: widget.color ?? AppColors.obsidianDark.withValues(alpha: 0.5 + (hoverValue * 0.1)),
               borderRadius: BorderRadius.circular(widget.borderRadius),
               border: widget.border,
             ),
@@ -250,10 +250,10 @@ class VisionBackground extends StatelessWidget {
     final colors = blobColors ?? animationProvider?.blobColors ?? [
       AppColors.accentIndigo,
       AppColors.accentTeal,
-      AppColors.accentPurple,
+      AppColors.accentDeepPurple,
       AppColors.accentIndigo,
       AppColors.accentTeal,
-      AppColors.accentPurple,
+      AppColors.accentDeepPurple,
     ];
 
     return Container(
@@ -266,70 +266,57 @@ class VisionBackground extends StatelessWidget {
               builder: (context, child) {
                 return Stack(
                   children: [
-                    // Drifting aurora blobs optimized with RadialGradient
-                    // Increased blob count and layered movement for deeper 'Vision Pro' look
+                    // 5 complex aurora layers with higher opacity and movement
                     _AuroraBlob(
-                      color: colors[0 % colors.length].withValues(alpha: 0.3),
-                      size: kIsWeb ? 400 : 800,
-                      alignment: Alignment.topLeft,
-                      depth: 0.05,
-                      baseOffset: Offset(
-                        math.cos(animation.value * 2 * math.pi) * 150 - 150,
-                        math.sin(animation.value * 2 * math.pi) * 150 - 150,
-                      ),
-                    ),
-                    _AuroraBlob(
-                      color: colors[1 % colors.length].withValues(alpha: 0.25),
+                      color: colors[0 % colors.length].withValues(alpha: 0.45),
                       size: kIsWeb ? 500 : 900,
-                      alignment: Alignment.bottomRight,
-                      depth: 0.08,
+                      alignment: Alignment.topLeft,
+                      depth: 0.07,
                       baseOffset: Offset(
-                        math.sin(animation.value * 2 * math.pi) * 200 + 150,
-                        math.cos(animation.value * 2 * math.pi) * 200 + 150,
+                        math.cos(animation.value * 2 * math.pi) * 300 - 150,
+                        math.sin(animation.value * 2 * math.pi) * 300 - 150,
                       ),
                     ),
                     _AuroraBlob(
-                      color: colors[2 % colors.length].withValues(alpha: 0.22),
-                      size: kIsWeb ? 350 : 750,
+                      color: colors[1 % colors.length].withValues(alpha: 0.4),
+                      size: kIsWeb ? 600 : 1000,
+                      alignment: Alignment.bottomRight,
+                      depth: 0.12,
+                      baseOffset: Offset(
+                        math.sin(animation.value * 2 * math.pi) * 400 + 150,
+                        math.cos(animation.value * 2 * math.pi) * 400 + 150,
+                      ),
+                    ),
+                    _AuroraBlob(
+                      color: colors[2 % colors.length].withValues(alpha: 0.35),
+                      size: kIsWeb ? 450 : 850,
                       alignment: Alignment.topRight,
+                      depth: 0.09,
+                      baseOffset: Offset(
+                        math.cos(animation.value * 2 * math.pi + math.pi/3) * 350,
+                        math.sin(animation.value * 2 * math.pi + math.pi/3) * 350,
+                      ),
+                    ),
+                    _AuroraBlob(
+                      color: colors[3 % colors.length].withValues(alpha: 0.3),
+                      size: kIsWeb ? 550 : 750,
+                      alignment: Alignment.bottomLeft,
                       depth: 0.06,
                       baseOffset: Offset(
-                        math.cos(animation.value * 2 * math.pi + math.pi/3) * 180,
-                        math.sin(animation.value * 2 * math.pi + math.pi/3) * 180,
+                        math.sin(animation.value * 2 * math.pi + math.pi/2) * 250 - 100,
+                        math.cos(animation.value * 2 * math.pi + math.pi/2) * 250 + 100,
                       ),
                     ),
                     _AuroraBlob(
-                      color: colors[3 % colors.length].withValues(alpha: 0.2),
-                      size: kIsWeb ? 450 : 650,
-                      alignment: Alignment.bottomLeft,
-                      depth: 0.04,
+                      color: colors[4 % colors.length].withValues(alpha: 0.25),
+                      size: kIsWeb ? 500 : 800,
+                      alignment: Alignment.center,
+                      depth: 0.15,
                       baseOffset: Offset(
-                        math.sin(animation.value * 2 * math.pi + math.pi/2) * 120 - 100,
-                        math.cos(animation.value * 2 * math.pi + math.pi/2) * 120 + 100,
+                        math.cos(animation.value * 4 * math.pi) * 200,
+                        math.sin(animation.value * 4 * math.pi) * 200,
                       ),
                     ),
-                    if (!kIsWeb) ...[
-                      _AuroraBlob(
-                        color: colors[4 % colors.length].withValues(alpha: 0.18),
-                        size: 600,
-                        alignment: Alignment.centerLeft,
-                        depth: 0.03,
-                        baseOffset: Offset(
-                          math.cos(animation.value * 2 * math.pi + math.pi / 2) * 250,
-                          math.sin(animation.value * 2 * math.pi + math.pi / 2) * 150,
-                        ),
-                      ),
-                      _AuroraBlob(
-                        color: colors[5 % colors.length].withValues(alpha: 0.15),
-                        size: 700,
-                        alignment: Alignment.centerRight,
-                        depth: 0.1,
-                        baseOffset: Offset(
-                          math.sin(animation.value * 2 * math.pi + math.pi / 4) * 200,
-                          math.cos(animation.value * 2 * math.pi + math.pi / 4) * 200,
-                        ),
-                      ),
-                    ],
                     
                     // Noise texture overlay for tactile feel
                     Positioned.fill(
@@ -405,7 +392,7 @@ class _AuroraBlob extends StatelessWidget {
           // Calculate interaction offset (repulsion)
           Offset interactionOffset = Offset.zero;
           if (pointerPos != Offset.zero && pointerPos.dx > -500) {
-            final screenSize = MediaQuery.of(context).size;
+            final screenSize = MediaQuery.sizeOf(context);
             final center = Offset(screenSize.width / 2, screenSize.height / 2);
             final relPos = pointerPos - center;
             final dist = relPos.distance;

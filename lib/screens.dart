@@ -34,10 +34,6 @@ class _NotesScreenState extends State<NotesScreen> {
   List<Note>? _lastSourceNotes;
   // Debounce timer for search
   Timer? _searchDebounceTimer;
-  // Background state
-  Color? _backgroundColor;
-  List<Color>? _blobColors;
-  Decoration? _backgroundDecoration;
 
   @override
   void initState() {
@@ -67,7 +63,6 @@ class _NotesScreenState extends State<NotesScreen> {
   void _logout() async {
     widget.storage.clearCache();
     await FirebaseAuth.instance.signOut();
-    if (!mounted) return;
   }
 
   void _openNote(BuildContext context, Note note) {
@@ -139,24 +134,18 @@ class _NotesScreenState extends State<NotesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+    final size = MediaQuery.sizeOf(context);
     const paddingH = 24.0;
     final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      backgroundColor: _backgroundColor ?? AppColors.obsidianDark,
+      backgroundColor: AppColors.obsidianDark,
       extendBodyBehindAppBar: true,
       body: Stack(
         children: [
-          if (_backgroundDecoration != null)
-            Positioned.fill(child: Container(decoration: _backgroundDecoration))
-          else
-            Positioned.fill(
-              child: VisionBackground(
-                backgroundColor: _backgroundColor,
-                blobColors: _blobColors,
-              ),
-            ),
+          const Positioned.fill(
+            child: VisionBackground(),
+          ),
           SafeArea(
             child: CustomScrollView(
               slivers: [
@@ -298,7 +287,7 @@ class _NotesScreenState extends State<NotesScreen> {
                       gradient: const LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                        colors: [AppColors.accentBlue, AppColors.accentPurple],
+                        colors: [AppColors.accentBlue, AppColors.accentDeepPurple],
                       ),
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -326,7 +315,6 @@ class _NotesScreenState extends State<NotesScreen> {
                 Navigator.pop(context);
                 try {
                   await widget.storage.exportNotes();
-                  if (!mounted) return;
                   scaffoldMessenger.showSnackBar(
                     SnackBar(
                       content: Text(exportL10n?.exportSuccess ?? 'Exported successfully'),
@@ -337,7 +325,6 @@ class _NotesScreenState extends State<NotesScreen> {
                     ),
                   );
                 } catch (e) {
-                  if (!mounted) return;
                   scaffoldMessenger.showSnackBar(
                     SnackBar(
                       content: Text('${exportL10n?.exportError ?? 'Export error'}: $e'),
@@ -355,7 +342,6 @@ class _NotesScreenState extends State<NotesScreen> {
                 Navigator.pop(context);
                 try {
                   await widget.storage.importNotes();
-                  if (!mounted) return;
                   scaffoldMessenger.showSnackBar(
                     SnackBar(
                       content: Text(importL10n?.importSuccess ?? 'Imported successfully'),
@@ -366,7 +352,6 @@ class _NotesScreenState extends State<NotesScreen> {
                     ),
                   );
                 } catch (e) {
-                  if (!mounted) return;
                   scaffoldMessenger.showSnackBar(
                     SnackBar(
                       content: Text('${importL10n?.importError ?? 'Import error'}: $e'),
@@ -394,14 +379,7 @@ class _NotesScreenState extends State<NotesScreen> {
         builder: (context) => SettingsScreen(
           storage: widget.storage,
           onThemeChanged: (Color? color, List<Color>? blobs, Decoration? decoration) {
-            if (mounted) {
-              GlassAnimationProvider.of(context)?.onThemeChanged?.call(color, blobs);
-              setState(() {
-                _backgroundColor = color;
-                _blobColors = blobs;
-                _backgroundDecoration = decoration;
-              });
-            }
+            GlassAnimationProvider.of(context)?.onThemeChanged?.call(color, blobs);
           },
         ),
       ),
@@ -854,17 +832,15 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
     );
     try {
       await widget.storage.save(updatedNote);
-      if (!mounted) return;
       _showSnackBar(l10n?.saveSuccess ?? 'Saved');
     } catch (e) {
-      if (!mounted) return;
       _showSnackBar('${l10n?.saveError ?? 'Save error'}: $e', isError: true);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+    final size = MediaQuery.sizeOf(context);
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     final l10n = AppLocalizations.of(context);
 
@@ -917,10 +893,8 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                                   final updatedNote = widget.note.copyWith(isPinned: !widget.note.isPinned);
                                   try {
                                     await widget.storage.save(updatedNote);
-                                    if (!mounted) return;
-                                    setState(() {});
+                                    if (mounted) setState(() {});
                                   } catch (e) {
-                                    if (!mounted) return;
                                     _showSnackBar('${l10n?.pinError ?? 'Pin error'}: $e', isError: true);
                                   }
                                 },
@@ -933,10 +907,8 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                                   if (widget.note.id.isNotEmpty) {
                                     try {
                                       await widget.storage.delete(widget.note.id);
-                                      if (!mounted) return;
-                                      Navigator.pop(context);
+                                      if (mounted) Navigator.pop(context);
                                     } catch (e) {
-                                      if (!mounted) return;
                                       _showSnackBar('${l10n?.deleteError ?? 'Delete error'}: $e', isError: true);
                                     }
                                   } else {
@@ -1066,7 +1038,6 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                         if (!mounted) return;
                         if (image != null) {
                           final bytes = await image.readAsBytes();
-                          if (!mounted) return;
                           // Process in microtask to avoid blocking UI
                           await Future.microtask(() {
                             if (mounted) {
@@ -1151,7 +1122,7 @@ class _TrashScreenState extends State<TrashScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final size = MediaQuery.of(context).size;
+    final size = MediaQuery.sizeOf(context);
     final paddingH = size.width * 0.04;
 
     return Scaffold(
@@ -1214,20 +1185,16 @@ class _TrashScreenState extends State<TrashScreen> {
                                 final updatedNote = note.copyWith(isArchived: false);
                                 try {
                                   await widget.storage.save(updatedNote);
-                                  if (!mounted) return;
                                   _showSnackBar(l10n?.noteRestored ?? 'Note restored');
                                 } catch (e) {
-                                  if (!mounted) return;
                                   _showSnackBar('${l10n?.restoreError ?? 'Restore error'}: $e', isError: true);
                                 }
                               },
                               onDelete: () async {
                                 try {
                                   await widget.storage.delete(note.id);
-                                  if (!mounted) return;
                                   _showSnackBar(l10n?.deletePermanent ?? 'Deleted permanently');
                                 } catch (e) {
-                                  if (!mounted) return;
                                   _showSnackBar('${l10n?.deleteError ?? 'Delete error'}: $e', isError: true);
                                 }
                               },
