@@ -338,7 +338,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
                   backgroundColor: AppColors.obsidianBlack,
                   body: Stack(
                     children: [
-                      const Positioned.fill(child: VisionBackground()),
+                      Positioned.fill(child: VisionBackground()),
                       Center(
                         child: Text('Auth Error: ${snapshot.error}', style: const TextStyle(color: Colors.white)),
                       ),
@@ -351,7 +351,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
                   backgroundColor: AppColors.obsidianBlack,
                   body: Stack(
                     children: [
-                      const Positioned.fill(child: VisionBackground()),
+                      Positioned.fill(child: VisionBackground()),
                       const Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -379,7 +379,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
                         backgroundColor: AppColors.obsidianBlack,
                         body: Stack(
                           children: [
-                            const Positioned.fill(child: VisionBackground()),
+                            Positioned.fill(child: VisionBackground()),
                             Center(
                               child: Text('Storage Error: ${storeSnapshot.error}', style: const TextStyle(color: Colors.white)),
                             ),
@@ -397,7 +397,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
                       backgroundColor: AppColors.obsidianBlack,
                       body: Stack(
                         children: [
-                          const Positioned.fill(child: VisionBackground()),
+                          Positioned.fill(child: VisionBackground()),
                           const Center(
                             child: CupertinoActivityIndicator(
                               color: AppColors.accentDeepPurple,
@@ -534,7 +534,7 @@ class _BiometricAuthWrapperState extends State<BiometricAuthWrapper> {
       backgroundColor: AppColors.obsidianBlack,
       body: Stack(
         children: [
-          const Positioned.fill(child: VisionBackground()),
+          Positioned.fill(child: VisionBackground()),
           Center(
             child: _isChecking
                 ? const CupertinoActivityIndicator(color: AppColors.accentDeepPurple)

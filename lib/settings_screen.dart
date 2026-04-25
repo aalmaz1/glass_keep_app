@@ -27,7 +27,7 @@ class SettingsScreen extends StatelessWidget {
       ),
       body: Stack(
         children: [
-          const Positioned.fill(child: VisionBackground()),
+          Positioned.fill(child: VisionBackground()),
           ListView(
             padding: const EdgeInsets.fromLTRB(16, kToolbarHeight + 60, 16, 16),
             children: [
