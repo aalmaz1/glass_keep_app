@@ -187,6 +187,7 @@ class _SpecularBorderPainter extends CustomPainter {
 
 /// Premium static background with elegant gradient and noise texture
 /// V1.7.0: Removed animated blobs for clean glassmorphism aesthetic
+/// V1.7.1: Fixed theme color support - now uses blobColors from provider
 class VisionBackground extends StatelessWidget {
   final Color? backgroundColor;
   final List<Color>? blobColors;
@@ -206,6 +207,7 @@ class VisionBackground extends StatelessWidget {
     
     // Use theme color if available, otherwise default to obsidian black
     final bg = backgroundColor ?? animationProvider?.themeColor ?? AppColors.obsidianBlack;
+    final blobs = blobColors ?? animationProvider?.blobColors ?? [AppColors.accentBlue, AppColors.accentIndigo, AppColors.accentDeepPurple];
 
     return Container(
       width: double.infinity,
@@ -217,15 +219,14 @@ class VisionBackground extends StatelessWidget {
           colors: [
             bg,
             bg.withValues(alpha: 0.95),
-            AppColors.accentDeepPurple.withValues(alpha: 0.08),
             bg.withValues(alpha: 0.98),
           ],
-          stops: const [0.0, 0.4, 0.7, 1.0],
+          stops: const [0.0, 0.5, 1.0],
         ),
       ),
       child: Stack(
         children: [
-          // Subtle static accent glows for depth
+          // Dynamic accent glows based on selected theme
           Positioned(
             top: -200,
             right: -150,
@@ -236,8 +237,8 @@ class VisionBackground extends StatelessWidget {
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    AppColors.accentIndigo.withValues(alpha: 0.12),
-                    AppColors.accentIndigo.withValues(alpha: 0.03),
+                    (blobs.isNotEmpty ? blobs[0] : AppColors.accentBlue).withValues(alpha: 0.15),
+                    (blobs.length > 1 ? blobs[1] : AppColors.accentIndigo).withValues(alpha: 0.05),
                     Colors.transparent,
                   ],
                   stops: const [0.0, 0.5, 1.0],
@@ -255,8 +256,8 @@ class VisionBackground extends StatelessWidget {
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    AppColors.accentTeal.withValues(alpha: 0.08),
-                    AppColors.accentTeal.withValues(alpha: 0.02),
+                    (blobs.length > 1 ? blobs[1] : AppColors.accentIndigo).withValues(alpha: 0.12),
+                    (blobs.length > 2 ? blobs[2] : AppColors.accentDeepPurple).withValues(alpha: 0.04),
                     Colors.transparent,
                   ],
                   stops: const [0.0, 0.6, 1.0],
