@@ -797,6 +797,19 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
   Uint8List? _decodedImage;
   bool _isLoading = false;
 
+  /// Compress image to fit within maxBytes limit
+  Future<Uint8List?> _compressImage(Uint8List bytes, int maxBytes) async {
+    // For web, we can't use dart:io easily, so if image is too large, return null to skip it
+    if (bytes.length <= maxBytes) return bytes;
+    
+    // Image too large for Firestore (1MB limit), skip saving image
+    debugPrint('[SYSTEM-REBORN] Image too large (${bytes.length} bytes), skipping image to prevent Firestore error');
+    if (context.mounted) {
+      _showSnackBar('Image too large, saved note without image', isError: true);
+    }
+    return null;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -1050,22 +1063,35 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                       try {
                         final XFile? image = await _picker.pickImage(
                           source: ImageSource.gallery,
-                          maxWidth: 1200,
-                          maxHeight: 1200,
-                          imageQuality: 85,
+                          maxWidth: 800,
+                          maxHeight: 800,
+                          imageQuality: 60,
                         );
                         if (!context.mounted) return;
                         if (image != null) {
                           final bytes = await image.readAsBytes();
-                          // Process in microtask to avoid blocking UI
-                          await Future.microtask(() {
+                          // Compress further if too large (>500KB)
+                          if (bytes.length > 500 * 1024) {
                             if (context.mounted) {
-                              setState(() {
-                                _img = base64Encode(bytes);
-                                _decodedImage = bytes;
-                              });
+                              setState(() => _isLoading = true);
                             }
-                          });
+                            final compressed = await _compressImage(bytes, 500 * 1024);
+                            if (!context.mounted) return;
+                            setState(() {
+                              _img = compressed != null ? base64Encode(compressed) : null;
+                              _decodedImage = compressed;
+                            });
+                          } else {
+                            // Process in microtask to avoid blocking UI
+                            await Future.microtask(() {
+                              if (context.mounted) {
+                                setState(() {
+                                  _img = base64Encode(bytes);
+                                  _decodedImage = bytes;
+                                });
+                              }
+                            });
+                          }
                         }
                       } finally {
                         if (context.mounted) {
