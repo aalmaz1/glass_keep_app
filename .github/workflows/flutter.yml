@@ -27,8 +27,9 @@ jobs:
   - name: Analyze project source        
     run: flutter analyze --no-fatal-infos --no-fatal-warnings      
   - name: Create config.json        
-    run: |          
-        echo '{            
+    run: |    
+        cat > config.json <<EOF
+        {            
         "FIREBASE_API_KEY": "${{ secrets.FIREBASE_API_KEY }}",            
         "FIREBASE_APP_ID": "${{ secrets.FIREBASE_APP_ID }}",            
         "FIREBASE_MESSAGING_SENDER_ID": "${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}",            
@@ -36,7 +37,9 @@ jobs:
         "FIREBASE_AUTH_DOMAIN": "${{ secrets.FIREBASE_AUTH_DOMAIN }}",            
         "FIREBASE_STORAGE_BUCKET": "${{ secrets.FIREBASE_STORAGE_BUCKET }}",            
         "FIREBASE_MEASUREMENT_ID": "${{ secrets.FIREBASE_MEASUREMENT_ID }}"          
-        }' > config.json      
+        }
+        E0F
+        
   - name: Build Web (Optimized for Size & Performance)        # ВАЖНО: Убран флаг --wasm. Он слишком тяжелый для простого приложения.        # --csp: убирает eval() для безопасности и совместимости        # --no-source-maps: уменьшает размер файлов        
     run: flutter build web --release --base-href /${{ github.event.repository.name }}/ --dart-define-from-file=config.json  --csp --no-source-maps    
 
