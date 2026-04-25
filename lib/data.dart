@@ -153,55 +153,80 @@ class StorageService {
   String get _uid => _auth.currentUser?.uid ?? 'anonymous';
 
   Stream<List<Note>> getNotesStream() {
-    // Return cached broadcast stream if available
     final cached = _notesStream;
     if (cached != null) {
       return cached;
     }
 
-    // Create a new stream with optimized mapping
-    final stream = _db.collection('notes')
-        .where('userId', isEqualTo: _uid)
+    final currentUid = _auth.currentUser?.uid;
+    final stream = (currentUid != null
+            ? _buildUserNotesStream(currentUid)
+            : _auth
+                .authStateChanges()
+                .where((user) => user != null)
+                .take(1)
+                .asyncExpand((user) => _buildUserNotesStream(user!.uid)))
+        .asBroadcastStream();
+
+    _notesStream = stream;
+    return stream;
+  }
+
+  Stream<List<Note>> _buildUserNotesStream(String uid) {
+    return _db
+        .collection('notes')
+        .where('userId', isEqualTo: uid)
         .snapshots()
-        .asyncMap((snapshot) async {
-          // Process notes in microtask to avoid blocking UI
-          return Future.microtask(() {
-            final oldNotes = _notesCache ?? [];
-            final notes = snapshot.docs.map((d) {
-              final data = d.data();
-              final noteId = data['id'] ?? '';
-              final updatedAt = data['updatedAt'] ?? 0;
+        .asyncMap(
+          (snapshot) => Future.microtask(() => _mapNotesSnapshot(snapshot)),
+        )
+        .timeout(
+          const Duration(seconds: 12),
+          onTimeout: (sink) {
+            debugPrint(
+              '[SYSTEM-REBORN] Notes stream timeout for uid=$uid. Using cache fallback.',
+            );
+            sink.add(_notesCache ?? const <Note>[]);
+          },
+        );
+  }
 
-              // Try to find existing note in cache
-              final existingNote = oldNotes.where(
-                (n) => n.id == noteId && n.updatedAt.millisecondsSinceEpoch == updatedAt,
-              ).firstOrNull;
+  List<Note> _mapNotesSnapshot(QuerySnapshot<Map<String, dynamic>> snapshot) {
+    final oldNotes = _notesCache ?? const <Note>[];
+    final notes = snapshot.docs.map((d) {
+      final data = d.data();
+      final noteId = data['id']?.toString() ?? '';
+      final updatedAt = data['updatedAt'] is int ? data['updatedAt'] as int : 0;
 
-              if (existingNote != null) {
-                return existingNote;
-              }
+      final existingNote = _findCachedNote(oldNotes, noteId, updatedAt);
+      if (existingNote != null) {
+        return existingNote;
+      }
 
-              try {
-                final note = Note.fromMap(data);
-                // Decrypt sensitive fields
-                return note.copyWith(
-                  title: EncryptionService().decryptText(note.title),
-                  content: EncryptionService().decryptText(note.content),
-                );
-              } catch (e) {
-                debugPrint('[SYSTEM-REBORN] Skipping corrupted note $noteId: $e');
-                return null;
-              }
-            }).whereType<Note>().toList();
-            _notesCache = List.unmodifiable(notes);
-            return notes;
-          });
-        });
+      try {
+        final note = Note.fromMap(data);
+        return note.copyWith(
+          title: EncryptionService().decryptText(note.title),
+          content: EncryptionService().decryptText(note.content),
+        );
+      } catch (e) {
+        debugPrint('[SYSTEM-REBORN] Skipping corrupted note $noteId: $e');
+        return null;
+      }
+    }).whereType<Note>().toList();
 
-    // Convert to broadcast stream to allow multiple listeners without recreating
-    final broadcast = stream.asBroadcastStream();
-    _notesStream = broadcast;
-    return broadcast;
+    _notesCache = List.unmodifiable(notes);
+    return notes;
+  }
+
+  Note? _findCachedNote(List<Note> notes, String noteId, int updatedAt) {
+    for (final note in notes) {
+      if (note.id == noteId &&
+          note.updatedAt.millisecondsSinceEpoch == updatedAt) {
+        return note;
+      }
+    }
+    return null;
   }
 
   /// Clear the cache - useful for logout scenarios
