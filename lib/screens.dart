@@ -310,57 +310,65 @@ class _NotesScreenState extends State<NotesScreen> {
               _MenuItem(icon: CupertinoIcons.globe, label: l10n.language, onTap: () { Navigator.pop(context); _showLanguagePicker(outerContext); }),
               _MenuItem(icon: CupertinoIcons.trash, label: l10n.trash, onTap: () { Navigator.pop(context); _openTrash(outerContext); }),
               _MenuItem(icon: Icons.upload_file, label: l10n.exportBackup, onTap: () async {
-                final scaffoldMessenger = ScaffoldMessenger.of(outerContext);
-                final exportL10n = AppLocalizations.of(outerContext);
                 Navigator.pop(context);
                 try {
                   await widget.storage.exportNotes();
-                  scaffoldMessenger.showSnackBar(
-                    SnackBar(
-                      content: Text(exportL10n?.exportSuccess ?? 'Exported successfully'),
-                      backgroundColor: AppColors.accentBlue,
-                      behavior: SnackBarBehavior.floating,
-                      margin: const EdgeInsets.all(16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                  );
+                  if (outerContext.mounted) {
+                    final exportL10n = AppLocalizations.of(outerContext);
+                    ScaffoldMessenger.of(outerContext).showSnackBar(
+                      SnackBar(
+                        content: Text(exportL10n?.exportSuccess ?? 'Exported successfully'),
+                        backgroundColor: AppColors.accentBlue,
+                        behavior: SnackBarBehavior.floating,
+                        margin: const EdgeInsets.all(16),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    );
+                  }
                 } catch (e) {
-                  scaffoldMessenger.showSnackBar(
-                    SnackBar(
-                      content: Text('${exportL10n?.exportError ?? 'Export error'}: $e'),
-                      backgroundColor: AppColors.accentRed,
-                      behavior: SnackBarBehavior.floating,
-                      margin: const EdgeInsets.all(16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                  );
+                  if (outerContext.mounted) {
+                    final exportL10n = AppLocalizations.of(outerContext);
+                    ScaffoldMessenger.of(outerContext).showSnackBar(
+                      SnackBar(
+                        content: Text('${exportL10n?.exportError ?? 'Export error'}: $e'),
+                        backgroundColor: AppColors.accentRed,
+                        behavior: SnackBarBehavior.floating,
+                        margin: const EdgeInsets.all(16),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    );
+                  }
                 }
               }),
               _MenuItem(icon: Icons.download, label: l10n.importBackup, onTap: () async {
-                final scaffoldMessenger = ScaffoldMessenger.of(outerContext);
-                final importL10n = AppLocalizations.of(outerContext);
                 Navigator.pop(context);
                 try {
                   await widget.storage.importNotes();
-                  scaffoldMessenger.showSnackBar(
-                    SnackBar(
-                      content: Text(importL10n?.importSuccess ?? 'Imported successfully'),
-                      backgroundColor: AppColors.accentBlue,
-                      behavior: SnackBarBehavior.floating,
-                      margin: const EdgeInsets.all(16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                  );
+                  if (outerContext.mounted) {
+                    final importL10n = AppLocalizations.of(outerContext);
+                    ScaffoldMessenger.of(outerContext).showSnackBar(
+                      SnackBar(
+                        content: Text(importL10n?.importSuccess ?? 'Imported successfully'),
+                        backgroundColor: AppColors.accentBlue,
+                        behavior: SnackBarBehavior.floating,
+                        margin: const EdgeInsets.all(16),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    );
+                  }
                 } catch (e) {
-                  scaffoldMessenger.showSnackBar(
-                    SnackBar(
-                      content: Text('${importL10n?.importError ?? 'Import error'}: $e'),
-                      backgroundColor: AppColors.accentRed,
-                      behavior: SnackBarBehavior.floating,
-                      margin: const EdgeInsets.all(16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                  );
+                  if (outerContext.mounted) {
+                    final importL10n = AppLocalizations.of(outerContext);
+                    ScaffoldMessenger.of(outerContext).showSnackBar(
+                      SnackBar(
+                        content: Text('${importL10n?.importError ?? 'Import error'}: $e'),
+                        backgroundColor: AppColors.accentRed,
+                        behavior: SnackBarBehavior.floating,
+                        margin: const EdgeInsets.all(16),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    );
+                  }
                 }
               }),
               const _BiometricToggle(),
