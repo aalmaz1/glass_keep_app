@@ -29,6 +29,7 @@ void main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+    debugPrint('[SYSTEM-REBORN] Firebase initialized successfully');
 
     if (!kIsWeb &&
         (defaultTargetPlatform == TargetPlatform.windows ||
@@ -116,6 +117,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
   }
 
   Future<void> _loadShaders() async {
+    debugPrint('[SYSTEM-REBORN] Loading shaders...');
     try {
       final grainProgram = await ui.FragmentProgram.fromAsset(
         'shaders/film_grain.frag',
@@ -125,12 +127,14 @@ class _GlassKeepAppState extends State<GlassKeepApp>
           _grainProgram = grainProgram;
         });
       }
+      debugPrint('[SYSTEM-REBORN] Shaders loaded successfully');
     } catch (e) {
-      debugPrint('Error loading shaders: $e');
+      debugPrint('[SYSTEM-REBORN] Error loading shaders: $e');
     }
   }
 
   void _initSensors() {
+    debugPrint('[SYSTEM-REBORN] Initializing sensors...');
     if (defaultTargetPlatform == TargetPlatform.android ||
         defaultTargetPlatform == TargetPlatform.iOS ||
         kIsWeb) {
@@ -161,6 +165,9 @@ class _GlassKeepAppState extends State<GlassKeepApp>
           (_tilt.value.dy + kick.dy).clamp(-1.5, 1.5),
         );
       });
+      debugPrint('[SYSTEM-REBORN] Sensors initialized successfully');
+    } else {
+      debugPrint('[SYSTEM-REBORN] Sensors not supported on this platform');
     }
   }
 
@@ -197,122 +204,128 @@ class _GlassKeepAppState extends State<GlassKeepApp>
             onPointerMove: (event) {
               _pointerPosition.value = event.position;
             },
-            child: MaterialApp(
-              title: 'Glass Keep',
-              debugShowCheckedModeBanner: false,
-              locale: _locale,
-              theme: ThemeData(
-                brightness: Brightness.dark,
-                useMaterial3: true,
-                scaffoldBackgroundColor: AppColors.obsidianBlack,
-                colorSchemeSeed: AppColors.accentBlue,
-                fontFamily: kIsWeb ? 'Roboto' : 'Noto Sans',
-                fontFamilyFallback: const ['Roboto', 'Arial'],
-                cupertinoOverrideTheme: const CupertinoThemeData(
+            child: Container(
+              color: AppColors.obsidianBlack,
+              child: MaterialApp(
+                title: 'Glass Keep',
+                debugShowCheckedModeBanner: false,
+                locale: _locale,
+                theme: ThemeData(
                   brightness: Brightness.dark,
-                  primaryColor: AppColors.accentBlue,
-                ),
-                appBarTheme: const AppBarTheme(
-                  backgroundColor: Colors.transparent,
-                  elevation: 0,
-                  centerTitle: true,
-                  titleTextStyle: TextStyle(
-                    color: Colors.white,
-                    fontSize: 17,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: -0.4,
+                  useMaterial3: true,
+                  scaffoldBackgroundColor: AppColors.obsidianBlack,
+                  colorSchemeSeed: AppColors.accentBlue,
+                  fontFamily: kIsWeb ? 'Roboto' : 'Noto Sans',
+                  fontFamilyFallback: const ['Roboto', 'Arial'],
+                  cupertinoOverrideTheme: const CupertinoThemeData(
+                    brightness: Brightness.dark,
+                    primaryColor: AppColors.accentBlue,
+                  ),
+                  appBarTheme: const AppBarTheme(
+                    backgroundColor: Colors.transparent,
+                    elevation: 0,
+                    centerTitle: true,
+                    titleTextStyle: TextStyle(
+                      color: Colors.white,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: -0.4,
+                    ),
+                  ),
+                  inputDecorationTheme: InputDecorationTheme(
+                    filled: true,
+                    fillColor: Colors.transparent,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
                   ),
                 ),
-                inputDecorationTheme: InputDecorationTheme(
-                  filled: true,
-                  fillColor: Colors.transparent,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 14,
-                  ),
-                ),
-              ),
-              localizationsDelegates: const [
-                AppLocalizations.delegate,
-                GlobalMaterialLocalizations.delegate,
-                GlobalWidgetsLocalizations.delegate,
-                GlobalCupertinoLocalizations.delegate,
-              ],
-              supportedLocales: AppLocalizations.supportedLocales,
-              home: StreamBuilder<User?>(
-                stream: _authStream,
-                builder: (context, snapshot) {
-                  if (snapshot.hasError) {
-                    return Scaffold(
-                      body: Center(
-                        child: Text('Auth Error: ${snapshot.error}'),
-                      ),
-                    );
-                  }
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Scaffold(
-                      body: Stack(
-                        children: [
-                          Positioned.fill(child: VisionBackground()),
-                          Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                localizationsDelegates: const [
+                  AppLocalizations.delegate,
+                  GlobalMaterialLocalizations.delegate,
+                  GlobalWidgetsLocalizations.delegate,
+                  GlobalCupertinoLocalizations.delegate,
+                ],
+                supportedLocales: AppLocalizations.supportedLocales,
+                home: StreamBuilder<User?>(
+                  stream: _authStream,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.active) {
+                      debugPrint('[SYSTEM-REBORN] Auth state changed: ${snapshot.hasData ? "LOGGED_IN" : "LOGGED_OUT"}');
+                    }
+                    if (snapshot.hasError) {
+                      return Scaffold(
+                        body: Center(
+                          child: Text('Auth Error: ${snapshot.error}'),
+                        ),
+                      );
+                    }
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Scaffold(
+                        body: Stack(
+                          children: [
+                            Positioned.fill(child: VisionBackground()),
+                            Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  _LoadingLogo(),
+                                  SizedBox(height: 24),
+                                  CupertinoActivityIndicator(
+                                    color: AppColors.accentBlue,
+                                    radius: 14,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+
+                    if (snapshot.hasData) {
+                      return FutureBuilder<StorageService>(
+                        future: _storageFuture,
+                        builder: (context, storeSnapshot) {
+                          if (storeSnapshot.hasError) {
+                            return Scaffold(
+                              body: Center(
+                                child: Text('Storage Error: ${storeSnapshot.error}'),
+                              ),
+                            );
+                          }
+                          final storage = storeSnapshot.data;
+                          if (storage != null) {
+                            return BiometricAuthWrapper(
+                              child: NotesScreen(storage: storage),
+                            );
+                          }
+                          return const Scaffold(
+                            body: Stack(
                               children: [
-                                _LoadingLogo(),
-                                SizedBox(height: 24),
-                                CupertinoActivityIndicator(
-                                  color: AppColors.accentBlue,
-                                  radius: 14,
+                                Positioned.fill(child: VisionBackground()),
+                                Center(
+                                  child: CupertinoActivityIndicator(
+                                    color: AppColors.accentBlue,
+                                  ),
                                 ),
                               ],
                             ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-    
-                  if (snapshot.hasData) {
-                    return FutureBuilder<StorageService>(
-                      future: _storageFuture,
-                      builder: (context, storeSnapshot) {
-                        if (storeSnapshot.hasError) {
-                          return Scaffold(
-                            body: Center(
-                              child: Text('Storage Error: ${storeSnapshot.error}'),
-                            ),
                           );
-                        }
-                        final storage = storeSnapshot.data;
-                        if (storage != null) {
-                          return BiometricAuthWrapper(
-                            child: NotesScreen(storage: storage),
-                          );
-                        }
-                        return const Scaffold(
-                          body: Stack(
-                            children: [
-                              Positioned.fill(child: VisionBackground()),
-                              Center(
-                                child: CupertinoActivityIndicator(
-                                  color: AppColors.accentBlue,
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    );
-                  }
-                  return const AuthScreen();
-                },
+                        },
+                      );
+                    }
+                    return const AuthScreen();
+                  },
+                ),
               ),
             ),
-          ),
+
           // Deployment verification text - always at the bottom of the stack
           const Positioned(
             bottom: 20,
