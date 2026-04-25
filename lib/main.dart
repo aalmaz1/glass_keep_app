@@ -274,9 +274,10 @@ class _GlassKeepAppState extends State<GlassKeepApp>
                             ),
                           );
                         }
-                        if (storeSnapshot.hasData) {
+                        final storage = storeSnapshot.data;
+                        if (storage != null) {
                           return BiometricAuthWrapper(
-                            child: NotesScreen(storage: storeSnapshot.data!),
+                            child: NotesScreen(storage: storage),
                           );
                         }
                         return const Scaffold(
@@ -307,7 +308,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
             child: IgnorePointer(
               child: Center(
                 child: Text(
-                  'SYSTEM-REBORN-V1.5.0',
+                  'SYSTEM-REBORN-V1.6.0',
                   style: TextStyle(
                     color: Colors.white54,
                     fontSize: 10,

@@ -51,7 +51,8 @@ class NotificationService {
   }
 
   Future<void> scheduleReminder(Note note) async {
-    if (kIsWeb || note.reminder == null || note.reminder!.isBefore(DateTime.now())) {
+    final reminder = note.reminder;
+    if (kIsWeb || reminder == null || reminder.isBefore(DateTime.now())) {
       return;
     }
 
@@ -63,7 +64,7 @@ class NotificationService {
       id,
       note.title.isEmpty ? 'Reminder' : note.title,
       note.content.isEmpty ? 'Note reminder' : note.content,
-      tz.TZDateTime.from(note.reminder!, tz.local),
+      tz.TZDateTime.from(reminder, tz.local),
       const NotificationDetails(
         android: AndroidNotificationDetails(
           'reminders',

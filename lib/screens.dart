@@ -36,6 +36,7 @@ class _NotesScreenState extends State<NotesScreen> {
   Timer? _searchDebounceTimer;
   // Background state
   Color? _backgroundColor;
+  List<Color>? _blobColors;
   Decoration? _backgroundDecoration;
 
   @override
@@ -98,13 +99,16 @@ class _NotesScreenState extends State<NotesScreen> {
 
   /// Optimized filtering with memoization - prevents unnecessary recalculations
   List<Note> _getFilteredAndSortedNotes(List<Note> sourceNotes) {
+    final lastSource = _lastSourceNotes;
+    final filtered = _filteredNotes;
+
     // Quick cache check using multiple criteria for accuracy
-    if (_filteredNotes != null &&
+    if (filtered != null &&
         _lastSearch == _search &&
-        _lastSourceNotes != null &&
-        _lastSourceNotes!.length == sourceNotes.length &&
-        _lastSourceNotes!.every((note) => sourceNotes.any((n) => n.id == note.id && n.updatedAt == note.updatedAt))) {
-      return _filteredNotes!;
+        lastSource != null &&
+        lastSource.length == sourceNotes.length &&
+        lastSource.every((note) => sourceNotes.any((n) => n.id == note.id && n.updatedAt == note.updatedAt))) {
+      return filtered;
     }
 
     // Filter out archived notes
@@ -137,7 +141,7 @@ class _NotesScreenState extends State<NotesScreen> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     const paddingH = 24.0;
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       backgroundColor: _backgroundColor ?? AppColors.obsidianDark,
@@ -147,7 +151,12 @@ class _NotesScreenState extends State<NotesScreen> {
           if (_backgroundDecoration != null)
             Positioned.fill(child: Container(decoration: _backgroundDecoration))
           else
-            const Positioned.fill(child: VisionBackground()),
+            Positioned.fill(
+              child: VisionBackground(
+                backgroundColor: _backgroundColor,
+                blobColors: _blobColors,
+              ),
+            ),
           SafeArea(
             child: CustomScrollView(
               slivers: [
@@ -197,7 +206,8 @@ class _NotesScreenState extends State<NotesScreen> {
                         ),
                       );
                     }
-                    if (!snapshot.hasData) {
+                    final sourceNotes = snapshot.data;
+                    if (sourceNotes == null) {
                       return const SliverFillRemaining(
                         child: Center(
                           child: CupertinoActivityIndicator(
@@ -208,13 +218,13 @@ class _NotesScreenState extends State<NotesScreen> {
                     }
 
                     // Optimized filtering - only runs when data or search changes
-                    final notes = _getFilteredAndSortedNotes(snapshot.data!);
+                    final notes = _getFilteredAndSortedNotes(sourceNotes);
 
                     if (notes.isEmpty) {
                       return SliverFillRemaining(
                         child: Center(
                           child: Text(
-                            l10n.noNotes,
+                            l10n?.noNotes ?? 'No notes found',
                             style: const TextStyle(
                               color: AppColors.secondaryText,
                               fontSize: 17,
@@ -261,7 +271,8 @@ class _NotesScreenState extends State<NotesScreen> {
   }
 
   void _showMenu(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) return;
     final outerContext = context;
     showModalBottomSheet(
       context: context,
@@ -311,14 +322,14 @@ class _NotesScreenState extends State<NotesScreen> {
               _MenuItem(icon: CupertinoIcons.trash, label: l10n.trash, onTap: () { Navigator.pop(context); _openTrash(outerContext); }),
               _MenuItem(icon: Icons.upload_file, label: l10n.exportBackup, onTap: () async {
                 final scaffoldMessenger = ScaffoldMessenger.of(outerContext);
-                final exportL10n = AppLocalizations.of(outerContext)!;
+                final exportL10n = AppLocalizations.of(outerContext);
                 Navigator.pop(context);
                 try {
                   await widget.storage.exportNotes();
                   if (!mounted) return;
                   scaffoldMessenger.showSnackBar(
                     SnackBar(
-                      content: Text(exportL10n.exportSuccess),
+                      content: Text(exportL10n?.exportSuccess ?? 'Exported successfully'),
                       backgroundColor: AppColors.accentBlue,
                       behavior: SnackBarBehavior.floating,
                       margin: const EdgeInsets.all(16),
@@ -329,7 +340,7 @@ class _NotesScreenState extends State<NotesScreen> {
                   if (!mounted) return;
                   scaffoldMessenger.showSnackBar(
                     SnackBar(
-                      content: Text('${exportL10n.exportError}: $e'),
+                      content: Text('${exportL10n?.exportError ?? 'Export error'}: $e'),
                       backgroundColor: AppColors.accentRed,
                       behavior: SnackBarBehavior.floating,
                       margin: const EdgeInsets.all(16),
@@ -340,14 +351,14 @@ class _NotesScreenState extends State<NotesScreen> {
               }),
               _MenuItem(icon: Icons.download, label: l10n.importBackup, onTap: () async {
                 final scaffoldMessenger = ScaffoldMessenger.of(outerContext);
-                final importL10n = AppLocalizations.of(outerContext)!;
+                final importL10n = AppLocalizations.of(outerContext);
                 Navigator.pop(context);
                 try {
                   await widget.storage.importNotes();
                   if (!mounted) return;
                   scaffoldMessenger.showSnackBar(
                     SnackBar(
-                      content: Text(importL10n.importSuccess),
+                      content: Text(importL10n?.importSuccess ?? 'Imported successfully'),
                       backgroundColor: AppColors.accentBlue,
                       behavior: SnackBarBehavior.floating,
                       margin: const EdgeInsets.all(16),
@@ -358,7 +369,7 @@ class _NotesScreenState extends State<NotesScreen> {
                   if (!mounted) return;
                   scaffoldMessenger.showSnackBar(
                     SnackBar(
-                      content: Text('${importL10n.importError}: $e'),
+                      content: Text('${importL10n?.importError ?? 'Import error'}: $e'),
                       backgroundColor: AppColors.accentRed,
                       behavior: SnackBarBehavior.floating,
                       margin: const EdgeInsets.all(16),
@@ -382,10 +393,11 @@ class _NotesScreenState extends State<NotesScreen> {
       MaterialPageRoute(
         builder: (context) => SettingsScreen(
           storage: widget.storage,
-          onThemeChanged: (Color? color, Decoration? decoration) {
+          onThemeChanged: (Color? color, List<Color>? blobs, Decoration? decoration) {
           if (mounted) {
             setState(() {
               _backgroundColor = color;
+              _blobColors = blobs;
               _backgroundDecoration = decoration;
             });
           }
@@ -543,12 +555,13 @@ class _NewNoteButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
 
     return GestureDetector(
       onTap: () {
         HapticFeedback.mediumImpact();
         final storage = _getStorageService(context);
+        if (storage == null) return;
         final n = Note(
           id: '',
           title: '',
@@ -581,7 +594,7 @@ class _NewNoteButton extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             Text(
-              l10n.newNote,
+              l10n?.newNote ?? 'New Note',
               style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
@@ -595,9 +608,9 @@ class _NewNoteButton extends StatelessWidget {
     );
   }
 
-  StorageService _getStorageService(BuildContext context) {
+  StorageService? _getStorageService(BuildContext context) {
     final state = context.findAncestorStateOfType<_NotesScreenState>();
-    return state!.widget.storage;
+    return state?.widget.storage;
   }
 
   void _openNoteEditor(BuildContext context, Note note, StorageService storage) {
@@ -649,23 +662,23 @@ class _NoteCardState extends State<NoteCard> with AutomaticKeepAliveClientMixin 
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    final image = _decodedImage;
     return RepaintBoundary(
       child: MouseRegion(
         onEnter: (_) => setState(() => _isHovered = true),
         onExit: (_) => setState(() => _isHovered = false),
         child: AnimatedScale(
           scale: _isHovered ? 1.01 : 1.0,
-          duration: const Duration(milliseconds: 500),
+          duration: const Duration(milliseconds: 300),
           curve: Curves.easeOutCubic,
           child: AnimatedContainer(
-            duration: const Duration(milliseconds: 500),
+            duration: const Duration(milliseconds: 300),
             curve: Curves.easeOutCubic,
             transform: Matrix4.translationValues(0, _isHovered ? -6 : 0, 0),
             child: _NoteCardContent(
               note: widget.note,
-              decodedImage: _decodedImage,
+              decodedImage: image,
               onTap: widget.onTap,
-              isHovered: _isHovered,
             ),
           ),
         ),
@@ -679,20 +692,21 @@ class _NoteCardContent extends StatelessWidget {
   final Note note;
   final Uint8List? decodedImage;
   final VoidCallback onTap;
-  final bool isHovered;
 
   const _NoteCardContent({
     required this.note,
     required this.decodedImage,
     required this.onTap,
-    required this.isHovered,
   });
 
   @override
   Widget build(BuildContext context) {
+    final image = decodedImage;
+    final reminder = note.reminder;
+
     return VisionGlassCard(
       padding: EdgeInsets.zero,
-      useDistortion: isHovered,
+      useDistortion: true,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(20),
@@ -701,13 +715,13 @@ class _NoteCardContent extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (decodedImage != null)
+              if (image != null)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 10),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12),
                     child: Image.memory(
-                      decodedImage!,
+                      image,
                       fit: BoxFit.cover,
                       cacheWidth: 400,
                       gaplessPlayback: true,
@@ -759,7 +773,7 @@ class _NoteCardContent extends StatelessWidget {
                   children: note.labels.map((l) => LabelChip(label: l)).toList(),
                 ),
               ],
-              if (note.reminder != null) ...[
+              if (reminder != null) ...[
                 const SizedBox(height: 10),
                 Row(
                   children: [
@@ -771,7 +785,7 @@ class _NoteCardContent extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      DateFormat('dd.MM HH:mm').format(note.reminder!),
+                      DateFormat('dd.MM HH:mm').format(reminder),
                       style: const TextStyle(
                         fontSize: 12,
                         color: AppColors.accentBlue,
@@ -842,7 +856,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
 
   void _save() async {
     if (_t.text.trim().isEmpty && _c.text.trim().isEmpty && _img == null) return;
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
 
     final updatedNote = widget.note.copyWith(
       title: _t.text.trim(),
@@ -855,10 +869,10 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
     try {
       await widget.storage.save(updatedNote);
       if (!mounted) return;
-      _showSnackBar(l10n.saveSuccess);
+      _showSnackBar(l10n?.saveSuccess ?? 'Saved');
     } catch (e) {
       if (!mounted) return;
-      _showSnackBar('${l10n.saveError}: $e', isError: true);
+      _showSnackBar('${l10n?.saveError ?? 'Save error'}: $e', isError: true);
     }
   }
 
@@ -866,7 +880,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
 
     return Padding(
       padding: EdgeInsets.only(bottom: bottomInset),
@@ -921,7 +935,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                                     setState(() {});
                                   } catch (e) {
                                     if (!mounted) return;
-                                    _showSnackBar('${l10n.pinError}: $e', isError: true);
+                                    _showSnackBar('${l10n?.pinError ?? 'Pin error'}: $e', isError: true);
                                   }
                                 },
                               ),
@@ -937,7 +951,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                                       Navigator.pop(context);
                                     } catch (e) {
                                       if (!mounted) return;
-                                      _showSnackBar('${l10n.deleteError}: $e', isError: true);
+                                      _showSnackBar('${l10n?.deleteError ?? 'Delete error'}: $e', isError: true);
                                     }
                                   } else {
                                     Navigator.pop(context);
@@ -979,7 +993,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                                   shadows: AppColors.iconShadows,
                                 ),
                                 const SizedBox(width: 8),
-                                Text(l10n.save, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                                Text(l10n?.save ?? 'Save', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
                               ],
                             ),
                           ),
@@ -996,19 +1010,21 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
     );
   }
 
-  Widget _buildBody(AppLocalizations l10n) {
+  Widget _buildBody(AppLocalizations? l10n) {
+    final image = _decodedImage;
+    final reminder = _rem;
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
       child: Column(
         children: [
-          if (_decodedImage != null)
+          if (image != null)
             Stack(
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(20),
                   child: Image.memory(
-                    _decodedImage!,
+                    image,
                     // Optimize image rendering
                     cacheWidth: 800,
                     gaplessPlayback: true,
@@ -1038,8 +1054,8 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                 ),
               ],
             ),
-          TextField(controller: _t, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: -0.5), decoration: InputDecoration(hintText: l10n.title, hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)), border: InputBorder.none)),
-          TextField(controller: _c, maxLines: null, style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 18, height: 1.5), decoration: InputDecoration(hintText: l10n.note, hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)), border: InputBorder.none)),
+          TextField(controller: _t, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: -0.5), decoration: InputDecoration(hintText: l10n?.title ?? 'Title', hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)), border: InputBorder.none)),
+          TextField(controller: _c, maxLines: null, style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 18, height: 1.5), decoration: InputDecoration(hintText: l10n?.note ?? 'Note', hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)), border: InputBorder.none)),
           const SizedBox(height: 24),
           VisionGlassCard(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -1092,9 +1108,9 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                     if (!mounted) return;
                     if (t != null) setState(() => _rem = DateTime(d.year, d.month, d.day, t.hour, t.minute));
                   }),
-                  if (_rem != null) ...[
+                  if (reminder != null) ...[
                     const SizedBox(width: 8),
-                    Expanded(child: Text(DateFormat('dd.MM HH:mm').format(_rem!), style: const TextStyle(fontSize: 12, color: AppColors.accentBlue, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)),
+                    Expanded(child: Text(DateFormat('dd.MM HH:mm').format(reminder), style: const TextStyle(fontSize: 12, color: AppColors.accentBlue, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)),
                     CupertinoButton(
                       padding: EdgeInsets.zero,
                       minimumSize: Size.zero,
@@ -1107,7 +1123,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
             ),
           ),
           const SizedBox(height: 20),
-          TextField(controller: _l, style: const TextStyle(color: Colors.white70, fontSize: 15), decoration: InputDecoration(hintText: l10n.labelsHint, hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)), border: InputBorder.none)),
+          TextField(controller: _l, style: const TextStyle(color: Colors.white70, fontSize: 15), decoration: InputDecoration(hintText: l10n?.labelsHint ?? 'Labels', hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)), border: InputBorder.none)),
           const SizedBox(height: 100),
         ],
       ),
@@ -1148,7 +1164,7 @@ class _TrashScreenState extends State<TrashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
     final size = MediaQuery.of(context).size;
     final paddingH = size.width * 0.04;
 
@@ -1180,7 +1196,7 @@ class _TrashScreenState extends State<TrashScreen> {
                         ),
                       ),
                       const SizedBox(width: 16),
-                      Text(l10n.trash, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
+                      Text(l10n?.trash ?? 'Trash', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
                     ],
                   ),
                 ),
@@ -1188,14 +1204,15 @@ class _TrashScreenState extends State<TrashScreen> {
                   child: StreamBuilder<List<Note>>(
                     stream: _notesStream,
                     builder: (context, snapshot) {
-                      if (!snapshot.hasData) {
+                      final data = snapshot.data;
+                      if (data == null) {
                         return const Center(child: CupertinoActivityIndicator(color: AppColors.accentBlue));
                       }
 
-                      final archivedNotes = snapshot.data!.where((n) => n.isArchived).toList();
+                      final archivedNotes = data.where((n) => n.isArchived).toList();
 
                       if (archivedNotes.isEmpty) {
-                        return Center(child: Text(l10n.trashEmptyHint, style: const TextStyle(color: AppColors.secondaryText, fontSize: 17)));
+                        return Center(child: Text(l10n?.trashEmptyHint ?? 'Trash is empty', style: const TextStyle(color: AppColors.secondaryText, fontSize: 17)));
                       }
 
                       return ListView.builder(
@@ -1212,20 +1229,20 @@ class _TrashScreenState extends State<TrashScreen> {
                                 try {
                                   await widget.storage.save(updatedNote);
                                   if (!mounted) return;
-                                  _showSnackBar(l10n.noteRestored);
+                                  _showSnackBar(l10n?.noteRestored ?? 'Note restored');
                                 } catch (e) {
                                   if (!mounted) return;
-                                  _showSnackBar('${l10n.restoreError}: $e', isError: true);
+                                  _showSnackBar('${l10n?.restoreError ?? 'Restore error'}: $e', isError: true);
                                 }
                               },
                               onDelete: () async {
                                 try {
                                   await widget.storage.delete(note.id);
                                   if (!mounted) return;
-                                  _showSnackBar(l10n.deletePermanent);
+                                  _showSnackBar(l10n?.deletePermanent ?? 'Deleted permanently');
                                 } catch (e) {
                                   if (!mounted) return;
-                                  _showSnackBar('${l10n.deleteError}: $e', isError: true);
+                                  _showSnackBar('${l10n?.deleteError ?? 'Delete error'}: $e', isError: true);
                                 }
                               },
                             ),
@@ -1356,7 +1373,7 @@ class _BiometricToggleState extends State<_BiometricToggle> {
   Widget build(BuildContext context) {
     if (!_isAvailable || kIsWeb) return const SizedBox.shrink();
 
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
 
     return Container(
       width: double.infinity,
@@ -1368,7 +1385,7 @@ class _BiometricToggleState extends State<_BiometricToggle> {
           const SizedBox(width: 16),
           Expanded(
             child: Text(
-              l10n.biometricLock,
+              l10n?.biometricLock ?? 'Biometric Lock',
               style: const TextStyle(fontSize: 17, color: Colors.white),
             ),
           ),

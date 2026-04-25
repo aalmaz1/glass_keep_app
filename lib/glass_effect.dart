@@ -173,7 +173,7 @@ class GlassDistortionEffect extends StatelessWidget {
             ),
           ),
           // Content layer
-          child!,
+          child ?? const SizedBox.shrink(),
         ],
       ),
       child: child,

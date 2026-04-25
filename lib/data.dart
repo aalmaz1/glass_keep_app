@@ -50,9 +50,10 @@ class Note {
 
   /// Decode base64 image synchronously - call this only when needed
   Uint8List? decodeImage() {
-    if (imageBase64 == null || imageBase64!.isEmpty) return null;
+    final base64 = imageBase64;
+    if (base64 == null || base64.isEmpty) return null;
     try {
-      return base64Decode(imageBase64!);
+      return base64Decode(base64);
     } catch (e) {
       return null;
     }
@@ -151,8 +152,9 @@ class StorageService {
 
   Stream<List<Note>> getNotesStream() {
     // Return cached broadcast stream if available
-    if (_notesStream != null) {
-      return _notesStream!;
+    final cached = _notesStream;
+    if (cached != null) {
+      return cached;
     }
 
     // Create a new stream with optimized mapping
@@ -195,8 +197,9 @@ class StorageService {
         });
 
     // Convert to broadcast stream to allow multiple listeners without recreating
-    _notesStream = stream.asBroadcastStream();
-    return _notesStream!;
+    final broadcast = stream.asBroadcastStream();
+    _notesStream = broadcast;
+    return broadcast;
   }
 
   /// Clear the cache - useful for logout scenarios
@@ -321,8 +324,9 @@ class StorageService {
         allowedExtensions: ['json'],
       );
 
-      if (result != null && result.files.single.path != null) {
-        final file = File(result.files.single.path!);
+      final path = result?.files.single.path;
+      if (path != null) {
+        final file = File(path);
         final jsonString = await file.readAsString();
         await importNotesFromJson(jsonString);
       }
