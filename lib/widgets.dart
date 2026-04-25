@@ -44,7 +44,7 @@ class _VisionGlassCardState extends State<VisionGlassCard> with SingleTickerProv
     super.initState();
     _hoverController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 400),
+      duration: const Duration(milliseconds: 300),
     );
     _hoverAnimation = CurvedAnimation(
       parent: _hoverController,
@@ -245,14 +245,15 @@ class VisionBackground extends StatelessWidget {
     final animationProvider = GlassAnimationProvider.of(context);
     final animation = animationProvider?.animationController;
     
-    // Default colors if none provided
-    final bg = backgroundColor ?? AppColors.obsidianDark;
-    final colors = blobColors ?? [
-      AppColors.accentBlue,
+    // Default colors if none provided - preferring provider state if available
+    final bg = backgroundColor ?? animationProvider?.themeColor ?? AppColors.obsidianDark;
+    final colors = blobColors ?? animationProvider?.blobColors ?? [
+      AppColors.accentIndigo,
+      AppColors.accentTeal,
       AppColors.accentPurple,
-      AppColors.accentBlue,
+      AppColors.accentIndigo,
+      AppColors.accentTeal,
       AppColors.accentPurple,
-      AppColors.accentBlue,
     ];
 
     return Container(
@@ -268,7 +269,7 @@ class VisionBackground extends StatelessWidget {
                     // Drifting aurora blobs optimized with RadialGradient
                     // Increased blob count and layered movement for deeper 'Vision Pro' look
                     _AuroraBlob(
-                      color: colors[0 % colors.length].withValues(alpha: 0.25),
+                      color: colors[0 % colors.length].withValues(alpha: 0.3),
                       size: kIsWeb ? 400 : 800,
                       alignment: Alignment.topLeft,
                       depth: 0.05,
@@ -278,7 +279,7 @@ class VisionBackground extends StatelessWidget {
                       ),
                     ),
                     _AuroraBlob(
-                      color: colors[1 % colors.length].withValues(alpha: 0.2),
+                      color: colors[1 % colors.length].withValues(alpha: 0.25),
                       size: kIsWeb ? 500 : 900,
                       alignment: Alignment.bottomRight,
                       depth: 0.08,
@@ -288,7 +289,7 @@ class VisionBackground extends StatelessWidget {
                       ),
                     ),
                     _AuroraBlob(
-                      color: colors[2 % colors.length].withValues(alpha: 0.18),
+                      color: colors[2 % colors.length].withValues(alpha: 0.22),
                       size: kIsWeb ? 350 : 750,
                       alignment: Alignment.topRight,
                       depth: 0.06,
@@ -297,9 +298,19 @@ class VisionBackground extends StatelessWidget {
                         math.sin(animation.value * 2 * math.pi + math.pi/3) * 180,
                       ),
                     ),
+                    _AuroraBlob(
+                      color: colors[3 % colors.length].withValues(alpha: 0.2),
+                      size: kIsWeb ? 450 : 650,
+                      alignment: Alignment.bottomLeft,
+                      depth: 0.04,
+                      baseOffset: Offset(
+                        math.sin(animation.value * 2 * math.pi + math.pi/2) * 120 - 100,
+                        math.cos(animation.value * 2 * math.pi + math.pi/2) * 120 + 100,
+                      ),
+                    ),
                     if (!kIsWeb) ...[
                       _AuroraBlob(
-                        color: colors[3 % colors.length].withValues(alpha: 0.15),
+                        color: colors[4 % colors.length].withValues(alpha: 0.18),
                         size: 600,
                         alignment: Alignment.centerLeft,
                         depth: 0.03,
@@ -309,9 +320,9 @@ class VisionBackground extends StatelessWidget {
                         ),
                       ),
                       _AuroraBlob(
-                        color: colors[4 % colors.length].withValues(alpha: 0.12),
+                        color: colors[5 % colors.length].withValues(alpha: 0.15),
                         size: 700,
-                        alignment: Alignment.topRight,
+                        alignment: Alignment.centerRight,
                         depth: 0.1,
                         baseOffset: Offset(
                           math.sin(animation.value * 2 * math.pi + math.pi / 4) * 200,
