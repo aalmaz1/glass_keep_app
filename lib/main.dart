@@ -340,7 +340,12 @@ class _GlassKeepAppState extends State<GlassKeepApp>
                   backgroundColor: AppColors.obsidianBlack,
                   body: Stack(
                     children: [
-                      Positioned.fill(child: VisionBackground()),
+                      Positioned.fill(
+                        child: VisionBackground(
+                          backgroundColor: _themeColor,
+                          blobColors: _blobColors,
+                        ),
+                      ),
                       Center(
                         child: Text('Auth Error: ${snapshot.error}', style: const TextStyle(color: Colors.white)),
                       ),
@@ -353,7 +358,12 @@ class _GlassKeepAppState extends State<GlassKeepApp>
                   backgroundColor: AppColors.obsidianBlack,
                   body: Stack(
                     children: [
-                      Positioned.fill(child: VisionBackground()),
+                      Positioned.fill(
+                        child: VisionBackground(
+                          backgroundColor: _themeColor,
+                          blobColors: _blobColors,
+                        ),
+                      ),
                       const Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -381,7 +391,12 @@ class _GlassKeepAppState extends State<GlassKeepApp>
                         backgroundColor: AppColors.obsidianBlack,
                         body: Stack(
                           children: [
-                            Positioned.fill(child: VisionBackground()),
+                            Positioned.fill(
+                              child: VisionBackground(
+                                backgroundColor: _themeColor,
+                                blobColors: _blobColors,
+                              ),
+                            ),
                             Center(
                               child: Text('Storage Error: ${storeSnapshot.error}', style: const TextStyle(color: Colors.white)),
                             ),
@@ -399,7 +414,12 @@ class _GlassKeepAppState extends State<GlassKeepApp>
                       backgroundColor: AppColors.obsidianBlack,
                       body: Stack(
                         children: [
-                          Positioned.fill(child: VisionBackground()),
+                          Positioned.fill(
+                            child: VisionBackground(
+                              backgroundColor: _themeColor,
+                              blobColors: _blobColors,
+                            ),
+                          ),
                           const Center(
                             child: CupertinoActivityIndicator(
                               color: AppColors.accentDeepPurple,
@@ -531,12 +551,19 @@ class _BiometricAuthWrapperState extends State<BiometricAuthWrapper> {
     final authenticateStr = l10n?.authenticateToUnlock ?? 
                            'Please authenticate to access your notes';
     final unlockStr = l10n?.unlock ?? 'Unlock';
+    final provider = GlassAnimationProvider.of(context);
+    final themeColor = provider?.themeColor ?? AppColors.accentDeepPurple;
 
     return Scaffold(
       backgroundColor: AppColors.obsidianBlack,
       body: Stack(
         children: [
-          Positioned.fill(child: VisionBackground()),
+          Positioned.fill(
+            child: VisionBackground(
+              backgroundColor: themeColor,
+              blobColors: provider?.blobColors,
+            ),
+          ),
           Center(
             child: _isChecking
                 ? const CupertinoActivityIndicator(color: AppColors.accentDeepPurple)

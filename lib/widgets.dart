@@ -241,7 +241,8 @@ class _VisionBackgroundState extends State<VisionBackground> {
       debugPrint('[SYSTEM-REBORN] VisionBackground.build: provider.themeColor=${animationProvider.themeColor}, provider.blobColors=${animationProvider.blobColors}');
     }
     
-    // Use theme color if available, otherwise default to obsidian black
+    // Use widget parameters if provided, otherwise fall back to provider values
+    // This ensures that when parent explicitly passes colors, they take precedence
     final bg = widget.backgroundColor ?? animationProvider?.themeColor ?? AppColors.obsidianBlack;
     final blobs = widget.blobColors ?? animationProvider?.blobColors ?? [AppColors.accentBlue, AppColors.accentIndigo, AppColors.accentDeepPurple];
     
