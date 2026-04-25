@@ -81,7 +81,7 @@ class _AuthScreenState extends State<AuthScreen> {
       backgroundColor: Colors.transparent,
       body: Stack(
         children: [
-          const VisionBackground(),
+          const Positioned.fill(child: VisionBackground()),
           Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(24, 24, 24, 80),

@@ -188,6 +188,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
       onThemeChanged: _changeTheme,
       child: Stack(
         children: [
+          const Positioned.fill(child: ColoredBox(color: AppColors.obsidianBlack)),
           Listener(
             behavior: HitTestBehavior.translucent,
             onPointerHover: (event) {
@@ -256,7 +257,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
                     return const Scaffold(
                       body: Stack(
                         children: [
-                          VisionBackground(),
+                          Positioned.fill(child: VisionBackground()),
                           Center(
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -295,7 +296,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
                         return const Scaffold(
                           body: Stack(
                             children: [
-                              VisionBackground(),
+                              Positioned.fill(child: VisionBackground()),
                               Center(
                                 child: CupertinoActivityIndicator(
                                   color: AppColors.accentBlue,
@@ -452,7 +453,7 @@ class _BiometricAuthWrapperState extends State<BiometricAuthWrapper> {
     return Scaffold(
       body: Stack(
         children: [
-          const VisionBackground(),
+          const Positioned.fill(child: VisionBackground()),
           Center(
             child: _isChecking
                 ? const CupertinoActivityIndicator(color: AppColors.accentBlue)
