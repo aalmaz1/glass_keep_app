@@ -232,23 +232,25 @@ class _NotesScreenState extends State<NotesScreen> {
                         .clamp(1, 6)
                         .toInt();
 
-                    return SliverPadding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24.0,
-                        vertical: 24.0,
+                  return SliverPadding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24.0,
+                      vertical: 24.0,
+                    ),
+                    sliver: SliverMasonryGrid.count(
+                      crossAxisCount: crossAxisCount,
+                      mainAxisSpacing: 18.0,
+                      crossAxisSpacing: 18.0,
+                      addAutomaticKeepAlives: true,
+                      addRepaintBoundaries: true,
+                      itemBuilder: (context, i) => NoteCard(
+                        key: ValueKey('note_${notes[i].id}'),
+                        note: notes[i],
+                        onTap: () => _openNote(context, notes[i]),
                       ),
-                      sliver: SliverMasonryGrid.count(
-                        crossAxisCount: crossAxisCount,
-                        mainAxisSpacing: 18.0,
-                        crossAxisSpacing: 18.0,
-                        itemBuilder: (context, i) => NoteCard(
-                          key: ValueKey('note_${notes[i].id}'),
-                          note: notes[i],
-                          onTap: () => _openNote(context, notes[i]),
-                        ),
-                        childCount: notes.length,
-                      ),
-                    );
+                      childCount: notes.length,
+                    ),
+                  );
                   },
                 ),
                 const SliverToBoxAdapter(child: SizedBox(height: 100)),

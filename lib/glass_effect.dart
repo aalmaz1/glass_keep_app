@@ -20,14 +20,14 @@ class GlassDistortionPainter extends CustomPainter {
   final double strength;
   final double scale;
   
-  // Pre-calculated time hash
+  // Pre-calculated time hash for efficient shouldRepaint
   final int _timeHash;
 
   GlassDistortionPainter({
     required this.time,
     this.strength = 1.2,
     this.scale = 0.01,
-  }) : _timeHash = (time * 10).toInt();
+  }) : _timeHash = time.hashCode; // Use hashCode instead of calculation
 
   @override
   void paint(Canvas canvas, Size size) {
