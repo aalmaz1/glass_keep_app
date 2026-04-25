@@ -124,7 +124,7 @@ class _VisionGlassCardState extends State<VisionGlassCard> with SingleTickerProv
           
           Widget cardContent = Container(
             decoration: BoxDecoration(
-              color: widget.color ?? AppColors.obsidianBlack.withValues(alpha: 0.5 + (hoverValue * 0.1)),
+              color: widget.color ?? AppColors.obsidianBlack.withOpacity(0.5 + (hoverValue * 0.1)),
               borderRadius: BorderRadius.circular(widget.borderRadius),
               border: widget.border,
             ),
@@ -137,19 +137,19 @@ class _VisionGlassCardState extends State<VisionGlassCard> with SingleTickerProv
               boxShadow: [
                 // Multi-layered deep premium shadows for physical depth
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.5 + (hoverValue * 0.15)),
+                  color: Colors.black.withOpacity(0.5 + (hoverValue * 0.15)),
                   blurRadius: 50 + (hoverValue * 30),
                   offset: Offset(0, 25 + (hoverValue * 15)),
                   spreadRadius: -15,
                 ),
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.3 + (hoverValue * 0.05)),
+                  color: Colors.black.withOpacity(0.3 + (hoverValue * 0.05)),
                   blurRadius: 25 + (hoverValue * 15),
                   offset: Offset(0, 12 + (hoverValue * 8)),
                   spreadRadius: -5,
                 ),
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.15),
+                  color: Colors.black.withOpacity(0.15),
                   blurRadius: 8,
                   offset: const Offset(0, 4),
                 ),
@@ -196,11 +196,11 @@ class _SpecularBorderPainter extends CustomPainter {
         Offset.zero + Offset(tilt.dx * 20, tilt.dy * 20),
         Offset(size.width, size.height) + Offset(tilt.dx * 20, tilt.dy * 20),
         [
-          Colors.white.withValues(alpha: 0.9 + (hoverIntensity * 0.1)),
-          Colors.white.withValues(alpha: 0.2),
-          Colors.white.withValues(alpha: 0.7 + (hoverIntensity * 0.2)),
-          Colors.white.withValues(alpha: 0.1),
-          Colors.white.withValues(alpha: 0.8 + (hoverIntensity * 0.15)),
+          Colors.white.withOpacity(0.9 + (hoverIntensity * 0.1)),
+          Colors.white.withOpacity(0.2),
+          Colors.white.withOpacity(0.7 + (hoverIntensity * 0.2)),
+          Colors.white.withOpacity(0.1),
+          Colors.white.withOpacity(0.8 + (hoverIntensity * 0.15)),
         ],
         const [0.0, 0.25, 0.5, 0.75, 1.0],
       );
@@ -213,9 +213,9 @@ class _SpecularBorderPainter extends CustomPainter {
         Offset(size.width, 0) - Offset(tilt.dx * 30, tilt.dy * 30),
         Offset(0, size.height) - Offset(tilt.dx * 30, tilt.dy * 30),
         [
-          Colors.white.withValues(alpha: 0.0),
-          Colors.white.withValues(alpha: 0.4 + (hoverIntensity * 0.3)),
-          Colors.white.withValues(alpha: 0.0),
+          Colors.white.withOpacity(0.0),
+          Colors.white.withOpacity(0.4 + (hoverIntensity * 0.3)),
+          Colors.white.withOpacity(0.0),
         ],
         const [0.0, 0.5, 1.0],
       );
@@ -276,7 +276,7 @@ class VisionBackground extends StatelessWidget {
                   children: [
                     // 5 complex aurora layers with higher opacity and movement
                     _AuroraBlob(
-                      color: colors[0 % colors.length].withValues(alpha: 0.45),
+                      color: colors[0 % colors.length].withOpacity(0.45),
                       size: kIsWeb ? 500 : 900,
                       alignment: Alignment.topLeft,
                       depth: 0.07,
@@ -286,7 +286,7 @@ class VisionBackground extends StatelessWidget {
                       ),
                     ),
                     _AuroraBlob(
-                      color: colors[1 % colors.length].withValues(alpha: 0.4),
+                      color: colors[1 % colors.length].withOpacity(0.4),
                       size: kIsWeb ? 600 : 1000,
                       alignment: Alignment.bottomRight,
                       depth: 0.12,
@@ -296,7 +296,7 @@ class VisionBackground extends StatelessWidget {
                       ),
                     ),
                     _AuroraBlob(
-                      color: colors[2 % colors.length].withValues(alpha: 0.35),
+                      color: colors[2 % colors.length].withOpacity(0.35),
                       size: kIsWeb ? 450 : 850,
                       alignment: Alignment.topRight,
                       depth: 0.09,
@@ -306,7 +306,7 @@ class VisionBackground extends StatelessWidget {
                       ),
                     ),
                     _AuroraBlob(
-                      color: colors[3 % colors.length].withValues(alpha: 0.3),
+                      color: colors[3 % colors.length].withOpacity(0.3),
                       size: kIsWeb ? 550 : 750,
                       alignment: Alignment.bottomLeft,
                       depth: 0.06,
@@ -316,7 +316,7 @@ class VisionBackground extends StatelessWidget {
                       ),
                     ),
                     _AuroraBlob(
-                      color: colors[4 % colors.length].withValues(alpha: 0.25),
+                      color: colors[4 % colors.length].withOpacity(0.25),
                       size: kIsWeb ? 500 : 800,
                       alignment: Alignment.center,
                       depth: 0.15,
@@ -404,8 +404,8 @@ class _AuroraBlob extends StatelessWidget {
                 gradient: RadialGradient(
                   colors: [
                     color,
-                    color.withValues(alpha: color.a * 0.5),
-                    color.withValues(alpha: 0.0),
+                    color.withOpacity(color.a * 0.5),
+                    color.withOpacity(0.0),
                   ],
                   stops: const [0.0, 0.4, 1.0],
                 ),
@@ -439,7 +439,7 @@ class _ShaderNoisePainter extends CustomPainter {
         final recorder = ui.PictureRecorder();
         final c = Canvas(recorder);
         final random = math.Random(42);
-        final paint = Paint()..color = Colors.white.withValues(alpha: 0.012);
+        final paint = Paint()..color = Colors.white.withOpacity(0.012);
         
         for (int i = 0; i < 800; i++) {
           final x = random.nextDouble() * size.width;
@@ -487,7 +487,7 @@ class GlassSearchBar extends StatelessWidget {
       borderRadius: 12,
       useDistortion: false,
       blur: 10,
-      color: Colors.white.withValues(alpha: 0.08),
+      color: Colors.white.withOpacity(0.08),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       child: TextField(
         controller: controller,
@@ -524,10 +524,10 @@ class LabelChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: AppColors.accentDeepPurple.withValues(alpha: 0.15),
+        color: AppColors.accentDeepPurple.withOpacity(0.15),
         borderRadius: BorderRadius.circular(6),
         border: Border.all(
-          color: AppColors.accentDeepPurple.withValues(alpha: 0.2),
+          color: AppColors.accentDeepPurple.withOpacity(0.2),
           width: 0.5,
         ),
       ),
@@ -569,7 +569,7 @@ class GlassButton extends StatelessWidget {
         borderRadius: borderRadius,
         useDistortion: false,
         blur: 10,
-        color: color ?? Colors.white.withValues(alpha: 0.1),
+        color: color ?? Colors.white.withOpacity(0.1),
         padding: const EdgeInsets.all(12),
         child: Center(child: child),
       ),

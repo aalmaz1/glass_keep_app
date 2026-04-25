@@ -4,13 +4,10 @@ import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb, Tar
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     _logKeys();
-    if (_apiKey.isEmpty) {
-      debugPrint(
-        '\n\x1B[31m[ERROR] Firebase configuration is missing!\x1B[0m\n'
-        'Please ensure you are providing environment variables using:\n'
-        '  \x1B[33m--dart-define-from-file=config.json\x1B[0m\n'
-        'Make sure config.json exists and contains the required Firebase keys.\n'
-      );
+    if (_apiKey.isEmpty || _appId.isEmpty || _projectId.isEmpty) {
+      final errorMsg = 'Firebase configuration is incomplete! FIREBASE_API_KEY, FIREBASE_APP_ID, and FIREBASE_PROJECT_ID are required.';
+      debugPrint('\n\x1B[31m[ERROR] $errorMsg\x1B[0m\n');
+      throw StateError(errorMsg);
     }
     if (kIsWeb) {
       return web;

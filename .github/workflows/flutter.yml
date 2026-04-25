@@ -22,9 +22,6 @@ jobs:
       - name: Enable Web
         run: flutter config --enable-web
 
-      - name: Clean
-        run: flutter clean
-
       - name: Install dependencies
         run: flutter pub get
 
@@ -39,8 +36,7 @@ jobs:
 
       - name: Build Web
         run: |
-          flutter clean
-          flutter build web --release --web-renderer canvaskit --base-href="/${{ github.event.repository.name }}/" --dart-define-from-file=config.json
+          flutter build web --release --web-renderer auto --base-href="./" --dart-define-from-file=config.json
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
