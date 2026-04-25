@@ -395,7 +395,13 @@ class _NotesScreenState extends State<NotesScreen> {
         builder: (context) => SettingsScreen(
           storage: widget.storage,
           onThemeChanged: (Color? color, List<Color>? blobs, Decoration? decoration) {
-            provider?.onThemeChanged?.call(color, blobs);
+            debugPrint('[SYSTEM-REBORN] Theme change requested: color=$color, blobs=${blobs?.map((c) => c.value).toList()}');
+            if (provider?.onThemeChanged != null) {
+              provider!.onThemeChanged!(color, blobs);
+              debugPrint('[SYSTEM-REBORN] Theme change callback executed');
+            } else {
+              debugPrint('[SYSTEM-REBORN] ERROR: onThemeChanged is null in provider');
+            }
           },
         ),
       ),
