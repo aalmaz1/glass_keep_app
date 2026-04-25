@@ -257,6 +257,8 @@ class VisionBackground extends StatelessWidget {
     ];
 
     return Container(
+      width: double.infinity,
+      height: double.infinity,
       color: bg,
       child: Stack(
         children: [
