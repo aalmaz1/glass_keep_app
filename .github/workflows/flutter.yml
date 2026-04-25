@@ -36,7 +36,7 @@ jobs:
 
       - name: Build Web
         run: |
-         flutter build web --release --wasm --base-href="/glass_keep_app" --dart-define-from-file=config.json 
+         flutter build web --release --wasm --base-href="/glass_keep_app/" --dart-define-from-file=config.json 
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
