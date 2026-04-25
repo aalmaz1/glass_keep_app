@@ -111,14 +111,14 @@ class _VisionGlassCardState extends State<VisionGlassCard> with SingleTickerProv
           if (widget.useDistortion) {
             mainContent = GlassDistortionEffect(
               borderRadius: widget.borderRadius,
-              distortionStrength: hoverValue * 0.8, // Reduced from 1.5 to 0.8 for better performance
+              distortionStrength: hoverValue * 0.5, // Reduced from 0.8 to 0.5 for better performance
               child: mainContent,
             );
           }
 
           final blurFilter = ui.ImageFilter.blur(
-            sigmaX: widget.blur + (hoverValue * 8), 
-            sigmaY: widget.blur + (hoverValue * 8)
+            sigmaX: widget.blur + (hoverValue * 4), // Reduced from 8 to 4 for better performance
+            sigmaY: widget.blur + (hoverValue * 4)
           );
           
           Widget cardContent = Container(
@@ -134,23 +134,17 @@ class _VisionGlassCardState extends State<VisionGlassCard> with SingleTickerProv
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(widget.borderRadius),
               boxShadow: [
-                // Multi-layered deep premium shadows for physical depth
+                // Simplified shadow layers for better performance
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.5 + (hoverValue * 0.15)),
-                  blurRadius: 50 + (hoverValue * 30),
-                  offset: Offset(0, 25 + (hoverValue * 15)),
-                  spreadRadius: -15,
+                  color: Colors.black.withValues(alpha: 0.4 + (hoverValue * 0.1)),
+                  blurRadius: 40 + (hoverValue * 20),
+                  offset: Offset(0, 20 + (hoverValue * 10)),
+                  spreadRadius: -10,
                 ),
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.3 + (hoverValue * 0.05)),
-                  blurRadius: 25 + (hoverValue * 15),
-                  offset: Offset(0, 12 + (hoverValue * 8)),
-                  spreadRadius: -5,
-                ),
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.15),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
+                  color: Colors.black.withValues(alpha: 0.2),
+                  blurRadius: 15,
+                  offset: const Offset(0, 8),
                 ),
               ],
             ),
@@ -186,41 +180,24 @@ class _SpecularBorderPainter extends CustomPainter {
     final rect = Offset.zero & size;
     final rrect = RRect.fromRectAndRadius(rect, Radius.circular(borderRadius));
 
-    // Primary specular border with complex gradient simulating light catch
-    // Intensifies and widens slightly on hover
+    // Single simplified border highlight for better performance
     final paint1 = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5 + (hoverIntensity * 0.5)
+      ..strokeWidth = 1.2 + (hoverIntensity * 0.4)
       ..shader = ui.Gradient.linear(
-        Offset.zero + Offset(tilt.dx * 20, tilt.dy * 20),
-        Offset(size.width, size.height) + Offset(tilt.dx * 20, tilt.dy * 20),
+        Offset(tilt.dx * 15, tilt.dy * 15),
+        Offset(size.width, size.height) + Offset(tilt.dx * 15, tilt.dy * 15),
         [
-          Colors.white.withValues(alpha: 0.9 + (hoverIntensity * 0.1)),
-          Colors.white.withValues(alpha: 0.2),
-          Colors.white.withValues(alpha: 0.7 + (hoverIntensity * 0.2)),
-          Colors.white.withValues(alpha: 0.1),
-          Colors.white.withValues(alpha: 0.8 + (hoverIntensity * 0.15)),
+          Colors.white.withValues(alpha: 0.7 + (hoverIntensity * 0.1)),
+          Colors.white.withValues(alpha: 0.15),
+          Colors.white.withValues(alpha: 0.5 + (hoverIntensity * 0.15)),
+          Colors.white.withValues(alpha: 0.08),
+          Colors.white.withValues(alpha: 0.6 + (hoverIntensity * 0.1)),
         ],
         const [0.0, 0.25, 0.5, 0.75, 1.0],
       );
 
-    // Secondary subtle highlight for added depth on the opposite edge
-    final paint2 = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.8 + (hoverIntensity * 0.4)
-      ..shader = ui.Gradient.linear(
-        Offset(size.width, 0) - Offset(tilt.dx * 30, tilt.dy * 30),
-        Offset(0, size.height) - Offset(tilt.dx * 30, tilt.dy * 30),
-        [
-          Colors.white.withValues(alpha: 0.0),
-          Colors.white.withValues(alpha: 0.4 + (hoverIntensity * 0.3)),
-          Colors.white.withValues(alpha: 0.0),
-        ],
-        const [0.0, 0.5, 1.0],
-      );
-
     canvas.drawRRect(rrect, paint1);
-    canvas.drawRRect(rrect, paint2);
   }
 
   @override
