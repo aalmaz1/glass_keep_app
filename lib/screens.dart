@@ -669,6 +669,7 @@ class _NoteCardContent extends StatelessWidget {
   final VoidCallback onTap;
 
   const _NoteCardContent({
+    super.key,
     required this.note,
     required this.decodedImage,
     required this.onTap,
