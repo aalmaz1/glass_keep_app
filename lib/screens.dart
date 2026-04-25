@@ -241,8 +241,6 @@ class _NotesScreenState extends State<NotesScreen> {
                       crossAxisCount: crossAxisCount,
                       mainAxisSpacing: 18.0,
                       crossAxisSpacing: 18.0,
-                      addAutomaticKeepAlives: true,
-                      addRepaintBoundaries: true,
                       itemBuilder: (context, i) => NoteCard(
                         key: ValueKey('note_${notes[i].id}'),
                         note: notes[i],
