@@ -387,6 +387,10 @@ class StorageService {
   }
 
   Future<void> exportNotes() async {
+    if (kIsWeb) {
+      debugPrint('Export not supported on web yet');
+      return;
+    }
     try {
       final encryptedJson = await exportNotesToJson();
       final directory = await getTemporaryDirectory();
@@ -407,7 +411,18 @@ class StorageService {
         allowedExtensions: ['json'],
       );
 
-      final path = result?.files.single.path;
+      if (result == null) return;
+
+      if (kIsWeb) {
+        final bytes = result.files.single.bytes;
+        if (bytes != null) {
+          final jsonString = utf8.decode(bytes);
+          await importNotesFromJson(jsonString);
+        }
+        return;
+      }
+
+      final path = result.files.single.path;
       if (path != null) {
         final file = File(path);
         final jsonString = await file.readAsString();

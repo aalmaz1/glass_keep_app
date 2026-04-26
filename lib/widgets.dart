@@ -36,16 +36,6 @@ class VisionGlassCard extends StatefulWidget {
 class _VisionGlassCardState extends State<VisionGlassCard> {
   bool _isHovered = false;
 
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
   void _handleHover(bool isHovered) {
     if (_isHovered == isHovered) return;
     setState(() {
