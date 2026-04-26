@@ -448,10 +448,10 @@ class LabelChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: themeColor.withValues(alpha: 0.15),
+        color: themeColor.withValues(alpha: 0.25),
         borderRadius: BorderRadius.circular(6),
         border: Border.all(
-          color: themeColor.withValues(alpha: 0.2),
+          color: themeColor.withValues(alpha: 0.3),
           width: 0.5,
         ),
       ),
@@ -460,7 +460,7 @@ class LabelChip extends StatelessWidget {
         style: TextStyle(
           color: themeColor,
           fontSize: 11,
-          fontWeight: FontWeight.w500,
+          fontWeight: FontWeight.w600,
         ),
       ),
     );

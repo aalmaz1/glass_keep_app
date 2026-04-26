@@ -667,19 +667,10 @@ class _NewNoteButton extends StatelessWidget {
         );
         _openNoteEditor(context, n, storage);
       },
-      child: Container(
+      child: VisionGlassCard(
+        borderRadius: 30,
+        color: themeColor.withValues(alpha: 0.7),
         padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
-        decoration: BoxDecoration(
-          color: themeColor.withValues(alpha: 0.9),
-          borderRadius: BorderRadius.circular(30),
-          boxShadow: [
-            BoxShadow(
-              color: themeColor.withValues(alpha: 0.3),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -1127,13 +1118,10 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                             HapticFeedback.mediumImpact();
                             _save();
                           },
-                          child: Container(
+                          child: VisionGlassCard(
+                            borderRadius: 30,
+                            color: _getThemeColor().withValues(alpha: 0.7),
                             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                            decoration: BoxDecoration(
-                              color: _getThemeColor().withValues(alpha: 0.9),
-                              borderRadius: BorderRadius.circular(30),
-                              boxShadow: [BoxShadow(color: _getThemeColor().withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 4))],
-                            ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
@@ -1217,7 +1205,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                   IconButton(
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
-                    icon: Icon(CupertinoIcons.photo, color: _getThemeColor().withValues(alpha: 0.7), shadows: AppColors.iconShadows),
+                    icon: Icon(CupertinoIcons.photo, color: _getThemeColor().withValues(alpha: 0.9), shadows: AppColors.iconShadows),
                     onPressed: _isLoading ? null : () async {
                       HapticFeedback.lightImpact();
                       if (context.mounted) setState(() => _isLoading = true);
@@ -1262,7 +1250,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                     },
                   ),
                   const VerticalDivider(color: Colors.white24, indent: 8, endIndent: 8),
-                  IconButton(padding: EdgeInsets.zero, constraints: const BoxConstraints(), icon: Icon(CupertinoIcons.alarm, color: _getThemeColor().withValues(alpha: 0.7), shadows: AppColors.iconShadows), onPressed: () async {
+                  IconButton(padding: EdgeInsets.zero, constraints: const BoxConstraints(), icon: Icon(CupertinoIcons.alarm, color: _getThemeColor().withValues(alpha: 0.9), shadows: AppColors.iconShadows), onPressed: () async {
                     HapticFeedback.lightImpact();
                     final now = DateTime.now();
                     final d = await showDatePicker(context: context, initialDate: now, firstDate: now, lastDate: now.add(const Duration(days: 365)));
