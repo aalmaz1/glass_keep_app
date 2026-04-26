@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-/// Core color constants for the app - Obsidian Vision Premium Dark Theme
+/// Core color constants for the app - Luxury Collection Premium Themes
 class AppColors {
-  static const String appVersion = 'V1.7.0';
+  static const String appVersion = 'V1.8.0';
 
   // Text colors
   static const Color secondaryText = Color.fromRGBO(255, 255, 255, 0.7); // 70% opacity white
@@ -11,15 +11,18 @@ class AppColors {
   // Glass morphism - Light theme
   static const Color glassLight = Color.fromARGB(25, 255, 255, 255);
 
-  // Obsidian theme colors (primary background)
-  static const Color obsidianBlack = Color(0xFF020204);
+  // Luxury collection base colors
+  // Note: obsidianBlack is set to Titanium's background for the default "Luxury" first impression
+  static const Color obsidianBlack = Color(0xFF1A1A1A); 
+  static const Color pureObsidian = Color(0xFF020204);
 
-  // Accent colors
-  static const Color accentBlue = Color(0xFF0A84FF);
-  static const Color accentTeal = Color(0xFF64FFDA);
-  static const Color accentIndigo = Color(0xFF5E5CE6);
-  static const Color accentRed = Color(0xFFFF453A);
-  static const Color accentDeepPurple = Color(0xFFBF5AF2);
+  // Accent colors - Refined Luxury Palette (V1.8.0)
+  // accentDeepPurple is set to Titanium's accent for the default first impression
+  static const Color accentBlue = Color(0xFF8ECAE6);
+  static const Color accentTeal = Color(0xFF99F6E4);
+  static const Color accentIndigo = Color(0xFFA5B4FC);
+  static const Color accentRed = Color(0xFFFDA4AF);
+  static const Color accentDeepPurple = Color(0xFFD1D1D6); 
 
   static const List<Shadow> iconShadows = [
     Shadow(color: Colors.black54, offset: Offset(0, 2), blurRadius: 10),
@@ -41,44 +44,44 @@ class AppTheme {
   });
 }
 
-/// Collection of curated glassmorphism-optimized themes
+/// Collection of curated glassmorphism-optimized themes: The Luxury Collection
 class AppThemes {
   static const List<AppTheme> all = [
     AppTheme(
-      name: 'Obsidian',
+      name: 'Titanium',
+      backgroundColor: Color(0xFF1A1A1A),
+      blobColors: [Color(0xFF2C2C2E), Color(0xFF3A3A3C), Color(0xFF48484A)],
+      accentColor: Color(0xFFD1D1D6),
+    ),
+    AppTheme(
+      name: 'Royal Navy',
+      backgroundColor: Color(0xFF0A1128),
+      blobColors: [Color(0xFF001F3F), Color(0xFF003366), Color(0xFF004080)],
+      accentColor: Color(0xFF8ECAE6),
+    ),
+    AppTheme(
+      name: 'Champagne Gold',
+      backgroundColor: Color(0xFF1C1917),
+      blobColors: [Color(0xFF44403C), Color(0xFF78716C), Color(0xFFA8A29E)],
+      accentColor: Color(0xFFF5E1C8),
+    ),
+    AppTheme(
+      name: 'Nordic Ice',
+      backgroundColor: Color(0xFF020617),
+      blobColors: [Color(0xFF1E293B), Color(0xFF334155), Color(0xFF475569)],
+      accentColor: Color(0xFFF1F5F9),
+    ),
+    AppTheme(
+      name: 'Midnight Forest',
+      backgroundColor: Color(0xFF061612),
+      blobColors: [Color(0xFF064E3B), Color(0xFF065F46), Color(0xFF0F766E)],
+      accentColor: Color(0xFFA7F3D0),
+    ),
+    AppTheme(
+      name: 'Pure Obsidian',
       backgroundColor: Color(0xFF020204),
-      blobColors: [Color(0xFFBF5AF2), Color(0xFF0A84FF), Color(0xFF5E5CE6)],
-      accentColor: Color(0xFFBF5AF2),
-    ),
-    AppTheme(
-      name: 'Emerald Aurora',
-      backgroundColor: Color(0xFF001A1A),
-      blobColors: [Color(0xFF64FFDA), Color(0xFF00C853), Color(0xFF004D40)],
-      accentColor: Color(0xFF64FFDA),
-    ),
-    AppTheme(
-      name: 'Ruby Sunset',
-      backgroundColor: Color(0xFF1A0000),
-      blobColors: [Color(0xFFFF453A), Color(0xFFFF9F0A), Color(0xFF880E4F)],
-      accentColor: Color(0xFFFF453A),
-    ),
-    AppTheme(
-      name: 'Midnight Blue',
-      backgroundColor: Color(0xFF00001A),
-      blobColors: [Color(0xFF64D2FF), Color(0xFF5E5CE6), Color(0xFF0D47A1)],
-      accentColor: Color(0xFF64D2FF),
-    ),
-    AppTheme(
-      name: 'Golden Hour',
-      backgroundColor: Color(0xFF1A1200),
-      blobColors: [Color(0xFFFFD60A), Color(0xFFFF9F0A), Color(0xFF3E2723)],
-      accentColor: Color(0xFFFFD60A),
-    ),
-    AppTheme(
-      name: 'Cyberpunk',
-      backgroundColor: Color(0xFF12001A),
-      blobColors: [Color(0xFFFF375F), Color(0xFF64D2FF), Color(0xFF4A148C)],
-      accentColor: Color(0xFFFF375F),
+      blobColors: [Color(0xFF171717), Color(0xFF262626), Color(0xFF404040)],
+      accentColor: Color(0xFFFAFAFA),
     ),
   ];
 }

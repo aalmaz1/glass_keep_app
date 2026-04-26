@@ -239,7 +239,7 @@ class _VisionBackgroundState extends State<VisionBackground> {
     // Use widget parameters if provided, otherwise fall back to provider values
     // This ensures that when parent explicitly passes colors, they take precedence
     final bg = widget.backgroundColor ?? animationProvider?.themeColor ?? AppColors.obsidianBlack;
-    final blobs = widget.blobColors ?? animationProvider?.blobColors ?? [AppColors.accentBlue, AppColors.accentIndigo, AppColors.accentDeepPurple];
+    final blobs = widget.blobColors ?? animationProvider?.blobColors ?? [const Color(0xFF2C2C2E), const Color(0xFF3A3A3C), const Color(0xFF48484A)];
     
     debugPrint('[SYSTEM-REBORN] VisionBackground.build: final bg=$bg, blobs count=${blobs.length}');
 
