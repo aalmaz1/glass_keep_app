@@ -10,6 +10,7 @@ class GlassAnimationProvider extends InheritedWidget {
   final Function(Locale) onLocaleChanged;
   final ValueNotifier<Offset> pointerPosition;
   final ValueNotifier<Offset> tilt;
+  final ValueNotifier<bool> isLowPerformanceMode;
   final ui.FragmentProgram? grainProgram;
   final Color? themeColor;
   final List<Color>? blobColors;
@@ -22,6 +23,7 @@ class GlassAnimationProvider extends InheritedWidget {
     required this.onLocaleChanged,
     required this.pointerPosition,
     required this.tilt,
+    required this.isLowPerformanceMode,
     this.grainProgram,
     this.themeColor,
     this.blobColors,
