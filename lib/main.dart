@@ -270,12 +270,12 @@ class _GlassKeepAppState extends State<GlassKeepApp>
             brightness: Brightness.dark,
             useMaterial3: true,
             scaffoldBackgroundColor: _themeColor ?? AppColors.obsidianBlack,
-            colorSchemeSeed: _accentColor ?? AppColors.accentDeepPurple,
+            colorSchemeSeed: _accentColor ?? AppColors.accentBlue,
             fontFamily: kIsWeb ? 'Roboto' : 'Noto Sans',
             fontFamilyFallback: const ['Roboto', 'Arial'],
             cupertinoOverrideTheme: CupertinoThemeData(
               brightness: Brightness.dark,
-              primaryColor: _accentColor ?? AppColors.accentDeepPurple,
+              primaryColor: _accentColor ?? AppColors.accentBlue,
             ),
             appBarTheme: const AppBarTheme(
               backgroundColor: Colors.transparent,
@@ -375,7 +375,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
                             _LoadingLogo(),
                             SizedBox(height: 24),
                             CupertinoActivityIndicator(
-                              color: AppColors.accentDeepPurple,
+                              color: AppColors.accentBlue,
                               radius: 14,
                             ),
                           ],
@@ -557,7 +557,7 @@ class _BiometricAuthWrapperState extends State<BiometricAuthWrapper> {
     final unlockStr = l10n?.unlock ?? 'Unlock';
     final provider = GlassAnimationProvider.of(context);
     final bgColor = provider?.themeColor ?? AppColors.obsidianBlack;
-    final accentColor = provider?.accentColor ?? AppColors.accentDeepPurple;
+    final accentColor = provider?.accentColor ?? AppColors.accentBlue;
 
     return Scaffold(
       backgroundColor: AppColors.obsidianBlack,

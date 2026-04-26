@@ -79,7 +79,7 @@ class _AuthScreenState extends State<AuthScreen> {
   @override
   Widget build(BuildContext context) {
     final provider = GlassAnimationProvider.of(context);
-    final themeColor = provider?.themeColor ?? AppColors.accentDeepPurple;
+    final themeColor = provider?.themeColor ?? AppColors.obsidianBlack;
 
     return Scaffold(
       backgroundColor: Colors.transparent,

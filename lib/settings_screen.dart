@@ -19,7 +19,7 @@ class SettingsScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final appearanceTitle = l10n?.appearance ?? 'Appearance';
     final provider = GlassAnimationProvider.of(context);
-    final themeColor = provider?.themeColor ?? AppColors.accentDeepPurple;
+    final themeColor = provider?.themeColor ?? AppColors.obsidianBlack;
 
     return Scaffold(
       extendBodyBehindAppBar: true,

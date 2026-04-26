@@ -235,7 +235,7 @@ class _NotesScreenState extends State<NotesScreen> {
     const paddingH = 24.0;
     final l10n = AppLocalizations.of(context);
     final provider = GlassAnimationProvider.of(context);
-    final themeColor = provider?.themeColor ?? AppColors.accentDeepPurple;
+    final themeColor = provider?.themeColor ?? AppColors.obsidianBlack;
 
     return Scaffold(
       backgroundColor: AppColors.obsidianBlack,
@@ -276,7 +276,7 @@ class _NotesScreenState extends State<NotesScreen> {
                             child: Icon(
                               CupertinoIcons.ellipsis_vertical,
                               size: 26,
-                              color: themeColor,
+                              color: themeColor == AppColors.obsidianBlack ? Colors.white : themeColor,
                               shadows: AppColors.iconShadows,
                             ),
                           ),
@@ -351,7 +351,7 @@ class _NotesScreenState extends State<NotesScreen> {
             ),
           ),
           Positioned(
-            bottom: size.height * 0.04,
+            bottom: MediaQuery.paddingOf(context).bottom + 24,
             left: 0,
             right: 0,
             child: const Center(child: _NewNoteButton()),
@@ -652,7 +652,7 @@ class _NewNoteButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final animationProvider = GlassAnimationProvider.of(context);
-    final themeColor = animationProvider?.themeColor ?? AppColors.accentDeepPurple;
+    final accentColor = animationProvider?.accentColor ?? AppColors.accentBlue;
 
     return GestureDetector(
       onTap: () {
@@ -669,25 +669,38 @@ class _NewNoteButton extends StatelessWidget {
       },
       child: VisionGlassCard(
         borderRadius: 30,
-        color: themeColor.withValues(alpha: 0.7),
+        color: Colors.black.withValues(alpha: 0.4),
+        accentColor: accentColor,
         padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
+            Icon(
               CupertinoIcons.plus,
               color: Colors.white,
               size: 28,
-              shadows: AppColors.iconShadows,
+              shadows: [
+                Shadow(
+                  color: accentColor.withValues(alpha: 0.5),
+                  blurRadius: 10,
+                ),
+                ...AppColors.iconShadows,
+              ],
             ),
             const SizedBox(width: 8),
             Text(
               l10n?.newNote ?? 'New Note',
-              style: const TextStyle(
+              style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
                 fontSize: 18,
                 letterSpacing: -0.5,
+                shadows: [
+                  Shadow(
+                    color: accentColor.withValues(alpha: 0.5),
+                    blurRadius: 10,
+                  ),
+                ],
               ),
             ),
           ],
@@ -726,7 +739,7 @@ class _NoteCardState extends State<NoteCard> {
 
   Color _getThemeColor() {
     final provider = GlassAnimationProvider.of(context);
-    return provider?.themeColor ?? AppColors.accentDeepPurple;
+    return provider?.themeColor ?? AppColors.obsidianBlack;
   }
 
   @override
@@ -911,7 +924,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
   /// Get current theme color from provider
   Color _getThemeColor() {
     final provider = GlassAnimationProvider.of(context);
-    return provider?.themeColor ?? AppColors.accentDeepPurple;
+    return provider?.themeColor ?? AppColors.obsidianBlack;
   }
 
   /// Compress image to fit within maxBytes limit using a robust approach
@@ -988,7 +1001,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: isError ? AppColors.accentRed : AppColors.accentDeepPurple,
+        backgroundColor: isError ? AppColors.accentRed : AppColors.accentBlue,
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.all(16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -1120,7 +1133,8 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                           },
                           child: VisionGlassCard(
                             borderRadius: 30,
-                            color: _getThemeColor().withValues(alpha: 0.7),
+                            color: Colors.black.withValues(alpha: 0.4),
+                            accentColor: GlassAnimationProvider.of(context)?.accentColor ?? AppColors.accentBlue,
                             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -1132,7 +1146,20 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                                   shadows: AppColors.iconShadows,
                                 ),
                                 const SizedBox(width: 8),
-                                Text(l10n?.save ?? 'Save', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                                Text(
+                                  l10n?.save ?? 'Save',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                    shadows: [
+                                      Shadow(
+                                        color: (GlassAnimationProvider.of(context)?.accentColor ?? AppColors.accentBlue).withValues(alpha: 0.5),
+                                        blurRadius: 10,
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -1307,7 +1334,7 @@ class _TrashScreenState extends State<TrashScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: isError ? AppColors.accentRed : AppColors.accentDeepPurple,
+        backgroundColor: isError ? AppColors.accentRed : AppColors.accentBlue,
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.all(16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -1321,7 +1348,7 @@ class _TrashScreenState extends State<TrashScreen> {
     final size = MediaQuery.sizeOf(context);
     final paddingH = size.width * 0.04;
     final provider = GlassAnimationProvider.of(context);
-    final themeColor = provider?.themeColor ?? AppColors.accentDeepPurple;
+    final themeColor = provider?.themeColor ?? AppColors.obsidianBlack;
 
     return Scaffold(
       backgroundColor: AppColors.obsidianBlack,
