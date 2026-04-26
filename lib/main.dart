@@ -426,7 +426,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
                           ),
                           const Center(
                             child: CupertinoActivityIndicator(
-                              color: AppColors.accentDeepPurple,
+                              color: AppColors.accentBlue,
                             ),
                           ),
                         ],

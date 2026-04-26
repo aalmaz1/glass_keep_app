@@ -669,7 +669,7 @@ class _NewNoteButton extends StatelessWidget {
       },
       child: VisionGlassCard(
         borderRadius: 30,
-        color: Colors.black.withValues(alpha: 0.4),
+        color: Colors.black.withValues(alpha: 0.6),
         accentColor: accentColor,
         padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
         child: Row(
@@ -700,6 +700,7 @@ class _NewNoteButton extends StatelessWidget {
                     color: accentColor.withValues(alpha: 0.5),
                     blurRadius: 10,
                   ),
+                  ...AppColors.iconShadows,
                 ],
               ),
             ),
@@ -1133,7 +1134,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                           },
                           child: VisionGlassCard(
                             borderRadius: 30,
-                            color: Colors.black.withValues(alpha: 0.4),
+                            color: Colors.black.withValues(alpha: 0.6),
                             accentColor: GlassAnimationProvider.of(context)?.accentColor ?? AppColors.accentBlue,
                             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                             child: Row(
@@ -1157,6 +1158,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                                         color: (GlassAnimationProvider.of(context)?.accentColor ?? AppColors.accentBlue).withValues(alpha: 0.5),
                                         blurRadius: 10,
                                       ),
+                                      ...AppColors.iconShadows,
                                     ],
                                   ),
                                 ),

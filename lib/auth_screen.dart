@@ -300,12 +300,12 @@ class _AuthScreenState extends State<AuthScreen> {
                       child: _isLoading
                         ? const Center(
                             child: CircularProgressIndicator(
-                              color: AppColors.accentDeepPurple,
+                              color: AppColors.accentBlue,
                             ),
                           )
                         : ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.accentDeepPurple,
+                                backgroundColor: AppColors.accentBlue,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(16),
                                 ),
