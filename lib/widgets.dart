@@ -460,7 +460,7 @@ class LabelChip extends StatelessWidget {
         style: TextStyle(
           color: themeColor,
           fontSize: 11,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );
