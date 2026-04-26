@@ -5,7 +5,7 @@ class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     _logKeys();
     if (_apiKey.isEmpty || _appId.isEmpty || _projectId.isEmpty) {
-      final errorMsg = 'Firebase configuration is incomplete! FIREBASE_API_KEY, FIREBASE_APP_ID, and FIREBASE_PROJECT_ID are required.';
+      const errorMsg = 'Firebase configuration is incomplete! FIREBASE_API_KEY, FIREBASE_APP_ID, and FIREBASE_PROJECT_ID are required.';
       debugPrint('\n\x1B[31m[ERROR] $errorMsg\x1B[0m\n');
       throw StateError(errorMsg);
     }

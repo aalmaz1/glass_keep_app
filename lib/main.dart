@@ -36,9 +36,9 @@ void main() async {
             defaultTargetPlatform == TargetPlatform.linux ||
             defaultTargetPlatform == TargetPlatform.macOS)) {
       await windowManager.ensureInitialized();
-      final WindowOptions windowOptions = WindowOptions(
-        size: const Size(1200, 800),
-        minimumSize: const Size(400, 600),
+      const WindowOptions windowOptions = WindowOptions(
+        size: Size(1200, 800),
+        minimumSize: Size(400, 600),
         center: true,
         backgroundColor: Colors.transparent,
         skipTaskbar: false,
@@ -122,7 +122,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
   }
 
   void _changeTheme(Color? color, List<Color>? blobs) {
-    debugPrint('[SYSTEM-REBORN] _changeTheme called: color=$color, blobs=${blobs?.map((c) => c.value).toList()}');
+    debugPrint('[SYSTEM-REBORN] _changeTheme called: color=$color, blobs=${blobs?.map((c) => c.toARGB32()).toList()}');
     setState(() {
       _themeColor = color;
       _blobColors = blobs;

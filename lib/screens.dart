@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/cupertino.dart' show CupertinoIcons, CupertinoActivityIndicator, CupertinoNavigationBar, CupertinoButton;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -32,7 +33,7 @@ class _NotesScreenState extends State<NotesScreen> {
   StreamSubscription? _notesSubscription;
   
   List<Note> _streamNotes = [];
-  List<Note> _additionalNotes = [];
+  final List<Note> _additionalNotes = [];
   DocumentSnapshot? _lastDoc;
   bool _hasMore = true;
   bool _isLoadingMore = false;
@@ -489,7 +490,7 @@ class _NotesScreenState extends State<NotesScreen> {
         builder: (context) => SettingsScreen(
           storage: widget.storage,
           onThemeChanged: (Color? color, List<Color>? blobs, Decoration? decoration) {
-            debugPrint('[SYSTEM-REBORN] Theme change requested: color=$color, blobs=${blobs?.map((c) => c.value).toList()}');
+            debugPrint('[SYSTEM-REBORN] Theme change requested: color=$color, blobs=${blobs?.map((c) => c.toARGB32()).toList()}');
             if (provider?.onThemeChanged != null) {
               provider!.onThemeChanged!(color, blobs);
               debugPrint('[SYSTEM-REBORN] Theme change callback executed');
@@ -682,7 +683,7 @@ class _NewNoteButton extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
+            const Icon(
               CupertinoIcons.plus,
               color: Colors.white,
               size: 28,
@@ -1021,10 +1022,9 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
     );
     try {
       await widget.storage.save(updatedNote);
-      if (context.mounted) {
-        _showSnackBar(l10n?.saveSuccess ?? 'Saved');
-        Navigator.pop(context);
-      }
+      if (!context.mounted) return;
+      _showSnackBar(l10n?.saveSuccess ?? 'Saved');
+      Navigator.pop(context);
     } catch (e) {
       if (context.mounted) {
         _showSnackBar('${l10n?.saveError ?? 'Save error'}: $e', isError: true);
@@ -1137,14 +1137,14 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(
+                                const Icon(
                                   CupertinoIcons.checkmark,
                                   color: Colors.white,
                                   size: 24,
                                   shadows: AppColors.iconShadows,
                                 ),
                                 const SizedBox(width: 8),
-                                Text(l10n?.save ?? 'Save', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                                Text(l10n?.save ?? 'Save', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
                               ],
                             ),
                           ),
@@ -1266,9 +1266,11 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                     HapticFeedback.lightImpact();
                     final now = DateTime.now();
                     final d = await showDatePicker(context: context, initialDate: now, firstDate: now, lastDate: now.add(const Duration(days: 365)));
-                    if (d == null || !context.mounted) return;
+                    if (d == null) return;
+                    if (!context.mounted) return;
                     final t = await showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(now));
-                    if (t == null || !context.mounted) return;
+                    if (t == null) return;
+                    if (!context.mounted) return;
                     setState(() => _rem = DateTime(d.year, d.month, d.day, t.hour, t.minute));
                   }),
                   if (reminder != null) ...[
