@@ -55,7 +55,7 @@ class SettingsScreen extends StatelessWidget {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(l10n?.exportSuccess ?? 'Exported successfully'),
-                          backgroundColor: AppColors.accentDeepPurple,
+                          backgroundColor: AppColors.accentBlue,
                           behavior: SnackBarBehavior.floating,
                         ),
                       );
@@ -85,7 +85,7 @@ class SettingsScreen extends StatelessWidget {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(l10n?.importSuccess ?? 'Imported successfully'),
-                          backgroundColor: AppColors.accentDeepPurple,
+                          backgroundColor: AppColors.accentBlue,
                           behavior: SnackBarBehavior.floating,
                         ),
                       );
