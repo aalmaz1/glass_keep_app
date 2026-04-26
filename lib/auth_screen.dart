@@ -342,9 +342,9 @@ class _AuthScreenState extends State<AuthScreen> {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    const Text(
-                      'SYSTEM-REBORN-V1.6.0',
-                      style: TextStyle(
+                    Text(
+                      'SYSTEM-REBORN-${AppColors.appVersion}',
+                      style: const TextStyle(
                         color: Colors.white54,
                         fontSize: 12,
                         letterSpacing: 1.2,

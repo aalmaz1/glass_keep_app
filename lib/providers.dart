@@ -14,7 +14,8 @@ class GlassAnimationProvider extends InheritedWidget {
   final ui.FragmentProgram? grainProgram;
   final Color? themeColor;
   final List<Color>? blobColors;
-  final Function(Color?, List<Color>?)? onThemeChanged;
+  final Color? accentColor;
+  final Function(Color?, List<Color>?, Color?)? onThemeChanged;
 
   const GlassAnimationProvider({
     super.key,
@@ -27,6 +28,7 @@ class GlassAnimationProvider extends InheritedWidget {
     this.grainProgram,
     this.themeColor,
     this.blobColors,
+    this.accentColor,
     this.onThemeChanged,
     required super.child,
   });
@@ -42,9 +44,10 @@ class GlassAnimationProvider extends InheritedWidget {
     final shouldNotify = oldWidget.locale != locale ||
       oldWidget.grainProgram != grainProgram ||
       oldWidget.themeColor != themeColor ||
-      oldWidget.blobColors != blobColors;
+      oldWidget.blobColors != blobColors ||
+      oldWidget.accentColor != accentColor;
     if (shouldNotify) {
-      debugPrint('[SYSTEM-REBORN] GlassAnimationProvider.updateShouldNotify: themeColor changed from ${oldWidget.themeColor} to $themeColor, blobColors from ${oldWidget.blobColors} to $blobColors');
+      debugPrint('[SYSTEM-REBORN] GlassAnimationProvider.updateShouldNotify: themeColor changed, accentColor=$accentColor');
     }
     return shouldNotify;
   }

@@ -107,6 +107,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
   Locale _locale = const Locale('en');
   Color? _themeColor;
   List<Color>? _blobColors;
+  Color? _accentColor;
 
   final ValueNotifier<Offset> _pointerPosition =
       ValueNotifier<Offset>(const Offset(-1000, -1000));
@@ -121,13 +122,13 @@ class _GlassKeepAppState extends State<GlassKeepApp>
     setState(() => _locale = newLocale);
   }
 
-  void _changeTheme(Color? color, List<Color>? blobs) {
-    debugPrint('[SYSTEM-REBORN] _changeTheme called: color=$color, blobs=${blobs?.map((c) => c.toARGB32()).toList()}');
+  void _changeTheme(Color? color, List<Color>? blobs, Color? accent) {
+    debugPrint('[SYSTEM-REBORN] _changeTheme called: color=$color, blobs=${blobs?.map((c) => c.toARGB32()).toList()}, accent=$accent');
     setState(() {
       _themeColor = color;
       _blobColors = blobs;
+      _accentColor = accent;
     });
-    debugPrint('[SYSTEM-REBORN] _changeTheme completed: new themeColor=$_themeColor, new blobColors=$_blobColors');
   }
 
   @override
@@ -251,6 +252,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
       grainProgram: _grainProgram,
       themeColor: _themeColor,
       blobColors: _blobColors,
+      accentColor: _accentColor,
       onThemeChanged: _changeTheme,
       child: Listener(
         behavior: HitTestBehavior.translucent,
@@ -268,12 +270,12 @@ class _GlassKeepAppState extends State<GlassKeepApp>
             brightness: Brightness.dark,
             useMaterial3: true,
             scaffoldBackgroundColor: _themeColor ?? AppColors.obsidianBlack,
-            colorSchemeSeed: _themeColor ?? AppColors.accentDeepPurple,
+            colorSchemeSeed: _accentColor ?? AppColors.accentDeepPurple,
             fontFamily: kIsWeb ? 'Roboto' : 'Noto Sans',
             fontFamilyFallback: const ['Roboto', 'Arial'],
             cupertinoOverrideTheme: CupertinoThemeData(
               brightness: Brightness.dark,
-              primaryColor: _themeColor ?? AppColors.accentDeepPurple,
+              primaryColor: _accentColor ?? AppColors.accentDeepPurple,
             ),
             appBarTheme: const AppBarTheme(
               backgroundColor: Colors.transparent,
@@ -317,7 +319,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
                   child: IgnorePointer(
                     child: Center(
                       child: Text(
-                        'SYSTEM-REBORN-V1.6.0',
+                        'SYSTEM-REBORN-${AppColors.appVersion}',
                         style: TextStyle(
                           color: Colors.white54,
                           fontSize: 10,
@@ -554,7 +556,8 @@ class _BiometricAuthWrapperState extends State<BiometricAuthWrapper> {
                            'Please authenticate to access your notes';
     final unlockStr = l10n?.unlock ?? 'Unlock';
     final provider = GlassAnimationProvider.of(context);
-    final themeColor = provider?.themeColor ?? AppColors.accentDeepPurple;
+    final bgColor = provider?.themeColor ?? AppColors.obsidianBlack;
+    final accentColor = provider?.accentColor ?? AppColors.accentDeepPurple;
 
     return Scaffold(
       backgroundColor: AppColors.obsidianBlack,
@@ -562,22 +565,22 @@ class _BiometricAuthWrapperState extends State<BiometricAuthWrapper> {
         children: [
           Positioned.fill(
             child: VisionBackground(
-              backgroundColor: themeColor,
+              backgroundColor: bgColor,
               blobColors: provider?.blobColors,
             ),
           ),
           Center(
             child: _isChecking
-                ? const CupertinoActivityIndicator(color: AppColors.accentDeepPurple)
+                ? CupertinoActivityIndicator(color: accentColor)
                 : VisionGlassCard(
                     padding: const EdgeInsets.all(32),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(
+                        Icon(
                           CupertinoIcons.lock_shield_fill,
                           size: 64,
-                          color: AppColors.accentDeepPurple,
+                          color: accentColor,
                         ),
                         const SizedBox(height: 24),
                         Text(
@@ -599,7 +602,7 @@ class _BiometricAuthWrapperState extends State<BiometricAuthWrapper> {
                         const SizedBox(height: 32),
                         GlassButton(
                           onTap: _authenticate,
-                          color: AppColors.accentDeepPurple.withValues(alpha: 0.2),
+                          color: accentColor.withValues(alpha: 0.2),
                           borderRadius: 16,
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
