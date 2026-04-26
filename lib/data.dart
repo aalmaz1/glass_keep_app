@@ -116,6 +116,14 @@ class Note {
   }
 }
 
+class PaginatedNotes {
+  final List<Note> notes;
+  final DocumentSnapshot? lastDoc;
+  final bool hasMore;
+
+  PaginatedNotes({required this.notes, this.lastDoc, required this.hasMore});
+}
+
 class StorageService {
   final _db = FirebaseFirestore.instance;
   final _auth = FirebaseAuth.instance;
@@ -176,6 +184,8 @@ class StorageService {
     return _db
         .collection('notes')
         .where('userId', isEqualTo: uid)
+        .orderBy('updatedAt', descending: true)
+        .limit(50) // Limit initial real-time stream to 50 latest notes
         .snapshots()
         .asyncMap(
           (snapshot) => Future.microtask(() => _mapNotesSnapshot(snapshot)),
@@ -191,15 +201,44 @@ class StorageService {
         );
   }
 
+  Future<PaginatedNotes> getNotesPaginated({int limit = 20, DocumentSnapshot? startAfter}) async {
+    final uid = _uid;
+    var query = _db.collection('notes')
+        .where('userId', isEqualTo: uid)
+        .orderBy('updatedAt', descending: true)
+        .limit(limit);
+
+    if (startAfter != null) {
+      query = query.startAfterDocument(startAfter);
+    }
+
+    try {
+      final snapshot = await query.get();
+      final notes = _mapNotes(snapshot.docs);
+      
+      return PaginatedNotes(
+        notes: notes,
+        lastDoc: snapshot.docs.isNotEmpty ? snapshot.docs.last : null,
+        hasMore: snapshot.docs.length == limit,
+      );
+    } catch (e) {
+      debugPrint('getNotesPaginated error: $e');
+      return PaginatedNotes(notes: [], hasMore: false);
+    }
+  }
+
   List<Note> _mapNotesSnapshot(QuerySnapshot<Map<String, dynamic>> snapshot) {
+    return _mapNotes(snapshot.docs, updateCache: true);
+  }
+
+  List<Note> _mapNotes(List<QueryDocumentSnapshot<Map<String, dynamic>>> docs, {bool updateCache = false}) {
     final oldNotes = _notesCache ?? const <Note>[];
-    final notes = snapshot.docs.map((d) {
+    final notes = docs.map((d) {
       final data = d.data();
       final noteId = data['id']?.toString() ?? '';
       final updatedAt = data['updatedAt'] is int ? data['updatedAt'] as int : 0;
 
       // Skip cache check for new notes (they won't be in cache yet)
-      // This ensures new notes are always processed
       if (updatedAt == 0) {
         try {
           final note = Note.fromMap(data);
@@ -230,7 +269,9 @@ class StorageService {
       }
     }).whereType<Note>().toList();
 
-    _notesCache = List.unmodifiable(notes);
+    if (updateCache) {
+      _notesCache = List.unmodifiable(notes);
+    }
     return notes;
   }
 

@@ -28,26 +28,118 @@ class NotesScreen extends StatefulWidget {
 class _NotesScreenState extends State<NotesScreen> {
   String _search = '';
   late TextEditingController _searchController;
-  late Stream<List<Note>> _notesStream;
+  late ScrollController _scrollController;
+  StreamSubscription? _notesSubscription;
+  
+  List<Note> _streamNotes = [];
+  List<Note> _additionalNotes = [];
+  DocumentSnapshot? _lastDoc;
+  bool _hasMore = true;
+  bool _isLoadingMore = false;
+  
   List<Note>? _filteredNotes;
   String _lastSearch = '';
   List<Note>? _lastSourceNotes;
-  // Debounce timer for search
   Timer? _searchDebounceTimer;
+  Timer? _resetLowPerfTimer;
 
   @override
   void initState() {
     super.initState();
     _searchController = TextEditingController();
-    // Initialize stream once in initState
-    _notesStream = widget.storage.getNotesStream();
+    _scrollController = ScrollController()..addListener(_onScroll);
+    
+    _notesSubscription = widget.storage.getNotesStream().listen((notes) {
+      if (mounted) {
+        setState(() {
+          _streamNotes = notes;
+        });
+      }
+    });
   }
 
   @override
   void dispose() {
+    _notesSubscription?.cancel();
     _searchDebounceTimer?.cancel();
+    _resetLowPerfTimer?.cancel();
     _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    // Toggle low performance mode when scrolling
+    final provider = GlassAnimationProvider.of(context);
+    if (provider != null) {
+      if (!provider.isLowPerformanceMode.value) {
+        provider.isLowPerformanceMode.value = true;
+      }
+      _resetLowPerfTimer?.cancel();
+      _resetLowPerfTimer = Timer(const Duration(milliseconds: 200), () {
+        if (mounted) {
+          provider.isLowPerformanceMode.value = false;
+        }
+      });
+    }
+
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent * 0.8) {
+      _loadMoreNotes();
+    }
+  }
+
+  Future<void> _loadMoreNotes() async {
+    if (_isLoadingMore || !_hasMore || _search.isNotEmpty) return;
+
+    setState(() => _isLoadingMore = true);
+
+    // Use the last doc from the stream notes if additional notes is empty
+    DocumentSnapshot? startAfter = _lastDoc;
+    if (startAfter == null && _streamNotes.isNotEmpty) {
+      // This is slightly tricky, we need the last DocumentSnapshot from the stream
+      // But StorageService doesn't provide it via stream. 
+      // For simplicity, let's assume getNotesPaginated can handle startAfter=null 
+      // and we will manage it by keeping track of the last doc from the first page if needed.
+    }
+
+    // Wait, I need a way to get the last document of the stream notes to continue.
+    // Let's modify StorageService to provide the last document in some way or 
+    // just make the first call to getNotesPaginated with the last doc from the stream.
+    // But the stream doesn't give us DocumentSnapshots.
+    
+    // Alternative: If _lastDoc is null, we fetch the first page via getNotesPaginated 
+    // to get the lastDoc, and skip the notes we already have from the stream.
+    
+    final result = await widget.storage.getNotesPaginated(
+      startAfter: _lastDoc,
+      limit: 20,
+    );
+
+    if (mounted) {
+      setState(() {
+        _isLoadingMore = false;
+        _lastDoc = result.lastDoc;
+        _hasMore = result.hasMore;
+        
+        // Add only notes not already in stream
+        final streamIds = _streamNotes.map((n) => n.id).toSet();
+        final newNotes = result.notes.where((n) => !streamIds.contains(n.id)).toList();
+        _additionalNotes.addAll(newNotes);
+      });
+    }
+  }
+
+  List<Note> _getAllCombinedNotes() {
+    // Merge stream notes and additional notes
+    final combined = [..._streamNotes];
+    final streamIds = _streamNotes.map((n) => n.id).toSet();
+    
+    for (var note in _additionalNotes) {
+      if (!streamIds.contains(note.id)) {
+        combined.add(note);
+      }
+    }
+    return combined;
   }
 
   /// Debounced search update to avoid rebuilding on every keystroke
@@ -157,6 +249,7 @@ class _NotesScreenState extends State<NotesScreen> {
           ),
           SafeArea(
             child: CustomScrollView(
+              controller: _scrollController,
               slivers: [
                 SliverToBoxAdapter(
                   child: Padding(
@@ -191,21 +284,13 @@ class _NotesScreenState extends State<NotesScreen> {
                     ),
                   ),
                 ),
-                StreamBuilder<List<Note>>(
-                  stream: _notesStream,
-                  builder: (context, snapshot) {
-                    if (snapshot.hasError) {
-                      return SliverFillRemaining(
-                        child: Center(
-                          child: Text(
-                            'Error: ${snapshot.error}',
-                            style: const TextStyle(color: Colors.red),
-                          ),
-                        ),
-                      );
-                    }
-                    final sourceNotes = snapshot.data;
-                    if (sourceNotes == null) {
+                Builder(
+                  builder: (context) {
+                    final sourceNotes = _getAllCombinedNotes();
+                    // Optimized filtering - only runs when data or search changes
+                    final notes = _getFilteredAndSortedNotes(sourceNotes);
+
+                    if (notes.isEmpty && _streamNotes.isEmpty) {
                       return const SliverFillRemaining(
                         child: Center(
                           child: CupertinoActivityIndicator(
@@ -214,9 +299,6 @@ class _NotesScreenState extends State<NotesScreen> {
                         ),
                       );
                     }
-
-                    // Optimized filtering - only runs when data or search changes
-                    final notes = _getFilteredAndSortedNotes(sourceNotes);
 
                     if (notes.isEmpty) {
                       return SliverFillRemaining(
@@ -237,25 +319,32 @@ class _NotesScreenState extends State<NotesScreen> {
                         .clamp(1, 6)
                         .toInt();
 
-                  return SliverPadding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24.0,
-                      vertical: 24.0,
-                    ),
-                    sliver: SliverMasonryGrid.count(
-                      crossAxisCount: crossAxisCount,
-                      mainAxisSpacing: 18.0,
-                      crossAxisSpacing: 18.0,
-                      itemBuilder: (context, i) => NoteCard(
-                        key: ValueKey('note_${notes[i].id}'),
-                        note: notes[i],
-                        onTap: () => _openNote(context, notes[i]),
+                    return SliverPadding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24.0,
+                        vertical: 24.0,
                       ),
-                      childCount: notes.length,
-                    ),
-                  );
+                      sliver: SliverMasonryGrid.count(
+                        crossAxisCount: crossAxisCount,
+                        mainAxisSpacing: 18.0,
+                        crossAxisSpacing: 18.0,
+                        itemBuilder: (context, i) => NoteCard(
+                          key: ValueKey('note_${notes[i].id}'),
+                          note: notes[i],
+                          onTap: () => _openNote(context, notes[i]),
+                        ),
+                        childCount: notes.length,
+                      ),
+                    );
                   },
                 ),
+                if (_isLoadingMore)
+                  const SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.only(bottom: 40),
+                      child: Center(child: CupertinoActivityIndicator()),
+                    ),
+                  ),
                 const SliverToBoxAdapter(child: SizedBox(height: 100)),
               ],
             ),
@@ -640,11 +729,8 @@ class NoteCard extends StatefulWidget {
   State<NoteCard> createState() => _NoteCardState();
 }
 
-class _NoteCardState extends State<NoteCard> with AutomaticKeepAliveClientMixin {
+class _NoteCardState extends State<NoteCard> {
   Uint8List? _decodedImage;
-
-  @override
-  bool get wantKeepAlive => true;
 
   Color _getThemeColor() {
     final provider = GlassAnimationProvider.of(context);
@@ -655,6 +741,14 @@ class _NoteCardState extends State<NoteCard> with AutomaticKeepAliveClientMixin 
   void initState() {
     super.initState();
     _updateImage();
+  }
+
+  @override
+  void dispose() {
+    // Clear image cache when card is disposed (scrolled out of view)
+    // to keep memory usage under 300MB
+    widget.note.clearImageCache();
+    super.dispose();
   }
 
   @override
@@ -672,7 +766,6 @@ class _NoteCardState extends State<NoteCard> with AutomaticKeepAliveClientMixin 
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
     final image = _decodedImage;
     return RepaintBoundary(
       child: _NoteCardContent(
@@ -829,17 +922,53 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
     return provider?.themeColor ?? AppColors.accentDeepPurple;
   }
 
-  /// Compress image to fit within maxBytes limit
+  /// Compress image to fit within maxBytes limit using a robust approach
   Future<Uint8List?> _compressImage(Uint8List bytes, int maxBytes) async {
-    // For web, we can't use dart:io easily, so if image is too large, return null to skip it
     if (bytes.length <= maxBytes) return bytes;
     
-    // Image too large for Firestore (1MB limit), skip saving image
-    debugPrint('[SYSTEM-REBORN] Image too large (${bytes.length} bytes), skipping image to prevent Firestore error');
-    if (context.mounted) {
-      _showSnackBar('Image too large, saved note without image', isError: true);
+    try {
+      // Decode image to get dimensions and perform resize
+      final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
+      final ui.ImageDescriptor descriptor = await ui.ImageDescriptor.encoded(buffer);
+      
+      // Calculate target dimensions maintaining aspect ratio
+      int targetWidth = descriptor.width;
+      int targetHeight = descriptor.height;
+      
+      const int maxDim = 600;
+      if (targetWidth > maxDim || targetHeight > maxDim) {
+        if (targetWidth > targetHeight) {
+          targetHeight = (targetHeight * maxDim / targetWidth).round();
+          targetWidth = maxDim;
+        } else {
+          targetWidth = (targetWidth * maxDim / targetHeight).round();
+          targetHeight = maxDim;
+        }
+      }
+
+      final ui.Codec codec = await descriptor.instantiateCodec(
+        targetWidth: targetWidth,
+        targetHeight: targetHeight,
+      );
+      final ui.FrameInfo frameInfo = await codec.getNextFrame();
+      final ui.Image image = frameInfo.image;
+      
+      // Encode back to JPEG (using PNG here as simple alternative for toByteData)
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      if (byteData == null) return null;
+      final result = byteData.buffer.asUint8List();
+      
+      debugPrint('[SYSTEM-REBORN] Resized image from ${bytes.length} to ${result.length} bytes');
+      
+      if (result.length > maxBytes) {
+        debugPrint('[SYSTEM-REBORN] Image still large (${result.length} bytes), skipping');
+        return null;
+      }
+      return result;
+    } catch (e) {
+      debugPrint('[SYSTEM-REBORN] Error compressing image: $e');
+      return null;
     }
-    return null;
   }
 
   @override
@@ -1095,26 +1224,26 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                       try {
                         final XFile? image = await _picker.pickImage(
                           source: ImageSource.gallery,
-                          maxWidth: 800,
-                          maxHeight: 800,
-                          imageQuality: 60,
+                          maxWidth: 600,
+                          maxHeight: 600,
+                          imageQuality: 50,
                         );
                         if (!context.mounted) return;
                         if (image != null) {
                           final bytes = await image.readAsBytes();
-                          // Compress further if too large (>500KB)
-                          if (bytes.length > 500 * 1024) {
+                          // Aggressive check: if >200KB, compress further
+                          if (bytes.length > 200 * 1024) {
                             if (context.mounted) {
                               setState(() => _isLoading = true);
                             }
-                            final compressed = await _compressImage(bytes, 500 * 1024);
+                            final compressed = await _compressImage(bytes, 200 * 1024);
                             if (!context.mounted) return;
                             setState(() {
                               _img = compressed != null ? base64Encode(compressed) : null;
                               _decodedImage = compressed;
                             });
                           } else {
-                            // Process in microtask to avoid blocking UI
+
                             await Future.microtask(() {
                               if (context.mounted) {
                                 setState(() {

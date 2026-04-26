@@ -60,83 +60,88 @@ class _VisionGlassCardState extends State<VisionGlassCard> {
       debugPrint('[SYSTEM-REBORN] VisionGlassCard failed to find GlassAnimationProvider');
     }
 
-    // Simple hover value without animation controller
-    final hoverValue = _isHovered ? 1.0 : 0.0;
-    
-    Widget mainContent = Stack(
-      children: [
-        // Specular border highlights
-        Positioned.fill(
-          child: ValueListenableBuilder<Offset>(
-            valueListenable: animationProvider?.tilt ?? GlassAnimationProvider.defaultOffset,
-            builder: (context, currentTilt, _) {
-              return CustomPaint(
-                painter: _SpecularBorderPainter(
-                  borderRadius: widget.borderRadius,
-                  tilt: currentTilt,
-                  hoverIntensity: hoverValue,
-                ),
-              );
-            },
-          ),
-        ),
-        Padding(
-          padding: widget.padding ?? EdgeInsets.zero,
-          child: widget.child,
-        ),
-      ],
-    );
-
-    if (widget.useDistortion) {
-      mainContent = GlassDistortionEffect(
-        borderRadius: widget.borderRadius,
-        distortionStrength: hoverValue * 0.5,
-        child: mainContent,
-      );
-    }
-
-    final blurFilter = ui.ImageFilter.blur(
-      sigmaX: widget.blur + (hoverValue * 4),
-      sigmaY: widget.blur + (hoverValue * 4)
-    );
-    
-    Widget cardContent = Container(
-      decoration: BoxDecoration(
-        color: widget.color ?? AppColors.obsidianBlack.withValues(alpha: 0.5 + (hoverValue * 0.1)),
-        borderRadius: BorderRadius.circular(widget.borderRadius),
-        border: widget.border,
-      ),
-      child: mainContent,
-    );
-
-    return MouseRegion(
-      onEnter: (_) => _handleHover(true),
-      onExit: (_) => _handleHover(false),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(widget.borderRadius),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.4 + (hoverValue * 0.1)),
-              blurRadius: 40 + (hoverValue * 20),
-              offset: Offset(0, 20 + (hoverValue * 10)),
-              spreadRadius: -10,
+    return ValueListenableBuilder<bool>(
+      valueListenable: animationProvider?.isLowPerformanceMode ?? ValueNotifier(false),
+      builder: (context, isLowPerf, _) {
+        // Simple hover value without animation controller
+        final hoverValue = _isHovered ? 1.0 : 0.0;
+        
+        Widget mainContent = Stack(
+          children: [
+            // Specular border highlights
+            Positioned.fill(
+              child: ValueListenableBuilder<Offset>(
+                valueListenable: animationProvider?.tilt ?? GlassAnimationProvider.defaultOffset,
+                builder: (context, currentTilt, _) {
+                  return CustomPaint(
+                    painter: _SpecularBorderPainter(
+                      borderRadius: widget.borderRadius,
+                      tilt: currentTilt,
+                      hoverIntensity: hoverValue,
+                    ),
+                  );
+                },
+              ),
             ),
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.2),
-              blurRadius: 15,
-              offset: const Offset(0, 8),
+            Padding(
+              padding: widget.padding ?? EdgeInsets.zero,
+              child: widget.child,
             ),
           ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(widget.borderRadius),
-          child: BackdropFilter(
-            filter: blurFilter,
-            child: cardContent,
+        );
+
+        if (widget.useDistortion && !isLowPerf) {
+          mainContent = GlassDistortionEffect(
+            borderRadius: widget.borderRadius,
+            distortionStrength: hoverValue * 0.5,
+            child: mainContent,
+          );
+        }
+
+        final blurFilter = ui.ImageFilter.blur(
+          sigmaX: (widget.blur + (hoverValue * 4)) / (isLowPerf ? 2.0 : 1.0),
+          sigmaY: (widget.blur + (hoverValue * 4)) / (isLowPerf ? 2.0 : 1.0)
+        );
+        
+        Widget cardContent = Container(
+          decoration: BoxDecoration(
+            color: widget.color ?? AppColors.obsidianBlack.withValues(alpha: 0.5 + (hoverValue * 0.1)),
+            borderRadius: BorderRadius.circular(widget.borderRadius),
+            border: widget.border,
           ),
-        ),
-      ),
+          child: mainContent,
+        );
+
+        return MouseRegion(
+          onEnter: (_) => _handleHover(true),
+          onExit: (_) => _handleHover(false),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(widget.borderRadius),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.4 + (hoverValue * 0.1)),
+                  blurRadius: 40 + (hoverValue * 20),
+                  offset: Offset(0, 20 + (hoverValue * 10)),
+                  spreadRadius: -10,
+                ),
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.2),
+                  blurRadius: 15,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(widget.borderRadius),
+              child: BackdropFilter(
+                filter: blurFilter,
+                child: cardContent,
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

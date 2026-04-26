@@ -111,6 +111,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
   final ValueNotifier<Offset> _pointerPosition =
       ValueNotifier<Offset>(const Offset(-1000, -1000));
   final ValueNotifier<Offset> _tilt = ValueNotifier<Offset>(Offset.zero);
+  final ValueNotifier<bool> _isLowPerformanceMode = ValueNotifier<bool>(false);
   StreamSubscription? _accelerometerSubscription;
   StreamSubscription? _gyroscopeSubscription;
 
@@ -246,6 +247,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
       onLocaleChanged: _changeLocale,
       pointerPosition: _pointerPosition,
       tilt: _tilt,
+      isLowPerformanceMode: _isLowPerformanceMode,
       grainProgram: _grainProgram,
       themeColor: _themeColor,
       blobColors: _blobColors,
