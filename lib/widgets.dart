@@ -17,6 +17,7 @@ class VisionGlassCard extends StatefulWidget {
   final double blur;
   final EdgeInsetsGeometry? padding;
   final BoxBorder? border;
+  final Color? accentColor;
 
   const VisionGlassCard({
     super.key,
@@ -27,6 +28,7 @@ class VisionGlassCard extends StatefulWidget {
     this.blur = 30,
     this.padding,
     this.border,
+    this.accentColor,
   });
 
   @override
@@ -50,6 +52,8 @@ class _VisionGlassCardState extends State<VisionGlassCard> {
       debugPrint('[SYSTEM-REBORN] VisionGlassCard failed to find GlassAnimationProvider');
     }
 
+    final accentColor = widget.accentColor ?? animationProvider?.accentColor ?? Colors.white;
+
     return ValueListenableBuilder<bool>(
       valueListenable: animationProvider?.isLowPerformanceMode ?? ValueNotifier(false),
       builder: (context, isLowPerf, _) {
@@ -68,6 +72,7 @@ class _VisionGlassCardState extends State<VisionGlassCard> {
                       borderRadius: widget.borderRadius,
                       tilt: currentTilt,
                       hoverIntensity: hoverValue,
+                      accentColor: accentColor,
                     ),
                   );
                 },
@@ -142,6 +147,7 @@ class _SpecularBorderPainter extends CustomPainter {
   final double borderRadius;
   final Offset tilt;
   final double hoverIntensity;
+  final Color accentColor;
 
   // Cache gradients by size and tilt to avoid recreating them every frame
   static final Map<String, ui.Gradient> _gradientCache = {};
@@ -151,6 +157,7 @@ class _SpecularBorderPainter extends CustomPainter {
     required this.borderRadius,
     this.tilt = Offset.zero,
     this.hoverIntensity = 0.0,
+    required this.accentColor,
   });
 
   @override
@@ -158,8 +165,8 @@ class _SpecularBorderPainter extends CustomPainter {
     final rect = Offset.zero & size;
     final rrect = RRect.fromRectAndRadius(rect, Radius.circular(borderRadius));
 
-    // Create cache key from size and tilt
-    final cacheKey = '${size.width.toInt()}_${size.height.toInt()}_${tilt.dx.toStringAsFixed(2)}_${tilt.dy.toStringAsFixed(2)}';
+    // Create cache key from size, tilt and accentColor
+    final cacheKey = '${size.width.toInt()}_${size.height.toInt()}_${tilt.dx.toStringAsFixed(2)}_${tilt.dy.toStringAsFixed(2)}_${accentColor.toARGB32()}';
     
     // Try to get cached gradient or create new one
     var shader = _gradientCache[cacheKey];
@@ -173,11 +180,11 @@ class _SpecularBorderPainter extends CustomPainter {
         Offset(tilt.dx * 15, tilt.dy * 15),
         Offset(size.width, size.height) + Offset(tilt.dx * 15, tilt.dy * 15),
         [
-          Colors.white.withValues(alpha: 0.7),
-          Colors.white.withValues(alpha: 0.15),
-          Colors.white.withValues(alpha: 0.5),
-          Colors.white.withValues(alpha: 0.08),
-          Colors.white.withValues(alpha: 0.6),
+          accentColor.withValues(alpha: 0.8),
+          accentColor.withValues(alpha: 0.2),
+          accentColor.withValues(alpha: 0.5),
+          accentColor.withValues(alpha: 0.1),
+          accentColor.withValues(alpha: 0.7),
         ],
         const [0.0, 0.25, 0.5, 0.75, 1.0],
       );
@@ -187,7 +194,7 @@ class _SpecularBorderPainter extends CustomPainter {
     // Single simplified border highlight for better performance - no hover animation
     final paint1 = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.2
+      ..strokeWidth = 2.0
       ..shader = shader;
 
     canvas.drawRRect(rrect, paint1);
@@ -196,7 +203,8 @@ class _SpecularBorderPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _SpecularBorderPainter oldDelegate) =>
       oldDelegate.borderRadius != borderRadius || 
-      oldDelegate.tilt != tilt; // Removed hoverIntensity from repaint check for better performance
+      oldDelegate.tilt != tilt ||
+      oldDelegate.accentColor != accentColor; // Added accentColor to repaint check
 }
 
 /// Premium static background with elegant gradient and noise texture
