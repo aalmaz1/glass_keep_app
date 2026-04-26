@@ -22,7 +22,7 @@ class AppColors {
   static const Color accentTeal = Color(0xFF99F6E4);
   static const Color accentIndigo = Color(0xFFA5B4FC);
   static const Color accentRed = Color(0xFFFDA4AF);
-  static const Color accentDeepPurple = Color(0xFFD1D1D6); 
+  static const Color accentDeepPurple = Color(0xFFE1E1E6); 
 
   static const List<Shadow> iconShadows = [
     Shadow(color: Colors.black54, offset: Offset(0, 2), blurRadius: 10),
@@ -51,7 +51,7 @@ class AppThemes {
       name: 'Titanium',
       backgroundColor: Color(0xFF1A1A1A),
       blobColors: [Color(0xFF2C2C2E), Color(0xFF3A3A3C), Color(0xFF48484A)],
-      accentColor: Color(0xFFD1D1D6),
+      accentColor: Color(0xFFE1E1E6),
     ),
     AppTheme(
       name: 'Royal Navy',
