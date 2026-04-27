@@ -25,7 +25,7 @@ class VisionGlassCard extends StatefulWidget {
     this.borderRadius = 20,
     this.useDistortion = true,
     this.color,
-    this.blur = 30,
+    this.blur = 15,
     this.padding,
     this.border,
     this.accentColor,
@@ -35,82 +35,117 @@ class VisionGlassCard extends StatefulWidget {
   State<VisionGlassCard> createState() => _VisionGlassCardState();
 }
 
-class _VisionGlassCardState extends State<VisionGlassCard> {
+class _VisionGlassCardState extends State<VisionGlassCard> with SingleTickerProviderStateMixin {
+  late AnimationController _hoverController;
+  late Animation<double> _hoverAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _hoverController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _hoverAnimation = CurvedAnimation(
+      parent: _hoverController,
+      curve: Curves.easeOut,
+    );
+  }
+
+  @override
+  void dispose() {
+    _hoverController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final animationProvider = GlassAnimationProvider.of(context);
     final accentColor = widget.accentColor ?? animationProvider?.accentColor ?? Colors.white;
 
-    return ValueListenableBuilder<bool>(
-      valueListenable: animationProvider?.isLowPerformanceMode ?? ValueNotifier(false),
-      builder: (context, isLowPerf, _) {
-        Widget mainContent = Stack(
-          children: [
-            // Specular border highlights
-            Positioned.fill(
-              child: ValueListenableBuilder<Offset>(
-                valueListenable: animationProvider?.tilt ?? GlassAnimationProvider.defaultOffset,
-                builder: (context, currentTilt, _) {
-                  return CustomPaint(
-                    painter: _SpecularBorderPainter(
-                      borderRadius: widget.borderRadius,
-                      tilt: currentTilt,
-                      accentColor: accentColor,
+    return MouseRegion(
+      onEnter: (_) => _hoverController.forward(),
+      onExit: (_) => _hoverController.reverse(),
+      child: AnimatedBuilder(
+        animation: _hoverAnimation,
+        builder: (context, _) {
+          final hoverValue = _hoverAnimation.value;
+          return ValueListenableBuilder<bool>(
+            valueListenable: animationProvider?.isLowPerformanceMode ?? ValueNotifier(false),
+            builder: (context, isLowPerf, _) {
+              Widget mainContent = Stack(
+                children: [
+                  // Specular border highlights
+                  Positioned.fill(
+                    child: ValueListenableBuilder<Offset>(
+                      valueListenable: animationProvider?.tilt ?? GlassAnimationProvider.defaultOffset,
+                      builder: (context, currentTilt, _) {
+                        return CustomPaint(
+                          painter: _SpecularBorderPainter(
+                            borderRadius: widget.borderRadius,
+                            tilt: currentTilt,
+                            accentColor: accentColor,
+                          ),
+                        );
+                      },
                     ),
-                  );
-                },
-              ),
-            ),
-            Padding(
-              padding: widget.padding ?? EdgeInsets.zero,
-              child: widget.child,
-            ),
-          ],
-        );
+                  ),
+                  Padding(
+                    padding: widget.padding ?? EdgeInsets.zero,
+                    child: widget.child,
+                  ),
+                ],
+              );
 
-        if (widget.useDistortion && !isLowPerf) {
-          mainContent = GlassDistortionEffect(
-            borderRadius: widget.borderRadius,
-            distortionStrength: 0.1, // Fixed minimal distortion
-            child: mainContent,
+              if (widget.useDistortion && !isLowPerf) {
+                mainContent = GlassDistortionEffect(
+                  borderRadius: widget.borderRadius,
+                  distortionStrength: 0.1, // Fixed minimal distortion
+                  child: mainContent,
+                );
+              }
+
+              final blurFilter = ui.ImageFilter.blur(
+                sigmaX: widget.blur / (isLowPerf ? 2.0 : 1.0),
+                sigmaY: widget.blur / (isLowPerf ? 2.0 : 1.0)
+              );
+              
+              Widget cardContent = Container(
+                decoration: BoxDecoration(
+                  color: widget.color ?? Colors.white.withValues(alpha: 0.11 + (hoverValue * 0.04)),
+                  borderRadius: BorderRadius.circular(widget.borderRadius),
+                  border: widget.border ?? Border.all(
+                    color: Colors.white.withValues(alpha: 0.3),
+                    width: 1.0,
+                  ),
+                ),
+                child: mainContent,
+              );
+
+              return Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(widget.borderRadius),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.4),
+                      blurRadius: 40,
+                      offset: const Offset(0, 20),
+                      spreadRadius: -10,
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(widget.borderRadius),
+                  child: BackdropFilter(
+                    filter: blurFilter,
+                    child: cardContent,
+                  ),
+                ),
+              );
+            },
           );
-        }
-
-        final blurFilter = ui.ImageFilter.blur(
-          sigmaX: widget.blur / (isLowPerf ? 2.0 : 1.0),
-          sigmaY: widget.blur / (isLowPerf ? 2.0 : 1.0)
-        );
-        
-        Widget cardContent = Container(
-          decoration: BoxDecoration(
-            color: widget.color ?? AppColors.obsidianBlack.withValues(alpha: 0.5),
-            borderRadius: BorderRadius.circular(widget.borderRadius),
-            border: widget.border,
-          ),
-          child: mainContent,
-        );
-
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(widget.borderRadius),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.4),
-                blurRadius: 40,
-                offset: const Offset(0, 20),
-                spreadRadius: -10,
-              ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(widget.borderRadius),
-            child: BackdropFilter(
-              filter: blurFilter,
-              child: cardContent,
-            ),
-          ),
-        );
-      },
+        },
+      ),
     );
   }
 }
@@ -130,28 +165,57 @@ class _SpecularBorderPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final rect = Offset.zero & size;
-    final rrect = RRect.fromRectAndRadius(rect, Radius.circular(borderRadius));
+    final double br = borderRadius;
+    final double sw = 1.5;
+    
+    // Top path: top-left corner and top edge and top-right corner
+    final Path topPath = Path()
+      ..moveTo(0, br)
+      ..arcToPoint(Offset(br, 0), radius: Radius.circular(br))
+      ..lineTo(size.width - br, 0)
+      ..arcToPoint(Offset(size.width, br), radius: Radius.circular(br));
 
-    final shader = ui.Gradient.linear(
-      Offset(tilt.dx * 15, tilt.dy * 15),
-      Offset(size.width, size.height) + Offset(tilt.dx * 15, tilt.dy * 15),
-      [
-        accentColor.withValues(alpha: 0.8),
-        accentColor.withValues(alpha: 0.2),
-        accentColor.withValues(alpha: 0.5),
-        accentColor.withValues(alpha: 0.1),
-        accentColor.withValues(alpha: 0.7),
-      ],
-      const [0.0, 0.25, 0.5, 0.75, 1.0],
-    );
+    // Left path: top-left corner and left edge and bottom-left corner
+    final Path leftPath = Path()
+      ..moveTo(br, 0)
+      ..arcToPoint(Offset(0, br), radius: Radius.circular(br), clockwise: false)
+      ..lineTo(0, size.height - br)
+      ..arcToPoint(Offset(br, size.height), radius: Radius.circular(br), clockwise: false);
 
-    final paint1 = Paint()
+    // Dynamic offset based on tilt
+    final double dx = tilt.dx * 10;
+    final double dy = tilt.dy * 10;
+
+    final Paint topPaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0
-      ..shader = shader;
+      ..strokeWidth = sw
+      ..shader = ui.Gradient.linear(
+        Offset(size.width / 2 + dx, 0),
+        Offset(size.width / 2 + dx, br * 1.5 + dy),
+        [
+          Colors.white.withValues(alpha: 0.5),
+          Colors.white.withValues(alpha: 0.2),
+          Colors.transparent,
+        ],
+        [0.0, 0.5, 1.0],
+      );
 
-    canvas.drawRRect(rrect, paint1);
+    final Paint leftPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = sw
+      ..shader = ui.Gradient.linear(
+        Offset(0, size.height / 2 + dy),
+        Offset(br * 1.5 + dx, size.height / 2 + dy),
+        [
+          Colors.white.withValues(alpha: 0.5),
+          Colors.white.withValues(alpha: 0.2),
+          Colors.transparent,
+        ],
+        [0.0, 0.5, 1.0],
+      );
+
+    canvas.drawPath(topPath, topPaint);
+    canvas.drawPath(leftPath, leftPaint);
   }
 
   @override
@@ -371,8 +435,6 @@ class GlassSearchBar extends StatelessWidget {
     return VisionGlassCard(
       borderRadius: 12,
       useDistortion: false,
-      blur: 10,
-      color: Colors.white.withValues(alpha: 0.08),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       child: TextField(
         controller: controller,
@@ -454,8 +516,7 @@ class GlassButton extends StatelessWidget {
       child: VisionGlassCard(
         borderRadius: borderRadius,
         useDistortion: false,
-        blur: 10,
-        color: color ?? Colors.white.withValues(alpha: 0.1),
+        color: color ?? Colors.white.withValues(alpha: 0.11),
         padding: const EdgeInsets.all(12),
         child: Center(child: child),
       ),

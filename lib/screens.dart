@@ -364,17 +364,12 @@ class _NotesScreenState extends State<NotesScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: _NewNoteButton(
         onPressed: () {
           HapticFeedback.mediumImpact();
           _openNote(context, Note.empty());
         },
-        backgroundColor: accentColor,
-        icon: const Icon(CupertinoIcons.plus, color: Colors.white),
-        label: Text(
-          l10n?.newNote ?? 'New Note',
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
+        label: l10n?.newNote ?? 'New Note',
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
@@ -566,6 +561,41 @@ class _NotesScreenState extends State<NotesScreen> {
               const SizedBox(height: 20),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _NewNoteButton extends StatelessWidget {
+  final VoidCallback onPressed;
+  final String label;
+
+  const _NewNoteButton({required this.onPressed, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: VisionGlassCard(
+        borderRadius: 28,
+        color: Colors.black.withValues(alpha: 0.8),
+        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(CupertinoIcons.plus, color: Colors.white, size: 24),
+            const SizedBox(width: 10),
+            Text(
+              label,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 17,
+                letterSpacing: -0.4,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -996,12 +1026,12 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
         decoration: BoxDecoration(
           color: AppColors.obsidianBlack.withValues(alpha: 0.95),
           borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.15), width: 1),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1),
         ),
         child: ClipRRect(
           borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
           child: BackdropFilter(
-            filter: ui.ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+            filter: ui.ImageFilter.blur(sigmaX: 15, sigmaY: 15),
             child: Column(
               children: [
                 const SizedBox(height: 12),
