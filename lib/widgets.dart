@@ -389,7 +389,7 @@ class GlassSearchBar extends StatelessWidget {
             shadows: AppColors.iconShadows,
           ),
           hintText: 'Search notes...',
-          hintStyle: TextStyle(color: Colors.white38),
+          hintStyle: const TextStyle(color: Colors.white54),
           border: InputBorder.none,
           isDense: true,
         ),
