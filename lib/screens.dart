@@ -575,24 +575,29 @@ class _NewNoteButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final provider = GlassAnimationProvider.of(context);
+    final themeColor = provider?.themeColor ?? Colors.black;
+    final accentColor = provider?.accentColor ?? Colors.white;
+
     return Align(
       alignment: Alignment.bottomCenter,
-      child: IntrinsicWidth(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 220),
         child: GestureDetector(
           onTap: onPressed,
           child: VisionGlassCard(
             borderRadius: 28,
-            color: Colors.black.withValues(alpha: 0.85),
+            color: themeColor.withValues(alpha: 0.8),
             padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),
             child: Row(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(CupertinoIcons.plus, color: Colors.white, size: 24),
+                Icon(CupertinoIcons.plus, color: accentColor, size: 24),
                 const SizedBox(width: 10),
                 Text(
                   label,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: accentColor,
                     fontWeight: FontWeight.bold,
                     fontSize: 17,
                     letterSpacing: -0.4,
@@ -1075,16 +1080,15 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                       ),
                       CupertinoButton(
                         padding: EdgeInsets.zero,
-                        onPressed: () async {
+                        onPressed: () {
                           HapticFeedback.mediumImpact();
                           if (widget.note.id.isNotEmpty) {
-                            try {
-                              await widget.storage.delete(widget.note.id);
-                              if (widget.onDeleted != null) widget.onDeleted!(widget.note.id);
-                              if (context.mounted) Navigator.pop(context);
-                            } catch (e) {
-                              _showSnackBar('${l10n?.deleteError ?? 'Delete error'}: $e', isError: true);
-                            }
+                            if (widget.onDeleted != null) widget.onDeleted!(widget.note.id);
+                            Navigator.pop(context);
+                            // Deletion happens in background
+                            widget.storage.delete(widget.note.id).catchError((e) {
+                              debugPrint('Error deleting note in background: $e');
+                            });
                           } else {
                             Navigator.pop(context);
                           }
@@ -1097,24 +1101,36 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                 Expanded(child: _buildBody(l10n)),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: FloatingActionButton.extended(
-                      onPressed: () {
-                        HapticFeedback.mediumImpact();
-                        _save();
-                      },
-                      backgroundColor: accentColor,
-                      elevation: 0,
-                      label: Text(
-                        l10n?.save ?? 'Save',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 220),
+                      child: GestureDetector(
+                        onTap: () {
+                          HapticFeedback.mediumImpact();
+                          _save();
+                        },
+                        child: VisionGlassCard(
+                          borderRadius: 28,
+                          color: (GlassAnimationProvider.of(context)?.themeColor ?? Colors.black).withValues(alpha: 0.8),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(CupertinoIcons.checkmark_alt, color: accentColor, size: 24),
+                              const SizedBox(width: 10),
+                              Text(
+                                l10n?.save ?? 'Save',
+                                style: TextStyle(
+                                  color: accentColor,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                      icon: const Icon(CupertinoIcons.checkmark_alt, color: Colors.white, size: 24),
                     ),
                   ),
                 ),
