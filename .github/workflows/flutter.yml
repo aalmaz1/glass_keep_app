@@ -41,7 +41,7 @@ jobs:
         EOF
         
   - name: Build Web (Optimized for Size & Performance)        # ВАЖНО: Убран флаг --wasm. Он слишком тяжелый для простого приложения.        # --csp: убирает eval() для безопасности и совместимости        # --no-source-maps: уменьшает размер файлов        
-    run: flutter build web --release --tree-shake-icons --renderer canvaskit --base-href /${{ github.event.repository.name }}/ --dart-define-from-file=config.json --csp --no-source-maps    
+    run: flutter build web --release --tree-shake-icons --web-renderer canvaskit --base-href /${{ github.event.repository.name }}/ --dart-define-from-file=config.json --csp --no-source-maps    
 
   - name: Deploy to GitHub Pages        
     uses: peaceiris/actions-gh-pages@v4        

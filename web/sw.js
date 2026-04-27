@@ -9,10 +9,12 @@ const PRECACHE_ASSETS = [
   'flutter_bootstrap.js',
   'manifest.json',
   'favicon.png',
-  'icons/Icon-192.png',
-  'icons/Icon-512.png',
-  'icons/Icon-maskable-192.png',
-  'icons/Icon-maskable-512.png'
+  'icons/icon-192.png',
+  'icons/icon-512.png',
+  'icons/icon-maskable-192.png',
+  'icons/icon-maskable-512.png',
+  'canvaskit/canvaskit.wasm',
+  'canvaskit/canvaskit.js'
 ];
 
 // Install listener
@@ -40,15 +42,18 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch listener - Stale-While-Revalidate strategy
+// Fetch listener - Improved Stale-While-Revalidate strategy
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
-  // Skip cross-origin requests unless they are for canvaskit or fonts
-  const isCrossOrigin = !event.request.url.startsWith(self.location.origin);
-  const isAllowedCrossOrigin = event.request.url.includes('canvaskit') || event.request.url.includes('fonts');
+  const url = new URL(event.request.url);
   
-  if (isCrossOrigin && !isAllowedCrossOrigin) return;
+  // Only handle local assets or specific CDNs (canvaskit, fonts)
+  const isLocal = url.origin === self.location.origin;
+  const isCanvaskit = url.href.includes('canvaskit.wasm') || url.href.includes('canvaskit.js');
+  const isFont = url.hostname.includes('gstatic.com') || url.hostname.includes('googleapis.com');
+
+  if (!isLocal && !isCanvaskit && !isFont) return;
 
   event.respondWith(
     caches.open(CACHE_NAME).then((cache) => {
@@ -58,7 +63,10 @@ self.addEventListener('fetch', (event) => {
             cache.put(event.request, networkResponse.clone());
           }
           return networkResponse;
-        }).catch(() => cachedResponse);
+        }).catch((err) => {
+          console.warn('Network fetch failed, serving from cache if available:', err);
+          return cachedResponse;
+        });
 
         return cachedResponse || fetchPromise;
       });
