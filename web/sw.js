@@ -20,7 +20,9 @@ self.addEventListener('install', (event) => {
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(PRECACHE_ASSETS);
+      return cache.addAll(PRECACHE_ASSETS).catch(err => {
+        console.warn('Precache failed, some assets might be missing:', err);
+      });
     })
   );
 });
@@ -40,29 +42,25 @@ self.addEventListener('activate', (event) => {
 
 // Fetch listener - Stale-While-Revalidate strategy
 self.addEventListener('fetch', (event) => {
-  // Only handle GET requests
   if (event.request.method !== 'GET') return;
 
-  // Skip cross-origin requests
-  if (!event.request.url.startsWith(self.location.origin)) {
-    // Exception for CanvasKit and fonts
-    if (!event.request.url.includes('canvaskit') && !event.request.url.includes('fonts')) {
-      return;
-    }
-  }
+  // Skip cross-origin requests unless they are for canvaskit or fonts
+  const isCrossOrigin = !event.request.url.startsWith(self.location.origin);
+  const isAllowedCrossOrigin = event.request.url.includes('canvaskit') || event.request.url.includes('fonts');
+  
+  if (isCrossOrigin && !isAllowedCrossOrigin) return;
 
   event.respondWith(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.match(event.request).then((cachedResponse) => {
-        const fetchedResponse = fetch(event.request).then((networkResponse) => {
-          cache.put(event.request, networkResponse.clone());
+        const fetchPromise = fetch(event.request).then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            cache.put(event.request, networkResponse.clone());
+          }
           return networkResponse;
-        }).catch(() => {
-          // If network fails and no cache, return nothing (or offline page)
-          return cachedResponse;
-        });
+        }).catch(() => cachedResponse);
 
-        return cachedResponse || fetchedResponse;
+        return cachedResponse || fetchPromise;
       });
     })
   );

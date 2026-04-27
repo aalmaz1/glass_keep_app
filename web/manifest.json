@@ -1,10 +1,12 @@
 {
     "name": "Glass Keep",
-    "short_name": "GlassKeep",
+    "short_name": "Glass Keep",
     "start_url": ".",
     "display": "standalone",
     "theme_color": "#020204",
     "background_color": "#020204",
+    "description": "Premium glassmorphic note-taking experience with real-time sync.",
+    "orientation": "portrait-primary",
     "icons": [
         {
             "src": "icons/Icon-192.png",
