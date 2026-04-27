@@ -5,6 +5,9 @@ on:
      - main
   workflow_dispatch:
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 permissions:  
  contents: write
 jobs:  
@@ -48,5 +51,4 @@ jobs:
     with:          
       github_token: ${{ secrets.GITHUB_TOKEN }}          
       publish_dir: ./build/web          
-      force_orphan: true         # Включаем gzip сжатие на уровне действия для еще большей скорости загрузки          
-      gzip: true
+      force_orphan: true         # Создавать новый коммит без сохранения истории (force push)
