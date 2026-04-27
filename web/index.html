@@ -44,7 +44,6 @@
   <!-- Resource Preloading -->
   <link rel="preload" href="flutter.js" as="script">
   <link rel="preload" href="main.dart.js" as="script">
-  <link rel="preload" href="flutter_bootstrap.js" as="script">
   <link rel="preload" href="canvaskit/canvaskit.js" as="script">
   <link rel="preload" href="canvaskit/canvaskit.wasm" as="fetch" crossorigin="anonymous">
 
@@ -128,29 +127,32 @@
     <div class="loader"></div>
   </div>
 
+  <script src="flutter.js" defer></script>
   <script>
-    window.flutterConfiguration = {
-      renderer: "canvaskit",
-    };
-
-    window.addEventListener('load', function() {
-      // Register service worker
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js');
-      }
-
-      // Listen for Flutter's first frame to hide loader
-      window.addEventListener('flutter-first-frame', function() {
-        var loader = document.getElementById('loading-indicator');
-        if (loader) {
-          loader.style.opacity = '0';
-          setTimeout(function() {
-            loader.remove();
-          }, 500);
+    window.addEventListener('load', function(ev) {
+      _flutter.loader.loadEntrypoint({
+        serviceWorker: {
+          serviceWorkerVersion: "{{serviceWorkerVersion}}",
+        },
+        onEntrypointLoaded: function(engineInitializer) {
+          engineInitializer.initializeEngine({
+            renderer: "canvaskit",
+          }).then(function(appRunner) {
+            appRunner.runApp();
+            
+            // Fade out the loading indicator after the engine is initialized
+            // Using a slight delay to ensure a smooth transition
+            var loader = document.getElementById('loading-indicator');
+            if (loader) {
+              loader.style.opacity = '0';
+              setTimeout(function() {
+                loader.remove();
+              }, 600);
+            }
+          });
         }
       });
     });
   </script>
-  <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>
