@@ -165,7 +165,17 @@ class _NotesScreenState extends State<NotesScreen> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       barrierColor: Colors.black26,
-      builder: (context) => NoteEditScreen(note: note, storage: widget.storage),
+      builder: (context) => NoteEditScreen(
+        note: note,
+        storage: widget.storage,
+        onDeleted: () {
+          if (mounted) {
+            setState(() {
+              _additionalNotes.removeWhere((n) => n.id == note.id);
+            });
+          }
+        },
+      ),
     );
   }
 
@@ -236,6 +246,7 @@ class _NotesScreenState extends State<NotesScreen> {
     final l10n = AppLocalizations.of(context);
     final provider = GlassAnimationProvider.of(context);
     final themeColor = provider?.themeColor ?? AppColors.obsidianBlack;
+    final accentColor = provider?.accentColor ?? AppColors.accentBlue;
 
     return Scaffold(
       backgroundColor: AppColors.obsidianBlack,
@@ -276,7 +287,7 @@ class _NotesScreenState extends State<NotesScreen> {
                             child: Icon(
                               CupertinoIcons.ellipsis_vertical,
                               size: 26,
-                              color: Colors.white,
+                              color: accentColor,
                               shadows: AppColors.iconShadows,
                             ),
                           ),
@@ -350,14 +361,10 @@ class _NotesScreenState extends State<NotesScreen> {
               ],
             ),
           ),
-          Positioned(
-            bottom: MediaQuery.paddingOf(context).bottom + 24,
-            left: 0,
-            right: 0,
-            child: const Center(child: _NewNoteButton()),
-          ),
         ],
       ),
+      floatingActionButton: const _NewNoteButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
@@ -716,11 +723,22 @@ class _NewNoteButton extends StatelessWidget {
   }
 
   void _openNoteEditor(BuildContext context, Note note, StorageService storage) {
+    final state = context.findAncestorStateOfType<_NotesScreenState>();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => NoteEditScreen(note: note, storage: storage),
+      builder: (context) => NoteEditScreen(
+        note: note,
+        storage: storage,
+        onDeleted: () {
+          if (state?.mounted ?? false) {
+            state!.setState(() {
+              state._additionalNotes.removeWhere((n) => n.id == note.id);
+            });
+          }
+        },
+      ),
     );
   }
 }
@@ -894,7 +912,7 @@ class _NoteCardContent extends StatelessWidget {
                       DateFormat('dd.MM HH:mm').format(reminder),
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.7),
+                        color: accentColor,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -912,8 +930,9 @@ class _NoteCardContent extends StatelessWidget {
 class NoteEditScreen extends StatefulWidget {
   final Note note;
   final StorageService storage;
+  final VoidCallback? onDeleted;
 
-  const NoteEditScreen({super.key, required this.note, required this.storage});
+  const NoteEditScreen({super.key, required this.note, required this.storage, this.onDeleted});
 
   @override
   State<NoteEditScreen> createState() => _NoteEditScreenState();
@@ -1117,6 +1136,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                                   if (widget.note.id.isNotEmpty) {
                                     try {
                                       await widget.storage.delete(widget.note.id);
+                                      if (widget.onDeleted != null) widget.onDeleted!();
                                       if (context.mounted) Navigator.pop(context);
                                     } catch (e) {
                                       _showSnackBar('${l10n?.deleteError ?? 'Delete error'}: $e', isError: true);
@@ -1146,7 +1166,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                           child: VisionGlassCard(
                             borderRadius: 30,
                             color: Colors.black.withValues(alpha: 0.6),
-                            accentColor: GlassAnimationProvider.of(context)?.accentColor ?? AppColors.accentBlue,
+                            accentColor: _getAccentColor(),
                             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -1166,7 +1186,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                                     fontSize: 16,
                                     shadows: [
                                       Shadow(
-                                        color: (GlassAnimationProvider.of(context)?.accentColor ?? AppColors.accentBlue).withValues(alpha: 0.5),
+                                        color: _getAccentColor().withValues(alpha: 0.5),
                                         blurRadius: 10,
                                       ),
                                       ...AppColors.iconShadows,
@@ -1303,7 +1323,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                   }),
                   if (reminder != null) ...[
                     const SizedBox(width: 8),
-                    Expanded(child: Text(DateFormat('dd.MM HH:mm').format(reminder), style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.7), fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)),
+                    Expanded(child: Text(DateFormat('dd.MM HH:mm').format(reminder), style: TextStyle(fontSize: 12, color: _getAccentColor(), fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)),
                     CupertinoButton(
                       padding: EdgeInsets.zero,
                       minimumSize: Size.zero,
