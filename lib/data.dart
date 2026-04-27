@@ -130,8 +130,6 @@ class StorageService {
 
   // Cached stream for notes to avoid multiple subscriptions
   Stream<List<Note>>? _notesStream;
-  // Cache for the latest notes data
-  List<Note>? _notesCache;
   // Track if persistence is enabled
   static bool _initialized = false;
 
@@ -187,17 +185,8 @@ class StorageService {
         .orderBy('updatedAt', descending: true)
         .limit(50) // Limit initial real-time stream to 50 latest notes
         .snapshots()
-        .asyncMap(
-          (snapshot) => Future.microtask(() => _mapNotesSnapshot(snapshot)),
-        )
-        .timeout(
-          const Duration(seconds: 12),
-          onTimeout: (sink) {
-            debugPrint(
-              '[SYSTEM-REBORN] Notes stream timeout for uid=$uid. Using cache fallback.',
-            );
-            sink.add(_notesCache ?? const <Note>[]);
-          },
+        .map(
+          (snapshot) => _mapNotes(snapshot.docs),
         );
   }
 
@@ -227,36 +216,9 @@ class StorageService {
     }
   }
 
-  List<Note> _mapNotesSnapshot(QuerySnapshot<Map<String, dynamic>> snapshot) {
-    return _mapNotes(snapshot.docs, updateCache: true);
-  }
-
-  List<Note> _mapNotes(List<QueryDocumentSnapshot<Map<String, dynamic>>> docs, {bool updateCache = false}) {
-    final oldNotes = _notesCache ?? const <Note>[];
-    final notes = docs.map((d) {
+  List<Note> _mapNotes(List<QueryDocumentSnapshot<Map<String, dynamic>>> docs) {
+    return docs.map((d) {
       final data = d.data();
-      final noteId = data['id']?.toString() ?? '';
-      final updatedAt = data['updatedAt'] is int ? data['updatedAt'] as int : 0;
-
-      // Skip cache check for new notes (they won't be in cache yet)
-      if (updatedAt == 0) {
-        try {
-          final note = Note.fromMap(data);
-          return note.copyWith(
-            title: EncryptionService().decryptText(note.title),
-            content: EncryptionService().decryptText(note.content),
-          );
-        } catch (e) {
-          debugPrint('[SYSTEM-REBORN] Skipping corrupted note $noteId: $e');
-          return null;
-        }
-      }
-
-      final existingNote = _findCachedNote(oldNotes, noteId, updatedAt);
-      if (existingNote != null) {
-        return existingNote;
-      }
-
       try {
         final note = Note.fromMap(data);
         return note.copyWith(
@@ -264,34 +226,18 @@ class StorageService {
           content: EncryptionService().decryptText(note.content),
         );
       } catch (e) {
-        debugPrint('[SYSTEM-REBORN] Skipping corrupted note $noteId: $e');
+        debugPrint('[SYSTEM-REBORN] Skipping corrupted note: $e');
         return null;
       }
     }).whereType<Note>().toList();
-
-    if (updateCache) {
-      _notesCache = List.unmodifiable(notes);
-    }
-    return notes;
-  }
-
-  Note? _findCachedNote(List<Note> notes, String noteId, int updatedAt) {
-    for (final note in notes) {
-      if (note.id == noteId &&
-          note.updatedAt.millisecondsSinceEpoch == updatedAt) {
-        return note;
-      }
-    }
-    return null;
   }
 
   /// Clear the cache - useful for logout scenarios
   void clearCache() {
     _notesStream = null;
-    _notesCache = null;
   }
 
-  Future<void> save(Note note) async {
+  Future<Note> save(Note note) async {
     try {
       // Encrypt sensitive fields before saving
       final encryptedNote = note.copyWith(
@@ -305,11 +251,13 @@ class StorageService {
       if (note.id.isEmpty) {
         final doc = _db.collection('notes').doc();
         map['id'] = doc.id;
+        final savedNote = note.copyWith(id: doc.id);
         // We use the original note for scheduling reminders as it has unencrypted text
         await _db.collection('notes').doc(map['id']).set(map);
         if (note.reminder != null && !note.isArchived) {
-          await NotificationService().scheduleReminder(note.copyWith(id: map['id']));
+          await NotificationService().scheduleReminder(savedNote);
         }
+        return savedNote;
       } else {
         await _db.collection('notes').doc(note.id).set(map);
         if (note.reminder != null && !note.isArchived) {
@@ -317,6 +265,7 @@ class StorageService {
         } else {
           await NotificationService().cancelReminder(note.id);
         }
+        return note;
       }
     } catch (e) {
       debugPrint('save note error: $e');

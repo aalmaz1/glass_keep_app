@@ -38,9 +38,6 @@ class _NotesScreenState extends State<NotesScreen> {
   bool _hasMore = true;
   bool _isLoadingMore = false;
   
-  List<Note>? _filteredNotes;
-  String _lastSearch = '';
-  List<Note>? _lastSourceNotes;
   Timer? _searchDebounceTimer;
   Timer? _resetLowPerfTimer;
 
@@ -169,6 +166,7 @@ class _NotesScreenState extends State<NotesScreen> {
         note: note,
         storage: widget.storage,
         onDeleted: _handleNoteDeleted,
+        onSaved: _handleNoteSaved,
       ),
     );
   }
@@ -178,7 +176,27 @@ class _NotesScreenState extends State<NotesScreen> {
       setState(() {
         _streamNotes.removeWhere((n) => n.id == id);
         _additionalNotes.removeWhere((n) => n.id == id);
-        _filteredNotes = null;
+      });
+    }
+  }
+
+  void _handleNoteSaved(Note note) {
+    if (mounted) {
+      setState(() {
+        // Update in stream notes if exists
+        final streamIdx = _streamNotes.indexWhere((n) => n.id == note.id);
+        if (streamIdx != -1) {
+          _streamNotes[streamIdx] = note;
+        } else {
+          // Update in additional notes if exists
+          final addIdx = _additionalNotes.indexWhere((n) => n.id == note.id);
+          if (addIdx != -1) {
+            _additionalNotes[addIdx] = note;
+          } else if (note.id.isNotEmpty) {
+            // New note that isn't in stream yet
+            _streamNotes.insert(0, note);
+          }
+        }
       });
     }
   }
@@ -199,24 +217,8 @@ class _NotesScreenState extends State<NotesScreen> {
     );
   }
 
-  /// Optimized filtering with memoization using hash-based comparison for better performance
+  /// Simplified filtering and sorting without over-engineered memoization
   List<Note> _getFilteredAndSortedNotes(List<Note> sourceNotes) {
-    final lastSource = _lastSourceNotes;
-    final filtered = _filteredNotes;
-
-    // Quick cache check using hash-based comparison for O(1) lookup instead of O(n²)
-    if (filtered != null &&
-        _lastSearch == _search &&
-        lastSource != null &&
-        lastSource.length == sourceNotes.length) {
-      // Use hash set for O(1) comparison instead of O(n²) every/any
-      final oldIds = Map.fromEntries(lastSource.map((n) => MapEntry('${n.id}_${n.updatedAt.millisecondsSinceEpoch}', true)));
-      final allMatch = sourceNotes.every((n) => oldIds.containsKey('${n.id}_${n.updatedAt.millisecondsSinceEpoch}'));
-      if (allMatch) {
-        return filtered;
-      }
-    }
-
     // Filter out archived notes
     var notes = sourceNotes.where((n) => !n.isArchived).toList();
 
@@ -236,10 +238,6 @@ class _NotesScreenState extends State<NotesScreen> {
       return b.updatedAt.compareTo(a.updatedAt);
     });
 
-    // Update cache
-    _filteredNotes = List.unmodifiable(notes);
-    _lastSearch = _search;
-    _lastSourceNotes = List.unmodifiable(sourceNotes);
     return notes;
   }
 
@@ -665,8 +663,8 @@ class _NewNoteButton extends StatelessWidget {
     final animationProvider = GlassAnimationProvider.of(context);
     final accentColor = animationProvider?.accentColor ?? AppColors.accentBlue;
 
-    return GestureDetector(
-      onTap: () {
+    return FloatingActionButton.extended(
+      onPressed: () {
         HapticFeedback.mediumImpact();
         final storage = _getStorageService(context);
         if (storage == null) return;
@@ -678,45 +676,21 @@ class _NewNoteButton extends StatelessWidget {
         );
         _openNoteEditor(context, n, storage);
       },
-      child: VisionGlassCard(
-        borderRadius: 30,
-        color: Colors.black.withValues(alpha: 0.6),
-        accentColor: accentColor,
-        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              CupertinoIcons.plus,
+      backgroundColor: Colors.black.withValues(alpha: 0.8),
+      elevation: 0,
+      label: Row(
+        children: [
+          const Icon(CupertinoIcons.plus, color: Colors.white, size: 24),
+          const SizedBox(width: 8),
+          Text(
+            l10n?.newNote ?? 'New Note',
+            style: const TextStyle(
               color: Colors.white,
-              size: 28,
-              shadows: [
-                Shadow(
-                  color: accentColor.withValues(alpha: 0.5),
-                  blurRadius: 10,
-                ),
-                ...AppColors.iconShadows,
-              ],
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
             ),
-            const SizedBox(width: 8),
-            Text(
-              l10n?.newNote ?? 'New Note',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-                letterSpacing: -0.5,
-                shadows: [
-                  Shadow(
-                    color: accentColor.withValues(alpha: 0.5),
-                    blurRadius: 10,
-                  ),
-                  ...AppColors.iconShadows,
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -738,6 +712,11 @@ class _NewNoteButton extends StatelessWidget {
         onDeleted: (id) {
           if (state != null) {
             state._handleNoteDeleted(id);
+          }
+        },
+        onSaved: (note) {
+          if (state != null) {
+            state._handleNoteSaved(note);
           }
         },
       ),
@@ -928,8 +907,9 @@ class NoteEditScreen extends StatefulWidget {
   final Note note;
   final StorageService storage;
   final Function(String)? onDeleted;
+  final Function(Note)? onSaved;
 
-  const NoteEditScreen({super.key, required this.note, required this.storage, this.onDeleted});
+  const NoteEditScreen({super.key, required this.note, required this.storage, this.onDeleted, this.onSaved});
 
   @override
   State<NoteEditScreen> createState() => _NoteEditScreenState();
@@ -1047,7 +1027,11 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
       updatedAt: DateTime.now(),
     );
     try {
-      await widget.storage.save(updatedNote);
+      // Provide immediate feedback by optimistic UI update if possible
+      // but since we are in a modal and it closes, the main screen stream will handle it.
+      // Still, let's call save.
+      final savedNote = await widget.storage.save(updatedNote);
+      if (widget.onSaved != null) widget.onSaved!(savedNote);
       if (!context.mounted) return;
       _showSnackBar(l10n?.saveSuccess ?? 'Saved');
       Navigator.pop(context);
@@ -1077,122 +1061,92 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
           borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
           child: BackdropFilter(
             filter: ui.ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-            child: Stack(
-              children: [
-                Positioned(
-                  top: 0, left: 0, right: 0, height: 1,
-                  child: Container(decoration: BoxDecoration(gradient: LinearGradient(colors: [Colors.transparent, Colors.white.withValues(alpha: 0.1), Colors.transparent]))),
-                ),
-                Scaffold(
-                  resizeToAvoidBottomInset: false,
-                  backgroundColor: Colors.transparent,
-                  appBar: PreferredSize(
-                    preferredSize: const Size.fromHeight(70),
-                    child: Column(
-                      children: [
-                        const SizedBox(height: 12),
-                        Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.tertiaryText.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
-                        const SizedBox(height: 4),
-                        CupertinoNavigationBar(
-                          backgroundColor: Colors.transparent,
-                          border: null,
-                          automaticallyImplyLeading: false,
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              CupertinoButton(
-                                padding: EdgeInsets.zero,
-                                child: Icon(
-                                  CupertinoIcons.pin,
-                                  color: widget.note.isPinned ? _getAccentColor() : _getAccentColor().withValues(alpha: 0.3),
-                                  size: 22,
-                                  shadows: AppColors.iconShadows,
-                                ),
-                                onPressed: () async {
-                                  HapticFeedback.lightImpact();
-                                  final updatedNote = widget.note.copyWith(isPinned: !widget.note.isPinned);
-                                  try {
-                                    await widget.storage.save(updatedNote);
-                                    if (context.mounted) setState(() {});
-                                  } catch (e) {
-                                    _showSnackBar('${l10n?.pinError ?? 'Pin error'}: $e', isError: true);
-                                  }
-                                },
-                              ),
-                              CupertinoButton(
-                                padding: EdgeInsets.zero,
-                                child: const Icon(CupertinoIcons.trash, color: AppColors.accentRed, size: 22, shadows: AppColors.iconShadows),
-                                onPressed: () async {
-                                  HapticFeedback.mediumImpact();
-                                  if (widget.note.id.isNotEmpty) {
-                                    try {
-                                      await widget.storage.delete(widget.note.id);
-                                      if (widget.onDeleted != null) widget.onDeleted!(widget.note.id);
-                                      if (context.mounted) Navigator.pop(context);
-                                    } catch (e) {
-                                      _showSnackBar('${l10n?.deleteError ?? 'Delete error'}: $e', isError: true);
-                                    }
-                                  } else {
-                                    Navigator.pop(context);
-                                  }
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  body: Stack(
-                    children: [
-                      _buildBody(l10n),
-                      Positioned(
-                        right: 24,
-                        bottom: 24,
-                        child: GestureDetector(
-                          onTap: () {
-                            HapticFeedback.mediumImpact();
-                            _save();
-                          },
-                          child: VisionGlassCard(
-                            borderRadius: 30,
-                            color: Colors.black.withValues(alpha: 0.6),
-                            accentColor: _getAccentColor(),
-                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(
-                                  CupertinoIcons.checkmark,
-                                  color: Colors.white,
-                                  size: 24,
-                                  shadows: AppColors.iconShadows,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  l10n?.save ?? 'Save',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                    shadows: [
-                                      Shadow(
-                                        color: _getAccentColor().withValues(alpha: 0.5),
-                                        blurRadius: 10,
-                                      ),
-                                      ...AppColors.iconShadows,
-                                    ],
-                                  ),
-                                ),
-                              ],
+            child: Scaffold(
+              resizeToAvoidBottomInset: false,
+              backgroundColor: Colors.transparent,
+              appBar: PreferredSize(
+                preferredSize: const Size.fromHeight(70),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 12),
+                    Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.tertiaryText.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
+                    const SizedBox(height: 4),
+                    CupertinoNavigationBar(
+                      backgroundColor: Colors.transparent,
+                      border: null,
+                      automaticallyImplyLeading: false,
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CupertinoButton(
+                            padding: EdgeInsets.zero,
+                            child: Icon(
+                              CupertinoIcons.pin,
+                              color: widget.note.isPinned ? _getAccentColor() : _getAccentColor().withValues(alpha: 0.3),
+                              size: 22,
+                              shadows: AppColors.iconShadows,
                             ),
+                            onPressed: () async {
+                              HapticFeedback.lightImpact();
+                              final updatedNote = widget.note.copyWith(isPinned: !widget.note.isPinned);
+                              try {
+                                final savedNote = await widget.storage.save(updatedNote);
+                                if (widget.onSaved != null) widget.onSaved!(savedNote);
+                                if (context.mounted) setState(() {});
+                              } catch (e) {
+                                _showSnackBar('${l10n?.pinError ?? 'Pin error'}: $e', isError: true);
+                              }
+                            },
+
+                          CupertinoButton(
+                            padding: EdgeInsets.zero,
+                            child: const Icon(CupertinoIcons.trash, color: AppColors.accentRed, size: 22, shadows: AppColors.iconShadows),
+                            onPressed: () async {
+                              HapticFeedback.mediumImpact();
+                              if (widget.note.id.isNotEmpty) {
+                                try {
+                                  await widget.storage.delete(widget.note.id);
+                                  if (widget.onDeleted != null) widget.onDeleted!(widget.note.id);
+                                  if (context.mounted) Navigator.pop(context);
+                                } catch (e) {
+                                  _showSnackBar('${l10n?.deleteError ?? 'Delete error'}: $e', isError: true);
+                                }
+                              } else {
+                                Navigator.pop(context);
+                              }
+                            },
                           ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              body: _buildBody(l10n),
+              floatingActionButton: Padding(
+                padding: const EdgeInsets.only(right: 8, bottom: 8),
+                child: FloatingActionButton.extended(
+                  onPressed: () {
+                    HapticFeedback.mediumImpact();
+                    _save();
+                  },
+                  backgroundColor: Colors.black.withValues(alpha: 0.8),
+                  elevation: 0,
+                  label: Row(
+                    children: [
+                      const Icon(CupertinoIcons.checkmark, color: Colors.white, size: 20),
+                      const SizedBox(width: 8),
+                      Text(
+                        l10n?.save ?? 'Save',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],
                   ),
                 ),
-              ],
+              ),
             ),
           ),
         ),
