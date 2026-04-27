@@ -138,7 +138,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     const SizedBox(height: 16),
                     const Text(
                       'Glass Keep',
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 32,
                         fontWeight: FontWeight.w800,

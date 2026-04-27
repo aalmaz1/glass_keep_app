@@ -129,7 +129,7 @@ class _SpecularBorderPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final double br = borderRadius;
-    final double sw = 1.5;
+    const double sw = 1.5;
     
     // Top path: top-left corner and top edge and top-right corner
     final Path topPath = Path()
@@ -414,7 +414,7 @@ class GlassSearchBar extends StatelessWidget {
             shadows: AppColors.iconShadows,
           ),
           hintText: 'Search notes...',
-          hintStyle: const TextStyle(color: Colors.white54),
+          hintStyle: TextStyle(color: Colors.white54),
           border: InputBorder.none,
           isDense: true,
         ),

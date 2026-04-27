@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter/cupertino.dart' show CupertinoIcons, CupertinoActivityIndicator, CupertinoNavigationBar, CupertinoButton;
+import 'package:flutter/cupertino.dart' show CupertinoIcons, CupertinoActivityIndicator, CupertinoButton;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -248,7 +248,6 @@ class _NotesScreenState extends State<NotesScreen> {
     final l10n = AppLocalizations.of(context);
     final provider = GlassAnimationProvider.of(context);
     final themeColor = provider?.themeColor ?? AppColors.obsidianBlack;
-    final accentColor = provider?.accentColor ?? AppColors.accentBlue;
 
     return Scaffold(
       backgroundColor: AppColors.obsidianBlack,
@@ -540,7 +539,7 @@ class _NotesScreenState extends State<NotesScreen> {
                 padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                 child: Row(
                   children: [
-                    Icon(CupertinoIcons.globe, color: AppColors.accentBlue, size: 22, shadows: AppColors.iconShadows),
+                    const Icon(CupertinoIcons.globe, color: AppColors.accentBlue, size: 22, shadows: AppColors.iconShadows),
                     SizedBox(width: 12),
                     Text('Language', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white)),
                   ],
@@ -1178,7 +1177,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                   IconButton(
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
-                    icon: Icon(CupertinoIcons.photo, color: Colors.white, shadows: AppColors.iconShadows),
+                    icon: const Icon(CupertinoIcons.photo, color: Colors.white, shadows: AppColors.iconShadows),
                     onPressed: _isLoading ? null : () async {
                       HapticFeedback.lightImpact();
                       if (context.mounted) setState(() => _isLoading = true);
