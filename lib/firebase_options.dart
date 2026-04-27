@@ -4,11 +4,15 @@ import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb, Tar
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     _logKeys();
-    if (_apiKey.isEmpty || _appId.isEmpty || _projectId.isEmpty) {
-      const errorMsg = 'Firebase configuration is incomplete! FIREBASE_API_KEY, FIREBASE_APP_ID, and FIREBASE_PROJECT_ID are required.';
+    
+    // Check for empty or placeholder values
+    if (_isInvalid(_apiKey) || _isInvalid(_appId) || _isInvalid(_projectId) || _isInvalid(_messagingSenderId)) {
+      const errorMsg = 'Firebase configuration is incomplete or contains placeholders! '
+          'FIREBASE_API_KEY, FIREBASE_APP_ID, FIREBASE_PROJECT_ID and FIREBASE_MESSAGING_SENDER_ID are required and must be valid.';
       debugPrint('\n\x1B[31m[ERROR] $errorMsg\x1B[0m\n');
       throw StateError(errorMsg);
     }
+    
     if (kIsWeb) {
       return web;
     }
@@ -42,6 +46,12 @@ class DefaultFirebaseOptions {
     debugPrint('[SYSTEM-REBORN] FIREBASE_AUTH_DOMAIN: ${_authDomain.isNotEmpty ? "FOUND" : "EMPTY"}');
     debugPrint('[SYSTEM-REBORN] FIREBASE_STORAGE_BUCKET: ${_storageBucket.isNotEmpty ? "FOUND" : "EMPTY"}');
     debugPrint('[SYSTEM-REBORN] FIREBASE_MEASUREMENT_ID: ${_measurementId.isNotEmpty ? "FOUND" : "EMPTY"}');
+  }
+
+  static bool _isInvalid(String value) {
+    if (value.isEmpty) return true;
+    final lower = value.toLowerCase();
+    return lower.contains('your_') || lower.contains('_here');
   }
 
   // Generic fallback secrets
@@ -78,9 +88,9 @@ class DefaultFirebaseOptions {
     appId: _appIdWeb,
     messagingSenderId: _messagingSenderId,
     projectId: _projectId,
-    authDomain: _authDomain,
-    storageBucket: _storageBucket,
-    measurementId: _measurementId,
+    authDomain: _authDomain != '' ? _authDomain : null,
+    storageBucket: _storageBucket != '' ? _storageBucket : null,
+    measurementId: _measurementId != '' ? _measurementId : null,
   );
 
   static const FirebaseOptions android = FirebaseOptions(
@@ -88,9 +98,9 @@ class DefaultFirebaseOptions {
     appId: _appIdAndroid,
     messagingSenderId: _messagingSenderId,
     projectId: _projectId,
-    storageBucket: _storageBucket,
-    authDomain: _authDomain,
-    measurementId: _measurementId,
+    storageBucket: _storageBucket != '' ? _storageBucket : null,
+    authDomain: _authDomain != '' ? _authDomain : null,
+    measurementId: _measurementId != '' ? _measurementId : null,
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
@@ -98,10 +108,10 @@ class DefaultFirebaseOptions {
     appId: _appIdIos,
     messagingSenderId: _messagingSenderId,
     projectId: _projectId,
-    storageBucket: _storageBucket,
-    authDomain: _authDomain,
+    storageBucket: _storageBucket != '' ? _storageBucket : null,
+    authDomain: _authDomain != '' ? _authDomain : null,
     iosBundleId: _iosBundleId,
-    measurementId: _measurementId,
+    measurementId: _measurementId != '' ? _measurementId : null,
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
@@ -109,10 +119,10 @@ class DefaultFirebaseOptions {
     appId: _appIdIos,
     messagingSenderId: _messagingSenderId,
     projectId: _projectId,
-    storageBucket: _storageBucket,
-    authDomain: _authDomain,
+    storageBucket: _storageBucket != '' ? _storageBucket : null,
+    authDomain: _authDomain != '' ? _authDomain : null,
     iosBundleId: _iosBundleId,
-    measurementId: _measurementId,
+    measurementId: _measurementId != '' ? _measurementId : null,
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
@@ -120,8 +130,8 @@ class DefaultFirebaseOptions {
     appId: _appId,
     messagingSenderId: _messagingSenderId,
     projectId: _projectId,
-    authDomain: _authDomain,
-    storageBucket: _storageBucket,
-    measurementId: _measurementId,
+    authDomain: _authDomain != '' ? _authDomain : null,
+    storageBucket: _storageBucket != '' ? _storageBucket : null,
+    measurementId: _measurementId != '' ? _measurementId : null,
   );
 }

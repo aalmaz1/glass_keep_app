@@ -24,32 +24,7 @@ void main() async {
   runZonedGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
 
-    await NotificationService().init();
-
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-    debugPrint('[SYSTEM-REBORN] Firebase initialized successfully');
-
-    if (!kIsWeb &&
-        (defaultTargetPlatform == TargetPlatform.windows ||
-            defaultTargetPlatform == TargetPlatform.linux ||
-            defaultTargetPlatform == TargetPlatform.macOS)) {
-      await windowManager.ensureInitialized();
-      const WindowOptions windowOptions = WindowOptions(
-        size: Size(1200, 800),
-        minimumSize: Size(400, 600),
-        center: true,
-        backgroundColor: Colors.transparent,
-        skipTaskbar: false,
-        titleBarStyle: TitleBarStyle.normal,
-      );
-      windowManager.waitUntilReadyToShow(windowOptions, () async {
-        await windowManager.show();
-        await windowManager.focus();
-      });
-    }
-
+    // Set up error handlers early to catch initialization errors
     FlutterError.onError = (FlutterErrorDetails details) {
       FlutterError.presentError(details);
       final stackTrace = details.stack.toString();
@@ -80,6 +55,46 @@ void main() async {
       debugPrint('----------------------------------------');
       return true;
     };
+
+    await NotificationService().init();
+
+    debugPrint('[SYSTEM-REBORN] Initializing Firebase...');
+    try {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      ).timeout(const Duration(seconds: 10), onTimeout: () {
+        debugPrint('[SYSTEM-REBORN] Firebase initialization timed out after 10s');
+        throw TimeoutException('Firebase initialization timed out. Check network or configuration.');
+      });
+      debugPrint('[SYSTEM-REBORN] Firebase initialized successfully');
+    } catch (e) {
+      debugPrint('[SYSTEM-REBORN] Firebase initialization failed: $e');
+      // On web, sometimes it fails due to script loading issues or Trusted Types
+      if (kIsWeb) {
+        debugPrint('[SYSTEM-REBORN] Web-specific initialization error detected. '
+            'Please ensure Firebase SDKs are allowed to load and configuration is correct.');
+      }
+      rethrow;
+    }
+
+    if (!kIsWeb &&
+        (defaultTargetPlatform == TargetPlatform.windows ||
+            defaultTargetPlatform == TargetPlatform.linux ||
+            defaultTargetPlatform == TargetPlatform.macOS)) {
+      await windowManager.ensureInitialized();
+      const WindowOptions windowOptions = WindowOptions(
+        size: Size(1200, 800),
+        minimumSize: Size(400, 600),
+        center: true,
+        backgroundColor: Colors.transparent,
+        skipTaskbar: false,
+        titleBarStyle: TitleBarStyle.normal,
+      );
+      windowManager.waitUntilReadyToShow(windowOptions, () async {
+        await windowManager.show();
+        await windowManager.focus();
+      });
+    }
 
     runApp(const GlassKeepApp());
   }, (error, stack) {
