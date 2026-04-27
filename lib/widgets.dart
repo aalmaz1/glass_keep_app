@@ -25,7 +25,7 @@ class VisionGlassCard extends StatelessWidget {
     this.borderRadius = 20,
     this.useDistortion = true,
     this.color,
-    this.blur = 15,
+    this.blur = 10,
     this.padding,
     this.border,
     this.accentColor,
@@ -78,10 +78,10 @@ class VisionGlassCard extends StatelessWidget {
         
         Widget cardContent = Container(
           decoration: BoxDecoration(
-            color: color ?? Colors.white.withValues(alpha: 0.11),
+            color: color ?? Colors.transparent,
             borderRadius: BorderRadius.circular(borderRadius),
             border: border ?? Border.all(
-              color: Colors.white.withValues(alpha: 0.3),
+              color: Colors.white.withValues(alpha: 0.1),
               width: 1.0,
             ),
           ),
@@ -95,10 +95,9 @@ class VisionGlassCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(borderRadius),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.4),
-                    blurRadius: 40,
-                    offset: const Offset(0, 20),
-                    spreadRadius: -10,
+                    color: Colors.black.withValues(alpha: 0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
                   ),
                 ],
               ),
@@ -133,7 +132,7 @@ class _SpecularBorderPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final double br = borderRadius;
-    const double sw = 1.5;
+    const double sw = 1.0;
     
     // Top path: top-left corner and top edge and top-right corner
     final Path topPath = Path()
@@ -153,32 +152,32 @@ class _SpecularBorderPainter extends CustomPainter {
     final double dx = tilt.dx * 10;
     final double dy = tilt.dy * 10;
 
+    // Top highlight: horizontal gradient (90deg)
     final Paint topPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = sw
       ..shader = ui.Gradient.linear(
-        Offset(size.width / 2 + dx, 0),
-        Offset(size.width / 2 + dx, br * 1.5 + dy),
+        Offset(dx, 0),
+        Offset(size.width + dx, 0),
         [
-          Colors.white.withValues(alpha: 0.8),
-          Colors.white.withValues(alpha: 0.2),
+          Colors.transparent,
+          Colors.white.withValues(alpha: 0.15),
           Colors.transparent,
         ],
-        [0.0, 0.5, 1.0],
       );
 
+    // Left highlight: vertical gradient (180deg)
     final Paint leftPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = sw
       ..shader = ui.Gradient.linear(
-        Offset(0, size.height / 2 + dy),
-        Offset(br * 1.5 + dx, size.height / 2 + dy),
+        Offset(0, dy),
+        Offset(0, size.height + dy),
         [
-          Colors.white.withValues(alpha: 0.8),
-          Colors.white.withValues(alpha: 0.2),
+          Colors.transparent,
+          Colors.white.withValues(alpha: 0.15),
           Colors.transparent,
         ],
-        [0.0, 0.5, 1.0],
       );
 
     canvas.drawPath(topPath, topPaint);
