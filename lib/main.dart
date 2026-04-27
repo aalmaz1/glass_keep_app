@@ -57,7 +57,12 @@ void main() async {
     };
 
     await NotificationService().init();
-
+    
+    // Address Intl.v8BreakIterator deprecation warning:
+    // This warning (mostly seen on Web/Chrome) is addressed by using intl: ^0.20.2
+    // and ensuring the Flutter SDK is up to date (recommended: 3.38.0+).
+    // Future Flutter SDK updates will further mitigate internal web engine calls to deprecated APIs.
+    
     debugPrint('[SYSTEM-REBORN] Initializing Firebase...');
     try {
       await Firebase.initializeApp(
