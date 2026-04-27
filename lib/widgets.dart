@@ -112,7 +112,7 @@ class _VisionGlassCardState extends State<VisionGlassCard> with SingleTickerProv
               
               Widget cardContent = Container(
                 decoration: BoxDecoration(
-                  color: widget.color ?? Colors.white.withValues(alpha: 0.11 + (hoverValue * 0.04)),
+                  color: widget.color ?? Colors.white.withValues(alpha: 0.11),
                   borderRadius: BorderRadius.circular(widget.borderRadius),
                   border: widget.border ?? Border.all(
                     color: Colors.white.withValues(alpha: 0.3),
@@ -193,7 +193,7 @@ class _SpecularBorderPainter extends CustomPainter {
         Offset(size.width / 2 + dx, 0),
         Offset(size.width / 2 + dx, br * 1.5 + dy),
         [
-          Colors.white.withValues(alpha: 0.5),
+          Colors.white.withValues(alpha: 0.8),
           Colors.white.withValues(alpha: 0.2),
           Colors.transparent,
         ],
@@ -207,7 +207,7 @@ class _SpecularBorderPainter extends CustomPainter {
         Offset(0, size.height / 2 + dy),
         Offset(br * 1.5 + dx, size.height / 2 + dy),
         [
-          Colors.white.withValues(alpha: 0.5),
+          Colors.white.withValues(alpha: 0.8),
           Colors.white.withValues(alpha: 0.2),
           Colors.transparent,
         ],
