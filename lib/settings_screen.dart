@@ -22,6 +22,7 @@ class SettingsScreen extends StatelessWidget {
     final themeColor = provider?.themeColor ?? AppColors.obsidianBlack;
 
     return Scaffold(
+      extendBody: true,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text(appearanceTitle),

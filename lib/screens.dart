@@ -252,6 +252,7 @@ class _NotesScreenState extends State<NotesScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.obsidianBlack,
+      extendBody: true,
       extendBodyBehindAppBar: true,
       body: Stack(
         children: [
@@ -579,7 +580,7 @@ class _NewNoteButton extends StatelessWidget {
       onTap: onPressed,
       child: VisionGlassCard(
         borderRadius: 28,
-        color: Colors.black.withValues(alpha: 0.8),
+        color: Colors.black.withValues(alpha: 0.85),
         padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -1297,6 +1298,8 @@ class _TrashScreenState extends State<TrashScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.obsidianBlack,
+      extendBody: true,
+      extendBodyBehindAppBar: true,
       body: Stack(
         children: [
           Positioned.fill(
