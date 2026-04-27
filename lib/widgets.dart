@@ -8,8 +8,8 @@ import 'package:glass_keep/glass_effect.dart';
 import 'package:glass_keep/providers.dart';
 
 /// A premium glass morphism card that uses BackdropFilter and optional distortion
-/// Enhanced in V1.6.0 with internal hover state management and smooth distortion scaling.
-class VisionGlassCard extends StatefulWidget {
+/// Refactored in V1.8.1: Removed internal hover state to strictly follow premium spec.
+class VisionGlassCard extends StatelessWidget {
   final Widget child;
   final double borderRadius;
   final bool useDistortion;
@@ -32,126 +32,89 @@ class VisionGlassCard extends StatefulWidget {
   });
 
   @override
-  State<VisionGlassCard> createState() => _VisionGlassCardState();
-}
-
-class _VisionGlassCardState extends State<VisionGlassCard> with SingleTickerProviderStateMixin {
-  late AnimationController _hoverController;
-  late Animation<double> _hoverAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _hoverController = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
-    _hoverAnimation = CurvedAnimation(
-      parent: _hoverController,
-      curve: Curves.easeOut,
-    );
-  }
-
-  @override
-  void dispose() {
-    _hoverController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final animationProvider = GlassAnimationProvider.of(context);
-    final accentColor = widget.accentColor ?? animationProvider?.accentColor ?? Colors.white;
+    final accentColor = this.accentColor ?? animationProvider?.accentColor ?? Colors.white;
 
-    return MouseRegion(
-      onEnter: (_) => _hoverController.forward(),
-      onExit: (_) => _hoverController.reverse(),
-      child: AnimatedBuilder(
-        animation: _hoverAnimation,
-        builder: (context, _) {
-          final hoverValue = _hoverAnimation.value;
-          return ValueListenableBuilder<bool>(
-            valueListenable: animationProvider?.isLowPerformanceMode ?? ValueNotifier(false),
-            builder: (context, isLowPerf, _) {
-              Widget mainContent = Stack(
-                children: [
-                  // Specular border highlights
-                  Positioned.fill(
-                    child: ValueListenableBuilder<Offset>(
-                      valueListenable: animationProvider?.tilt ?? GlassAnimationProvider.defaultOffset,
-                      builder: (context, currentTilt, _) {
-                        return CustomPaint(
-                          painter: _SpecularBorderPainter(
-                            borderRadius: widget.borderRadius,
-                            tilt: currentTilt,
-                            accentColor: accentColor,
-                          ),
-                        );
-                      },
+    return ValueListenableBuilder<bool>(
+      valueListenable: animationProvider?.isLowPerformanceMode ?? ValueNotifier(false),
+      builder: (context, isLowPerf, _) {
+        Widget mainContent = Stack(
+          children: [
+            // Specular border highlights
+            Positioned.fill(
+              child: ValueListenableBuilder<Offset>(
+                valueListenable: animationProvider?.tilt ?? GlassAnimationProvider.defaultOffset,
+                builder: (context, currentTilt, _) {
+                  return CustomPaint(
+                    painter: _SpecularBorderPainter(
+                      borderRadius: borderRadius,
+                      tilt: currentTilt,
+                      accentColor: accentColor,
                     ),
-                  ),
-                  Padding(
-                    padding: widget.padding ?? EdgeInsets.zero,
-                    child: widget.child,
-                  ),
-                ],
-              );
+                  );
+                },
+              ),
+            ),
+            Padding(
+              padding: padding ?? EdgeInsets.zero,
+              child: child,
+            ),
+          ],
+        );
 
-              if (widget.useDistortion && !isLowPerf) {
-                mainContent = GlassDistortionEffect(
-                  borderRadius: widget.borderRadius,
-                  distortionStrength: 0.1, // Fixed minimal distortion
-                  child: mainContent,
-                );
-              }
-
-              final blurFilter = ui.ImageFilter.blur(
-                sigmaX: widget.blur / (isLowPerf ? 2.0 : 1.0),
-                sigmaY: widget.blur / (isLowPerf ? 2.0 : 1.0)
-              );
-              
-              Widget cardContent = Container(
-                decoration: BoxDecoration(
-                  color: widget.color ?? Colors.white.withValues(alpha: 0.11),
-                  borderRadius: BorderRadius.circular(widget.borderRadius),
-                  border: widget.border ?? Border.all(
-                    color: Colors.white.withValues(alpha: 0.3),
-                    width: 1.0,
-                  ),
-                ),
-                child: mainContent,
-              );
-
-              return Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(widget.borderRadius),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.4),
-                      blurRadius: 40,
-                      offset: const Offset(0, 20),
-                      spreadRadius: -10,
-                    ),
-                  ],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(widget.borderRadius),
-                  child: BackdropFilter(
-                    filter: blurFilter,
-                    child: cardContent,
-                  ),
-                ),
-              );
-            },
+        if (useDistortion && !isLowPerf) {
+          mainContent = GlassDistortionEffect(
+            borderRadius: borderRadius,
+            distortionStrength: 0.1, // Fixed minimal distortion
+            child: mainContent,
           );
-        },
-      ),
+        }
+
+        final blurFilter = ui.ImageFilter.blur(
+          sigmaX: blur / (isLowPerf ? 2.0 : 1.0),
+          sigmaY: blur / (isLowPerf ? 2.0 : 1.0)
+        );
+        
+        Widget cardContent = Container(
+          decoration: BoxDecoration(
+            color: color ?? Colors.white.withValues(alpha: 0.11),
+            borderRadius: BorderRadius.circular(borderRadius),
+            border: border ?? Border.all(
+              color: Colors.white.withValues(alpha: 0.3),
+              width: 1.0,
+            ),
+          ),
+          child: mainContent,
+        );
+
+        return Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(borderRadius),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.4),
+                blurRadius: 40,
+                offset: const Offset(0, 20),
+                spreadRadius: -10,
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(borderRadius),
+            child: BackdropFilter(
+              filter: blurFilter,
+              child: cardContent,
+            ),
+          ),
+        );
+      },
     );
   }
 }
 
 /// Painter for specular border highlights on glass cards with enhanced dual-layer gradient
-/// and gyroscope-based dynamic lighting, now with hover intensity.
+/// and gyroscope-based dynamic lighting.
 class _SpecularBorderPainter extends CustomPainter {
   final double borderRadius;
   final Offset tilt;

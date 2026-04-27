@@ -493,6 +493,8 @@ class _BiometricAuthWrapperState extends State<BiometricAuthWrapper> {
 
     return Scaffold(
       backgroundColor: AppColors.obsidianBlack,
+      extendBody: true,
+      extendBodyBehindAppBar: true,
       body: Stack(
         children: [
           Positioned.fill(
