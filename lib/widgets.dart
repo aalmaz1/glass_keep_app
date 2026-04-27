@@ -95,7 +95,7 @@ class VisionGlassCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(borderRadius),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.2),
+                    color: Colors.black.withValues(alpha: 0.15),
                     blurRadius: 8,
                     offset: const Offset(0, 4),
                   ),
@@ -157,11 +157,11 @@ class _SpecularBorderPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = sw
       ..shader = ui.Gradient.linear(
-        Offset(dx, 0),
-        Offset(size.width + dx, 0),
+        const Offset(0, 0),
+        Offset(size.width, 0),
         [
           Colors.transparent,
-          Colors.white.withValues(alpha: 0.15),
+          accentColor.withValues(alpha: 0.3),
           Colors.transparent,
         ],
       );
@@ -171,11 +171,11 @@ class _SpecularBorderPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = sw
       ..shader = ui.Gradient.linear(
-        Offset(0, dy),
-        Offset(0, size.height + dy),
+        const Offset(0, 0),
+        Offset(0, size.height),
         [
           Colors.transparent,
-          Colors.white.withValues(alpha: 0.15),
+          accentColor.withValues(alpha: 0.3),
           Colors.transparent,
         ],
       );
