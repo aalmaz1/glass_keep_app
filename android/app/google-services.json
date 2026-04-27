@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "585955210188",
-    "project_id": "glasskeep-2a8e5",
-    "storage_bucket": "glasskeep-2a8e5.firebasestorage.app"
+    "project_number": "000000000000",
+    "project_id": "YOUR_PROJECT_ID",
+    "storage_bucket": "YOUR_PROJECT_ID.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:585955210188:android:14371eb6a66b9e52192369",
+        "mobilesdk_app_id": "1:000000000000:android:0000000000000000000000",
         "android_client_info": {
           "package_name": "com.example.glass_keep_app"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDuSsHleJ-xKZc4X3CWjPzmqO-BD6kn2TE"
+          "current_key": "YOUR_API_KEY"
         }
       ],
       "services": {
