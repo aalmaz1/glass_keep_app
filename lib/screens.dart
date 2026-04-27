@@ -276,7 +276,7 @@ class _NotesScreenState extends State<NotesScreen> {
                             child: Icon(
                               CupertinoIcons.ellipsis_vertical,
                               size: 26,
-                              color: themeColor == AppColors.obsidianBlack ? Colors.white : themeColor,
+                              color: Colors.white,
                               shadows: AppColors.iconShadows,
                             ),
                           ),
@@ -743,6 +743,11 @@ class _NoteCardState extends State<NoteCard> {
     return provider?.themeColor ?? AppColors.obsidianBlack;
   }
 
+  Color _getAccentColor() {
+    final provider = GlassAnimationProvider.of(context);
+    return provider?.accentColor ?? AppColors.accentBlue;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -779,7 +784,7 @@ class _NoteCardState extends State<NoteCard> {
         note: widget.note,
         decodedImage: image,
         onTap: widget.onTap,
-        themeColor: _getThemeColor(),
+        accentColor: _getAccentColor(),
       ),
     );
   }
@@ -790,14 +795,14 @@ class _NoteCardContent extends StatelessWidget {
   final Note note;
   final Uint8List? decodedImage;
   final VoidCallback onTap;
-  final Color themeColor;
+  final Color accentColor;
 
   const _NoteCardContent({
     super.key,
     required this.note,
     required this.decodedImage,
     required this.onTap,
-    required this.themeColor,
+    required this.accentColor,
   });
 
   @override
@@ -835,7 +840,7 @@ class _NoteCardContent extends StatelessWidget {
                     Icon(
                       CupertinoIcons.pin,
                       size: 14,
-                      color: themeColor,
+                      color: accentColor,
                       shadows: AppColors.iconShadows,
                     ),
                   if (note.isPinned) const SizedBox(width: 6),
@@ -871,7 +876,7 @@ class _NoteCardContent extends StatelessWidget {
                 Wrap(
                   spacing: 6,
                   runSpacing: 6,
-                  children: note.labels.map((l) => LabelChip(label: l, themeColor: themeColor)).toList(),
+                  children: note.labels.map((l) => LabelChip(label: l, accentColor: accentColor)).toList(),
                 ),
               ],
               if (reminder != null) ...[
@@ -881,7 +886,7 @@ class _NoteCardContent extends StatelessWidget {
                     Icon(
                       CupertinoIcons.alarm,
                       size: 14,
-                      color: themeColor,
+                      color: accentColor,
                       shadows: AppColors.iconShadows,
                     ),
                     const SizedBox(width: 4),
@@ -889,7 +894,7 @@ class _NoteCardContent extends StatelessWidget {
                       DateFormat('dd.MM HH:mm').format(reminder),
                       style: TextStyle(
                         fontSize: 12,
-                        color: themeColor,
+                        color: Colors.white.withValues(alpha: 0.7),
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -926,6 +931,12 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
   Color _getThemeColor() {
     final provider = GlassAnimationProvider.of(context);
     return provider?.themeColor ?? AppColors.obsidianBlack;
+  }
+
+  /// Get current accent color from provider
+  Color _getAccentColor() {
+    final provider = GlassAnimationProvider.of(context);
+    return provider?.accentColor ?? AppColors.accentBlue;
   }
 
   /// Compress image to fit within maxBytes limit using a robust approach
@@ -1083,7 +1094,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                                 padding: EdgeInsets.zero,
                                 child: Icon(
                                   CupertinoIcons.pin,
-                                  color: widget.note.isPinned ? _getThemeColor() : _getThemeColor().withValues(alpha: 0.3),
+                                  color: widget.note.isPinned ? _getAccentColor() : _getAccentColor().withValues(alpha: 0.3),
                                   size: 22,
                                   shadows: AppColors.iconShadows,
                                 ),
@@ -1234,7 +1245,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                   IconButton(
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
-                    icon: Icon(CupertinoIcons.photo, color: _getThemeColor().withValues(alpha: 0.9), shadows: AppColors.iconShadows),
+                    icon: Icon(CupertinoIcons.photo, color: _getAccentColor().withValues(alpha: 0.9), shadows: AppColors.iconShadows),
                     onPressed: _isLoading ? null : () async {
                       HapticFeedback.lightImpact();
                       if (context.mounted) setState(() => _isLoading = true);
@@ -1279,7 +1290,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                     },
                   ),
                   const VerticalDivider(color: Colors.white24, indent: 8, endIndent: 8),
-                  IconButton(padding: EdgeInsets.zero, constraints: const BoxConstraints(), icon: Icon(CupertinoIcons.alarm, color: _getThemeColor(), shadows: AppColors.iconShadows), onPressed: () async {
+                  IconButton(padding: EdgeInsets.zero, constraints: const BoxConstraints(), icon: Icon(CupertinoIcons.alarm, color: _getAccentColor(), shadows: AppColors.iconShadows), onPressed: () async {
                     HapticFeedback.lightImpact();
                     final now = DateTime.now();
                     final d = await showDatePicker(context: context, initialDate: now, firstDate: now, lastDate: now.add(const Duration(days: 365)));
@@ -1292,7 +1303,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                   }),
                   if (reminder != null) ...[
                     const SizedBox(width: 8),
-                    Expanded(child: Text(DateFormat('dd.MM HH:mm').format(reminder), style: TextStyle(fontSize: 12, color: _getThemeColor(), fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)),
+                    Expanded(child: Text(DateFormat('dd.MM HH:mm').format(reminder), style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.7), fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)),
                     CupertinoButton(
                       padding: EdgeInsets.zero,
                       minimumSize: Size.zero,

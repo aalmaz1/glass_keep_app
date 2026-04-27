@@ -447,26 +447,26 @@ class GlassSearchBar extends StatelessWidget {
 /// Styled chip for note labels
 class LabelChip extends StatelessWidget {
   final String label;
-  final Color themeColor;
+  final Color accentColor;
 
-  const LabelChip({super.key, required this.label, required this.themeColor});
+  const LabelChip({super.key, required this.label, required this.accentColor});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: themeColor.withValues(alpha: 0.25),
+        color: accentColor.withValues(alpha: 0.25),
         borderRadius: BorderRadius.circular(6),
         border: Border.all(
-          color: themeColor.withValues(alpha: 0.3),
+          color: accentColor.withValues(alpha: 0.3),
           width: 0.5,
         ),
       ),
       child: Text(
         label,
-        style: TextStyle(
-          color: themeColor,
+        style: const TextStyle(
+          color: Colors.white,
           fontSize: 11,
           fontWeight: FontWeight.bold,
         ),
