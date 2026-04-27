@@ -1,54 +1,62 @@
 name: Flutter CI and Deploy
-on:  
-  push:    
+
+on:
+  push:
     branches:
-     - main
+      - main
   workflow_dispatch:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
-permissions:  
- contents: write
-jobs:  
- build-and-deploy:    
-  runs-on: ubuntu-latest    
-  steps:      
-  - name: Checkout        
-    uses: actions/checkout@v4 
-    
-  - name: Setup Flutter        
-    uses: subosito/flutter-action@v2        
-    with:          
-       channel: 'stable'          
-       cache: true          
-       cache-key: "flutter-:os:-:channel:-:version:-:arch:-:hash:"      
-  - name: Enable Web        
-    run: flutter config --enable-web      
-  - name: Install dependencies        
-    run: flutter pub get      # Убрали dart format, так как это часто ломает билд без необходимости      
-  - name: Analyze project source        
-    run: flutter analyze --no-fatal-infos --no-fatal-warnings      
-  - name: Create config.json        
-    run: |    
-        cat > config.json <<EOF
-        {            
-        "FIREBASE_API_KEY": "${{ secrets.FIREBASE_API_KEY }}",            
-        "FIREBASE_APP_ID": "${{ secrets.FIREBASE_APP_ID }}",            
-        "FIREBASE_MESSAGING_SENDER_ID": "${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}",            
-        "FIREBASE_PROJECT_ID": "${{ secrets.FIREBASE_PROJECT_ID }}",            
-        "FIREBASE_AUTH_DOMAIN": "${{ secrets.FIREBASE_AUTH_DOMAIN }}",            
-        "FIREBASE_STORAGE_BUCKET": "${{ secrets.FIREBASE_STORAGE_BUCKET }}",            
-        "FIREBASE_MEASUREMENT_ID": "${{ secrets.FIREBASE_MEASUREMENT_ID }}"          
-        }
-        EOF
-        
-  - name: Build Web (Optimized for Size & Performance)        # ВАЖНО: Убран флаг --wasm. Он слишком тяжелый для простого приложения.        # --csp: убирает eval() для безопасности и совместимости        # --no-source-maps: уменьшает размер файлов        
-    run: flutter build web --release --tree-shake-icons --base-href /${{ github.event.repository.name }}/ --dart-define-from-file=config.json --csp --no-source-maps    
+permissions:
+  contents: write
 
-  - name: Deploy to GitHub Pages        
-    uses: peaceiris/actions-gh-pages@v4        
-    with:          
-      github_token: ${{ secrets.GITHUB_TOKEN }}          
-      publish_dir: ./build/web          
-      force_orphan: true         # Создавать новый коммит без сохранения истории (force push)
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+          cache-key: "flutter-:os:-:channel:-:version:-:arch:-:hash:"
+
+      - name: Enable Web
+        run: flutter config --enable-web
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Analyze project source
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings
+
+      - name: Create config.json
+        run: |
+          cat > config.json <<EOF
+          {
+            "FIREBASE_API_KEY": "${{ secrets.FIREBASE_API_KEY }}",
+            "FIREBASE_APP_ID": "${{ secrets.FIREBASE_APP_ID }}",
+            "FIREBASE_MESSAGING_SENDER_ID": "${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}",
+            "FIREBASE_PROJECT_ID": "${{ secrets.FIREBASE_PROJECT_ID }}",
+            "FIREBASE_AUTH_DOMAIN": "${{ secrets.FIREBASE_AUTH_DOMAIN }}",
+            "FIREBASE_STORAGE_BUCKET": "${{ secrets.FIREBASE_STORAGE_BUCKET }}",
+            "FIREBASE_MEASUREMENT_ID": "${{ secrets.FIREBASE_MEASUREMENT_ID }}"
+          }
+          EOF
+
+      - name: Build Web (Optimized for Size & Performance)
+        # --csp: removes eval() for security and compatibility
+        # --no-source-maps: reduces file size
+        run: flutter build web --release --tree-shake-icons --base-href /${{ github.event.repository.name }}/ --dart-define-from-file=config.json --csp --no-source-maps
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build/web
+          force_orphan: true
