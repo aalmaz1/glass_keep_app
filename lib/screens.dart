@@ -168,15 +168,19 @@ class _NotesScreenState extends State<NotesScreen> {
       builder: (context) => NoteEditScreen(
         note: note,
         storage: widget.storage,
-        onDeleted: () {
-          if (mounted) {
-            setState(() {
-              _additionalNotes.removeWhere((n) => n.id == note.id);
-            });
-          }
-        },
+        onDeleted: _handleNoteDeleted,
       ),
     );
+  }
+
+  void _handleNoteDeleted(String id) {
+    if (mounted) {
+      setState(() {
+        _streamNotes.removeWhere((n) => n.id == id);
+        _additionalNotes.removeWhere((n) => n.id == id);
+        _filteredNotes = null;
+      });
+    }
   }
 
   void _openTrash(BuildContext context) {
@@ -731,11 +735,9 @@ class _NewNoteButton extends StatelessWidget {
       builder: (context) => NoteEditScreen(
         note: note,
         storage: storage,
-        onDeleted: () {
-          if (state?.mounted ?? false) {
-            state!.setState(() {
-              state._additionalNotes.removeWhere((n) => n.id == note.id);
-            });
+        onDeleted: (id) {
+          if (state != null) {
+            state._handleNoteDeleted(id);
           }
         },
       ),
@@ -755,16 +757,6 @@ class NoteCard extends StatefulWidget {
 
 class _NoteCardState extends State<NoteCard> {
   Uint8List? _decodedImage;
-
-  Color _getThemeColor() {
-    final provider = GlassAnimationProvider.of(context);
-    return provider?.themeColor ?? AppColors.obsidianBlack;
-  }
-
-  Color _getAccentColor() {
-    final provider = GlassAnimationProvider.of(context);
-    return provider?.accentColor ?? AppColors.accentBlue;
-  }
 
   @override
   void initState() {
@@ -791,6 +783,11 @@ class _NoteCardState extends State<NoteCard> {
 
   void _updateImage() {
     _decodedImage = widget.note.cachedImage;
+  }
+
+  Color _getAccentColor() {
+    final provider = GlassAnimationProvider.of(context);
+    return provider?.accentColor ?? AppColors.accentBlue;
   }
 
   @override
@@ -930,7 +927,7 @@ class _NoteCardContent extends StatelessWidget {
 class NoteEditScreen extends StatefulWidget {
   final Note note;
   final StorageService storage;
-  final VoidCallback? onDeleted;
+  final Function(String)? onDeleted;
 
   const NoteEditScreen({super.key, required this.note, required this.storage, this.onDeleted});
 
@@ -945,12 +942,6 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
   final _picker = ImagePicker();
   Uint8List? _decodedImage;
   bool _isLoading = false;
-
-  /// Get current theme color from provider
-  Color _getThemeColor() {
-    final provider = GlassAnimationProvider.of(context);
-    return provider?.themeColor ?? AppColors.obsidianBlack;
-  }
 
   /// Get current accent color from provider
   Color _getAccentColor() {
@@ -1136,7 +1127,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                                   if (widget.note.id.isNotEmpty) {
                                     try {
                                       await widget.storage.delete(widget.note.id);
-                                      if (widget.onDeleted != null) widget.onDeleted!();
+                                      if (widget.onDeleted != null) widget.onDeleted!(widget.note.id);
                                       if (context.mounted) Navigator.pop(context);
                                     } catch (e) {
                                       _showSnackBar('${l10n?.deleteError ?? 'Delete error'}: $e', isError: true);

@@ -1,0 +1,49 @@
+  @override
+  void initState() {
+    super.initState();
+    _updateImage();
+  }
+
+  @override
+  void dispose() {
+    // Clear image cache when card is disposed (scrolled out of view)
+    // to keep memory usage under 300MB
+    widget.note.clearImageCache();
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(NoteCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.note.imageBase64 != widget.note.imageBase64 ||
+        oldWidget.note.id != widget.note.id) {
+      _updateImage();
+    }
+  }
+
+  void _updateImage() {
+    _decodedImage = widget.note.cachedImage;
+  }
+
+  Color _getAccentColor() {
+    final provider = GlassAnimationProvider.of(context);
+    return provider?.accentColor ?? AppColors.accentBlue;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final image = _decodedImage;
+    return RepaintBoundary(
+      child: _NoteCardContent(
+        key: ValueKey('note_content_${widget.note.id}_${widget.note.updatedAt.millisecondsSinceEpoch}'),
+        note: widget.note,
+        decodedImage: image,
+        onTap: widget.onTap,
+        accentColor: _getAccentColor(),
+      ),
+    );
+  }
+}
+
+/// Вынесенный контент карточки для оптимизации перерисовки
+class _NoteCardContent extends StatelessWidget {
