@@ -308,31 +308,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
             GlobalCupertinoLocalizations.delegate,
           ],
           supportedLocales: AppLocalizations.supportedLocales,
-          builder: (context, child) {
-            return Stack(
-              children: [
-                if (child != null) child,
-                const Positioned(
-                  bottom: 20,
-                  left: 0,
-                  right: 0,
-                  child: IgnorePointer(
-                    child: Center(
-                      child: Text(
-                        'SYSTEM-REBORN-${AppColors.appVersion}',
-                        style: TextStyle(
-                          color: Colors.white54,
-                          fontSize: 10,
-                          letterSpacing: 1.2,
-                          fontWeight: FontWeight.w300,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            );
-          },
+          builder: (context, child) => child!,
           home: StreamBuilder<User?>(
             stream: _authStream,
             builder: (context, snapshot) {
@@ -341,47 +317,25 @@ class _GlassKeepAppState extends State<GlassKeepApp>
               }
               if (snapshot.hasError) {
                 return Scaffold(
-                  backgroundColor: AppColors.obsidianBlack,
-                  body: Stack(
-                    children: [
-                      Positioned.fill(
-                        child: VisionBackground(
-                          backgroundColor: _themeColor,
-                          blobColors: _blobColors,
-                        ),
-                      ),
-                      Center(
-                        child: Text('Auth Error: ${snapshot.error}', style: const TextStyle(color: Colors.white)),
-                      ),
-                    ],
+                  body: Center(
+                    child: Text('Auth Error: ${snapshot.error}', style: const TextStyle(color: Colors.white)),
                   ),
                 );
               }
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return Scaffold(
-                  backgroundColor: AppColors.obsidianBlack,
-                  body: Stack(
-                    children: [
-                      Positioned.fill(
-                        child: VisionBackground(
-                          backgroundColor: _themeColor,
-                          blobColors: _blobColors,
+                return const Scaffold(
+                  body: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _LoadingLogo(),
+                        SizedBox(height: 24),
+                        CupertinoActivityIndicator(
+                          color: AppColors.accentBlue,
+                          radius: 14,
                         ),
-                      ),
-                      const Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            _LoadingLogo(),
-                            SizedBox(height: 24),
-                            CupertinoActivityIndicator(
-                              color: AppColors.accentBlue,
-                              radius: 14,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 );
               }
@@ -392,19 +346,8 @@ class _GlassKeepAppState extends State<GlassKeepApp>
                   builder: (context, storeSnapshot) {
                     if (storeSnapshot.hasError) {
                       return Scaffold(
-                        backgroundColor: AppColors.obsidianBlack,
-                        body: Stack(
-                          children: [
-                            Positioned.fill(
-                              child: VisionBackground(
-                                backgroundColor: _themeColor,
-                                blobColors: _blobColors,
-                              ),
-                            ),
-                            Center(
-                              child: Text('Storage Error: ${storeSnapshot.error}', style: const TextStyle(color: Colors.white)),
-                            ),
-                          ],
+                        body: Center(
+                          child: Text('Storage Error: ${storeSnapshot.error}', style: const TextStyle(color: Colors.white)),
                         ),
                       );
                     }
@@ -414,22 +357,11 @@ class _GlassKeepAppState extends State<GlassKeepApp>
                         child: NotesScreen(storage: storage),
                       );
                     }
-                    return Scaffold(
-                      backgroundColor: AppColors.obsidianBlack,
-                      body: Stack(
-                        children: [
-                          Positioned.fill(
-                            child: VisionBackground(
-                              backgroundColor: _themeColor,
-                              blobColors: _blobColors,
-                            ),
-                          ),
-                          const Center(
-                            child: CupertinoActivityIndicator(
-                              color: AppColors.accentBlue,
-                            ),
-                          ),
-                        ],
+                    return const Scaffold(
+                      body: Center(
+                        child: CupertinoActivityIndicator(
+                          color: AppColors.accentBlue,
+                        ),
                       ),
                     );
                   },

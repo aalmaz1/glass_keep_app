@@ -36,30 +36,14 @@ class VisionGlassCard extends StatefulWidget {
 }
 
 class _VisionGlassCardState extends State<VisionGlassCard> {
-  bool _isHovered = false;
-
-  void _handleHover(bool isHovered) {
-    if (_isHovered == isHovered) return;
-    setState(() {
-      _isHovered = isHovered;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final animationProvider = GlassAnimationProvider.of(context);
-    if (animationProvider == null) {
-      debugPrint('[SYSTEM-REBORN] VisionGlassCard failed to find GlassAnimationProvider');
-    }
-
     final accentColor = widget.accentColor ?? animationProvider?.accentColor ?? Colors.white;
 
     return ValueListenableBuilder<bool>(
       valueListenable: animationProvider?.isLowPerformanceMode ?? ValueNotifier(false),
       builder: (context, isLowPerf, _) {
-        // Simple hover value without animation controller
-        final hoverValue = _isHovered ? 1.0 : 0.0;
-        
         Widget mainContent = Stack(
           children: [
             // Specular border highlights
@@ -71,7 +55,6 @@ class _VisionGlassCardState extends State<VisionGlassCard> {
                     painter: _SpecularBorderPainter(
                       borderRadius: widget.borderRadius,
                       tilt: currentTilt,
-                      hoverIntensity: hoverValue,
                       accentColor: accentColor,
                     ),
                   );
@@ -88,51 +71,42 @@ class _VisionGlassCardState extends State<VisionGlassCard> {
         if (widget.useDistortion && !isLowPerf) {
           mainContent = GlassDistortionEffect(
             borderRadius: widget.borderRadius,
-            distortionStrength: hoverValue * 0.5,
+            distortionStrength: 0.1, // Fixed minimal distortion
             child: mainContent,
           );
         }
 
         final blurFilter = ui.ImageFilter.blur(
-          sigmaX: (widget.blur + (hoverValue * 4)) / (isLowPerf ? 2.0 : 1.0),
-          sigmaY: (widget.blur + (hoverValue * 4)) / (isLowPerf ? 2.0 : 1.0)
+          sigmaX: widget.blur / (isLowPerf ? 2.0 : 1.0),
+          sigmaY: widget.blur / (isLowPerf ? 2.0 : 1.0)
         );
         
         Widget cardContent = Container(
           decoration: BoxDecoration(
-            color: widget.color ?? AppColors.obsidianBlack.withValues(alpha: 0.5 + (hoverValue * 0.1)),
+            color: widget.color ?? AppColors.obsidianBlack.withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(widget.borderRadius),
             border: widget.border,
           ),
           child: mainContent,
         );
 
-        return MouseRegion(
-          onEnter: (_) => _handleHover(true),
-          onExit: (_) => _handleHover(false),
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(widget.borderRadius),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.4 + (hoverValue * 0.1)),
-                  blurRadius: 40 + (hoverValue * 20),
-                  offset: Offset(0, 20 + (hoverValue * 10)),
-                  spreadRadius: -10,
-                ),
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.2),
-                  blurRadius: 15,
-                  offset: const Offset(0, 8),
-                ),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(widget.borderRadius),
-              child: BackdropFilter(
-                filter: blurFilter,
-                child: cardContent,
+        return Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(widget.borderRadius),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.4),
+                blurRadius: 40,
+                offset: const Offset(0, 20),
+                spreadRadius: -10,
               ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(widget.borderRadius),
+            child: BackdropFilter(
+              filter: blurFilter,
+              child: cardContent,
             ),
           ),
         );
@@ -146,17 +120,11 @@ class _VisionGlassCardState extends State<VisionGlassCard> {
 class _SpecularBorderPainter extends CustomPainter {
   final double borderRadius;
   final Offset tilt;
-  final double hoverIntensity;
   final Color accentColor;
-
-  // Cache gradients by size and tilt to avoid recreating them every frame
-  static final Map<String, ui.Gradient> _gradientCache = {};
-  static const int _maxGradientCacheSize = 50;
 
   const _SpecularBorderPainter({
     required this.borderRadius,
     this.tilt = Offset.zero,
-    this.hoverIntensity = 0.0,
     required this.accentColor,
   });
 
@@ -165,33 +133,19 @@ class _SpecularBorderPainter extends CustomPainter {
     final rect = Offset.zero & size;
     final rrect = RRect.fromRectAndRadius(rect, Radius.circular(borderRadius));
 
-    // Create cache key from size, tilt and accentColor
-    final cacheKey = '${size.width.toInt()}_${size.height.toInt()}_${tilt.dx.toStringAsFixed(2)}_${tilt.dy.toStringAsFixed(2)}_${accentColor.toARGB32()}';
-    
-    // Try to get cached gradient or create new one
-    var shader = _gradientCache[cacheKey];
-    if (shader == null) {
-      // Limit cache size
-      if (_gradientCache.length >= _maxGradientCacheSize) {
-        _gradientCache.remove(_gradientCache.keys.first);
-      }
-      
-      shader = ui.Gradient.linear(
-        Offset(tilt.dx * 15, tilt.dy * 15),
-        Offset(size.width, size.height) + Offset(tilt.dx * 15, tilt.dy * 15),
-        [
-          accentColor.withValues(alpha: 0.8),
-          accentColor.withValues(alpha: 0.2),
-          accentColor.withValues(alpha: 0.5),
-          accentColor.withValues(alpha: 0.1),
-          accentColor.withValues(alpha: 0.7),
-        ],
-        const [0.0, 0.25, 0.5, 0.75, 1.0],
-      );
-      _gradientCache[cacheKey] = shader;
-    }
+    final shader = ui.Gradient.linear(
+      Offset(tilt.dx * 15, tilt.dy * 15),
+      Offset(size.width, size.height) + Offset(tilt.dx * 15, tilt.dy * 15),
+      [
+        accentColor.withValues(alpha: 0.8),
+        accentColor.withValues(alpha: 0.2),
+        accentColor.withValues(alpha: 0.5),
+        accentColor.withValues(alpha: 0.1),
+        accentColor.withValues(alpha: 0.7),
+      ],
+      const [0.0, 0.25, 0.5, 0.75, 1.0],
+    );
 
-    // Single simplified border highlight for better performance - no hover animation
     final paint1 = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0
@@ -204,7 +158,7 @@ class _SpecularBorderPainter extends CustomPainter {
   bool shouldRepaint(covariant _SpecularBorderPainter oldDelegate) =>
       oldDelegate.borderRadius != borderRadius || 
       oldDelegate.tilt != tilt ||
-      oldDelegate.accentColor != accentColor; // Added accentColor to repaint check
+      oldDelegate.accentColor != accentColor;
 }
 
 /// Premium static background with elegant gradient and noise texture

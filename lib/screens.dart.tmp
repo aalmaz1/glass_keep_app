@@ -1,49 +1,110 @@
   @override
-  void initState() {
-    super.initState();
-    _updateImage();
-  }
-
-  @override
-  void dispose() {
-    // Clear image cache when card is disposed (scrolled out of view)
-    // to keep memory usage under 300MB
-    widget.note.clearImageCache();
-    super.dispose();
-  }
-
-  @override
-  void didUpdateWidget(NoteCard oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.note.imageBase64 != widget.note.imageBase64 ||
-        oldWidget.note.id != widget.note.id) {
-      _updateImage();
-    }
-  }
-
-  void _updateImage() {
-    _decodedImage = widget.note.cachedImage;
-  }
-
-  Color _getAccentColor() {
-    final provider = GlassAnimationProvider.of(context);
-    return provider?.accentColor ?? AppColors.accentBlue;
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final image = _decodedImage;
-    return RepaintBoundary(
-      child: _NoteCardContent(
-        key: ValueKey('note_content_${widget.note.id}_${widget.note.updatedAt.millisecondsSinceEpoch}'),
-        note: widget.note,
-        decodedImage: image,
-        onTap: widget.onTap,
-        accentColor: _getAccentColor(),
+    final size = MediaQuery.sizeOf(context);
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    final l10n = AppLocalizations.of(context);
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: bottomInset),
+      child: Container(
+        height: size.height * 0.85,
+        decoration: BoxDecoration(
+          color: AppColors.obsidianBlack.withValues(alpha: 0.9),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.15), width: 1),
+        ),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+          child: BackdropFilter(
+            filter: ui.ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+            child: Scaffold(
+              resizeToAvoidBottomInset: false,
+              backgroundColor: Colors.transparent,
+              appBar: PreferredSize(
+                preferredSize: const Size.fromHeight(70),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 12),
+                    Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.tertiaryText.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
+                    const SizedBox(height: 4),
+                    CupertinoNavigationBar(
+                      backgroundColor: Colors.transparent,
+                      border: null,
+                      automaticallyImplyLeading: false,
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CupertinoButton(
+                            padding: EdgeInsets.zero,
+                            child: Icon(
+                              CupertinoIcons.pin,
+                              color: widget.note.isPinned ? _getAccentColor() : _getAccentColor().withValues(alpha: 0.3),
+                              size: 22,
+                              shadows: AppColors.iconShadows,
+                            ),
+                            onPressed: () async {
+                              HapticFeedback.lightImpact();
+                              final updatedNote = widget.note.copyWith(isPinned: !widget.note.isPinned);
+                              try {
+                                await widget.storage.save(updatedNote);
+                                if (context.mounted) setState(() {});
+                              } catch (e) {
+                                _showSnackBar('${l10n?.pinError ?? 'Pin error'}: $e', isError: true);
+                              }
+                            },
+                          ),
+                          CupertinoButton(
+                            padding: EdgeInsets.zero,
+                            child: const Icon(CupertinoIcons.trash, color: AppColors.accentRed, size: 22, shadows: AppColors.iconShadows),
+                            onPressed: () async {
+                              HapticFeedback.mediumImpact();
+                              if (widget.note.id.isNotEmpty) {
+                                try {
+                                  await widget.storage.delete(widget.note.id);
+                                  if (widget.onDeleted != null) widget.onDeleted!(widget.note.id);
+                                  if (context.mounted) Navigator.pop(context);
+                                } catch (e) {
+                                  _showSnackBar('${l10n?.deleteError ?? 'Delete error'}: $e', isError: true);
+                                }
+                              } else {
+                                Navigator.pop(context);
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              body: _buildBody(l10n),
+              floatingActionButton: Padding(
+                padding: const EdgeInsets.only(right: 8, bottom: 8),
+                child: FloatingActionButton.extended(
+                  onPressed: () {
+                    HapticFeedback.mediumImpact();
+                    _save();
+                  },
+                  backgroundColor: Colors.black.withValues(alpha: 0.8),
+                  elevation: 0,
+                  label: Row(
+                    children: [
+                      const Icon(CupertinoIcons.checkmark, color: Colors.white, size: 20),
+                      const SizedBox(width: 8),
+                      Text(
+                        l10n?.save ?? 'Save',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
-}
-
-/// Вынесенный контент карточки для оптимизации перерисовки
-class _NoteCardContent extends StatelessWidget {
