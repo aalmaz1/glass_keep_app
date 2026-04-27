@@ -156,7 +156,19 @@ class StorageService {
         );
         debugPrint('[SYSTEM-REBORN] Firestore persistence enabled');
       } catch (e) {
-        debugPrint('[SYSTEM-REBORN] Firestore settings already set or error: $e');
+        final errorStr = e.toString().toLowerCase();
+        // Check if error is related to persistence/corruption or initialization
+        if (errorStr.contains('persistence') || errorStr.contains('corruption') || errorStr.contains('failed')) {
+          debugPrint('[SYSTEM-REBORN] Firestore persistence error detected, clearing persistence: $e');
+          try {
+            await FirebaseFirestore.instance.clearPersistence();
+            debugPrint('[SYSTEM-REBORN] Persistence cleared successfully');
+          } catch (clearErr) {
+            debugPrint('[SYSTEM-REBORN] Failed to clear persistence: $clearErr');
+          }
+        } else {
+          debugPrint('[SYSTEM-REBORN] Firestore settings already set or non-critical error: $e');
+        }
       }
       _initialized = true;
     }
