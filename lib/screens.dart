@@ -286,10 +286,10 @@ class _NotesScreenState extends State<NotesScreen> {
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
                             ),
-                            child: Icon(
+                            child: const Icon(
                               CupertinoIcons.ellipsis_vertical,
                               size: 26,
-                              color: accentColor,
+                              color: Colors.white,
                               shadows: AppColors.iconShadows,
                             ),
                           ),
@@ -301,7 +301,6 @@ class _NotesScreenState extends State<NotesScreen> {
                 Builder(
                   builder: (context) {
                     final sourceNotes = _getAllCombinedNotes();
-                    // Optimized filtering - only runs when data or search changes
                     final notes = _getFilteredAndSortedNotes(sourceNotes);
 
                     if (notes.isEmpty && _streamNotes.isEmpty) {
@@ -320,7 +319,7 @@ class _NotesScreenState extends State<NotesScreen> {
                           child: Text(
                             l10n?.noNotes ?? 'No notes found',
                             style: const TextStyle(
-                              color: AppColors.secondaryText,
+                              color: Colors.white70,
                               fontSize: 17,
                             ),
                           ),
@@ -356,7 +355,7 @@ class _NotesScreenState extends State<NotesScreen> {
                   const SliverToBoxAdapter(
                     child: Padding(
                       padding: EdgeInsets.only(bottom: 40),
-                      child: Center(child: CupertinoActivityIndicator()),
+                      child: Center(child: CupertinoActivityIndicator(color: Colors.white)),
                     ),
                   ),
                 const SliverToBoxAdapter(child: SizedBox(height: 100)),
@@ -365,7 +364,18 @@ class _NotesScreenState extends State<NotesScreen> {
           ),
         ],
       ),
-      floatingActionButton: const _NewNoteButton(),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          HapticFeedback.mediumImpact();
+          _openNote(context, Note.empty());
+        },
+        backgroundColor: accentColor,
+        icon: const Icon(CupertinoIcons.plus, color: Colors.white),
+        label: Text(
+          l10n?.newNote ?? 'New Note',
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+      ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
@@ -654,76 +664,6 @@ class _LanguageOption extends StatelessWidget {
   }
 }
 
-class _NewNoteButton extends StatelessWidget {
-  const _NewNoteButton();
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final animationProvider = GlassAnimationProvider.of(context);
-    final accentColor = animationProvider?.accentColor ?? AppColors.accentBlue;
-
-    return FloatingActionButton.extended(
-      onPressed: () {
-        HapticFeedback.mediumImpact();
-        final storage = _getStorageService(context);
-        if (storage == null) return;
-        final n = Note(
-          id: '',
-          title: '',
-          content: '',
-          updatedAt: DateTime.now(),
-        );
-        _openNoteEditor(context, n, storage);
-      },
-      backgroundColor: Colors.black.withValues(alpha: 0.8),
-      elevation: 0,
-      label: Row(
-        children: [
-          const Icon(CupertinoIcons.plus, color: Colors.white, size: 24),
-          const SizedBox(width: 8),
-          Text(
-            l10n?.newNote ?? 'New Note',
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  StorageService? _getStorageService(BuildContext context) {
-    final state = context.findAncestorStateOfType<_NotesScreenState>();
-    return state?.widget.storage;
-  }
-
-  void _openNoteEditor(BuildContext context, Note note, StorageService storage) {
-    final state = context.findAncestorStateOfType<_NotesScreenState>();
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => NoteEditScreen(
-        note: note,
-        storage: storage,
-        onDeleted: (id) {
-          if (state != null) {
-            state._handleNoteDeleted(id);
-          }
-        },
-        onSaved: (note) {
-          if (state != null) {
-            state._handleNoteSaved(note);
-          }
-        },
-      ),
-    );
-  }
-}
-
 class NoteCard extends StatefulWidget {
   final Note note;
   final VoidCallback onTap;
@@ -858,8 +798,8 @@ class _NoteCardContent extends StatelessWidget {
                     note.content,
                     maxLines: 6,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.7),
+                    style: const TextStyle(
+                      color: Colors.white,
                       fontSize: 14,
                       height: 1.3,
                     ),
@@ -1047,13 +987,14 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
     final size = MediaQuery.sizeOf(context);
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     final l10n = AppLocalizations.of(context);
+    final accentColor = _getAccentColor();
 
     return Padding(
       padding: EdgeInsets.only(bottom: bottomInset),
       child: Container(
         height: size.height * 0.85,
         decoration: BoxDecoration(
-          color: AppColors.obsidianBlack.withValues(alpha: 0.9),
+          color: AppColors.obsidianBlack.withValues(alpha: 0.95),
           borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
           border: Border.all(color: Colors.white.withValues(alpha: 0.15), width: 1),
         ),
@@ -1061,92 +1002,88 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
           borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
           child: BackdropFilter(
             filter: ui.ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-            child: Scaffold(
-              resizeToAvoidBottomInset: false,
-              backgroundColor: Colors.transparent,
-              appBar: PreferredSize(
-                preferredSize: const Size.fromHeight(70),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 12),
-                    Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.tertiaryText.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
-                    const SizedBox(height: 4),
-                    CupertinoNavigationBar(
-                      backgroundColor: Colors.transparent,
-                      border: null,
-                      automaticallyImplyLeading: false,
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          CupertinoButton(
-                            padding: EdgeInsets.zero,
-                            child: Icon(
-                              CupertinoIcons.pin,
-                              color: widget.note.isPinned ? _getAccentColor() : _getAccentColor().withValues(alpha: 0.3),
-                              size: 22,
-                              shadows: AppColors.iconShadows,
-                            ),
-                            onPressed: () async {
-                              HapticFeedback.lightImpact();
-                              final updatedNote = widget.note.copyWith(isPinned: !widget.note.isPinned);
-                              try {
-                                final savedNote = await widget.storage.save(updatedNote);
-                                if (widget.onSaved != null) widget.onSaved!(savedNote);
-                                if (context.mounted) setState(() {});
-                              } catch (e) {
-                                _showSnackBar('${l10n?.pinError ?? 'Pin error'}: $e', isError: true);
-                              }
-                            },
-
-                          CupertinoButton(
-                            padding: EdgeInsets.zero,
-                            child: const Icon(CupertinoIcons.trash, color: AppColors.accentRed, size: 22, shadows: AppColors.iconShadows),
-                            onPressed: () async {
-                              HapticFeedback.mediumImpact();
-                              if (widget.note.id.isNotEmpty) {
-                                try {
-                                  await widget.storage.delete(widget.note.id);
-                                  if (widget.onDeleted != null) widget.onDeleted!(widget.note.id);
-                                  if (context.mounted) Navigator.pop(context);
-                                } catch (e) {
-                                  _showSnackBar('${l10n?.deleteError ?? 'Delete error'}: $e', isError: true);
-                                }
-                              } else {
-                                Navigator.pop(context);
-                              }
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+            child: Column(
+              children: [
+                const SizedBox(height: 12),
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
-              ),
-              body: _buildBody(l10n),
-              floatingActionButton: Padding(
-                padding: const EdgeInsets.only(right: 8, bottom: 8),
-                child: FloatingActionButton.extended(
-                  onPressed: () {
-                    HapticFeedback.mediumImpact();
-                    _save();
-                  },
-                  backgroundColor: Colors.black.withValues(alpha: 0.8),
-                  elevation: 0,
-                  label: Row(
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      const Icon(CupertinoIcons.checkmark, color: Colors.white, size: 20),
-                      const SizedBox(width: 8),
-                      Text(
-                        l10n?.save ?? 'Save',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
+                      CupertinoButton(
+                        padding: EdgeInsets.zero,
+                        onPressed: () async {
+                          HapticFeedback.lightImpact();
+                          final updatedNote = widget.note.copyWith(isPinned: !widget.note.isPinned);
+                          try {
+                            final savedNote = await widget.storage.save(updatedNote);
+                            if (widget.onSaved != null) widget.onSaved!(savedNote);
+                            if (context.mounted) setState(() {});
+                          } catch (e) {
+                            _showSnackBar('${l10n?.pinError ?? 'Pin error'}: $e', isError: true);
+                          }
+                        },
+                        child: Icon(
+                          CupertinoIcons.pin,
+                          color: widget.note.isPinned ? accentColor : Colors.white54,
+                          size: 24,
                         ),
+                      ),
+                      CupertinoButton(
+                        padding: EdgeInsets.zero,
+                        onPressed: () async {
+                          HapticFeedback.mediumImpact();
+                          if (widget.note.id.isNotEmpty) {
+                            try {
+                              await widget.storage.delete(widget.note.id);
+                              if (widget.onDeleted != null) widget.onDeleted!(widget.note.id);
+                              if (context.mounted) Navigator.pop(context);
+                            } catch (e) {
+                              _showSnackBar('${l10n?.deleteError ?? 'Delete error'}: $e', isError: true);
+                            }
+                          } else {
+                            Navigator.pop(context);
+                          }
+                        },
+                        child: const Icon(CupertinoIcons.trash, color: AppColors.accentRed, size: 24),
                       ),
                     ],
                   ),
                 ),
-              ),
+                Expanded(child: _buildBody(l10n)),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: FloatingActionButton.extended(
+                      onPressed: () {
+                        HapticFeedback.mediumImpact();
+                        _save();
+                      },
+                      backgroundColor: accentColor,
+                      elevation: 0,
+                      label: Text(
+                        l10n?.save ?? 'Save',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      icon: const Icon(CupertinoIcons.checkmark_alt, color: Colors.white, size: 24),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -1198,8 +1135,8 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                 ),
               ],
             ),
-          TextField(controller: _t, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: -0.5), decoration: InputDecoration(hintText: l10n?.title ?? 'Title', hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)), border: InputBorder.none)),
-          TextField(controller: _c, maxLines: null, style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 18, height: 1.5), decoration: InputDecoration(hintText: l10n?.note ?? 'Note', hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)), border: InputBorder.none)),
+          TextField(controller: _t, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: -0.5), decoration: InputDecoration(hintText: l10n?.title ?? 'Title', hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.5)), border: InputBorder.none)),
+          TextField(controller: _c, maxLines: null, style: const TextStyle(color: Colors.white, fontSize: 18, height: 1.5), decoration: InputDecoration(hintText: l10n?.note ?? 'Note', hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.5)), border: InputBorder.none)),
           const SizedBox(height: 24),
           VisionGlassCard(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -1210,7 +1147,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                   IconButton(
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
-                    icon: Icon(CupertinoIcons.photo, color: _getAccentColor().withValues(alpha: 0.9), shadows: AppColors.iconShadows),
+                    icon: Icon(CupertinoIcons.photo, color: Colors.white, shadows: AppColors.iconShadows),
                     onPressed: _isLoading ? null : () async {
                       HapticFeedback.lightImpact();
                       if (context.mounted) setState(() => _isLoading = true);
@@ -1255,7 +1192,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                     },
                   ),
                   const VerticalDivider(color: Colors.white24, indent: 8, endIndent: 8),
-                  IconButton(padding: EdgeInsets.zero, constraints: const BoxConstraints(), icon: Icon(CupertinoIcons.alarm, color: _getAccentColor(), shadows: AppColors.iconShadows), onPressed: () async {
+                  IconButton(padding: EdgeInsets.zero, constraints: const BoxConstraints(), icon: const Icon(CupertinoIcons.alarm, color: Colors.white, shadows: AppColors.iconShadows), onPressed: () async {
                     HapticFeedback.lightImpact();
                     final now = DateTime.now();
                     final d = await showDatePicker(context: context, initialDate: now, firstDate: now, lastDate: now.add(const Duration(days: 365)));
@@ -1268,11 +1205,11 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                   }),
                   if (reminder != null) ...[
                     const SizedBox(width: 8),
-                    Expanded(child: Text(DateFormat('dd.MM HH:mm').format(reminder), style: TextStyle(fontSize: 12, color: _getAccentColor(), fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)),
+                    Expanded(child: Text(DateFormat('dd.MM HH:mm').format(reminder), style: const TextStyle(fontSize: 12, color: Colors.white, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)),
                     CupertinoButton(
                       padding: EdgeInsets.zero,
                       minimumSize: Size.zero,
-                      child: const Icon(CupertinoIcons.xmark_circle_fill, size: 18, color: Colors.white54),
+                      child: const Icon(CupertinoIcons.xmark_circle_fill, size: 18, color: Colors.white),
                       onPressed: () => setState(() => _rem = null),
                     ),
                   ],
@@ -1281,7 +1218,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
             ),
           ),
           const SizedBox(height: 20),
-          TextField(controller: _l, style: const TextStyle(color: Colors.white70, fontSize: 15), decoration: InputDecoration(hintText: l10n?.labelsHint ?? 'Labels', hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)), border: InputBorder.none)),
+          TextField(controller: _l, style: const TextStyle(color: Colors.white, fontSize: 15), decoration: InputDecoration(hintText: l10n?.labelsHint ?? 'Labels', hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.5)), border: InputBorder.none)),
           const SizedBox(height: 100),
         ],
       ),
@@ -1377,7 +1314,7 @@ class _TrashScreenState extends State<TrashScreen> {
                       final archivedNotes = data.where((n) => n.isArchived).toList();
 
                       if (archivedNotes.isEmpty) {
-                        return Center(child: Text(l10n?.trashEmptyHint ?? 'Trash is empty', style: const TextStyle(color: AppColors.secondaryText, fontSize: 17)));
+                        return Center(child: Text(l10n?.trashEmptyHint ?? 'Trash is empty', style: const TextStyle(color: Colors.white70, fontSize: 17)));
                       }
 
                       return ListView.builder(
@@ -1488,8 +1425,8 @@ class _TrashNoteCard extends StatelessWidget {
                   note.content,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
+                  style: const TextStyle(
+                    color: Colors.white,
                     fontSize: 14,
                   ),
                 ),

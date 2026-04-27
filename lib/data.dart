@@ -36,6 +36,13 @@ class Note {
     required this.updatedAt,
   });
 
+  factory Note.empty() => Note(
+    id: '',
+    title: '',
+    content: '',
+    updatedAt: DateTime.now(),
+  );
+
   /// Get cached image bytes, decoding only on first access
   Uint8List? get cachedImage {
     if (_cachedImage != null) return _cachedImage;
