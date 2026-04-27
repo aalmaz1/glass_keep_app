@@ -31,6 +31,12 @@ class DefaultFirebaseOptions {
   static void _logKeys() {
     debugPrint('[SYSTEM-REBORN] FIREBASE_API_KEY: ${_apiKey.isNotEmpty ? "FOUND" : "EMPTY"}');
     debugPrint('[SYSTEM-REBORN] FIREBASE_APP_ID: ${_appId.isNotEmpty ? "FOUND" : "EMPTY"}');
+    debugPrint('[SYSTEM-REBORN] FIREBASE_API_KEY_ANDROID: ${_apiKeyAndroidRaw.isNotEmpty ? "FOUND" : "EMPTY"}');
+    debugPrint('[SYSTEM-REBORN] FIREBASE_APP_ID_ANDROID: ${_appIdAndroidRaw.isNotEmpty ? "FOUND" : "EMPTY"}');
+    debugPrint('[SYSTEM-REBORN] FIREBASE_API_KEY_IOS: ${_apiKeyIosRaw.isNotEmpty ? "FOUND" : "EMPTY"}');
+    debugPrint('[SYSTEM-REBORN] FIREBASE_APP_ID_IOS: ${_appIdIosRaw.isNotEmpty ? "FOUND" : "EMPTY"}');
+    debugPrint('[SYSTEM-REBORN] FIREBASE_API_KEY_WEB: ${_apiKeyWebRaw.isNotEmpty ? "FOUND" : "EMPTY"}');
+    debugPrint('[SYSTEM-REBORN] FIREBASE_APP_ID_WEB: ${_appIdWebRaw.isNotEmpty ? "FOUND" : "EMPTY"}');
     debugPrint('[SYSTEM-REBORN] FIREBASE_MESSAGING_SENDER_ID: ${_messagingSenderId.isNotEmpty ? "FOUND" : "EMPTY"}');
     debugPrint('[SYSTEM-REBORN] FIREBASE_PROJECT_ID: ${_projectId.isNotEmpty ? "FOUND" : "EMPTY"}');
     debugPrint('[SYSTEM-REBORN] FIREBASE_AUTH_DOMAIN: ${_authDomain.isNotEmpty ? "FOUND" : "EMPTY"}');
@@ -38,8 +44,28 @@ class DefaultFirebaseOptions {
     debugPrint('[SYSTEM-REBORN] FIREBASE_MEASUREMENT_ID: ${_measurementId.isNotEmpty ? "FOUND" : "EMPTY"}');
   }
 
+  // Generic fallback secrets
   static const String _apiKey = String.fromEnvironment('FIREBASE_API_KEY');
   static const String _appId = String.fromEnvironment('FIREBASE_APP_ID');
+
+  // Android specific
+  static const String _apiKeyAndroidRaw = String.fromEnvironment('FIREBASE_API_KEY_ANDROID');
+  static const String _apiKeyAndroid = _apiKeyAndroidRaw != '' ? _apiKeyAndroidRaw : _apiKey;
+  static const String _appIdAndroidRaw = String.fromEnvironment('FIREBASE_APP_ID_ANDROID');
+  static const String _appIdAndroid = _appIdAndroidRaw != '' ? _appIdAndroidRaw : _appId;
+
+  // iOS specific
+  static const String _apiKeyIosRaw = String.fromEnvironment('FIREBASE_API_KEY_IOS');
+  static const String _apiKeyIos = _apiKeyIosRaw != '' ? _apiKeyIosRaw : _apiKey;
+  static const String _appIdIosRaw = String.fromEnvironment('FIREBASE_APP_ID_IOS');
+  static const String _appIdIos = _appIdIosRaw != '' ? _appIdIosRaw : _appId;
+
+  // Web specific
+  static const String _apiKeyWebRaw = String.fromEnvironment('FIREBASE_API_KEY_WEB');
+  static const String _apiKeyWeb = _apiKeyWebRaw != '' ? _apiKeyWebRaw : _apiKey;
+  static const String _appIdWebRaw = String.fromEnvironment('FIREBASE_APP_ID_WEB');
+  static const String _appIdWeb = _appIdWebRaw != '' ? _appIdWebRaw : _appId;
+
   static const String _messagingSenderId = String.fromEnvironment('FIREBASE_MESSAGING_SENDER_ID');
   static const String _projectId = String.fromEnvironment('FIREBASE_PROJECT_ID');
   static const String _authDomain = String.fromEnvironment('FIREBASE_AUTH_DOMAIN');
@@ -48,8 +74,8 @@ class DefaultFirebaseOptions {
   static const String _iosBundleId = String.fromEnvironment('FIREBASE_IOS_BUNDLE_ID', defaultValue: 'com.glasskeep.app');
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: _apiKey,
-    appId: _appId,
+    apiKey: _apiKeyWeb,
+    appId: _appIdWeb,
     messagingSenderId: _messagingSenderId,
     projectId: _projectId,
     authDomain: _authDomain,
@@ -58,8 +84,8 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: _apiKey,
-    appId: _appId,
+    apiKey: _apiKeyAndroid,
+    appId: _appIdAndroid,
     messagingSenderId: _messagingSenderId,
     projectId: _projectId,
     storageBucket: _storageBucket,
@@ -68,8 +94,8 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: _apiKey,
-    appId: _appId,
+    apiKey: _apiKeyIos,
+    appId: _appIdIos,
     messagingSenderId: _messagingSenderId,
     projectId: _projectId,
     storageBucket: _storageBucket,
@@ -79,8 +105,8 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: _apiKey,
-    appId: _appId,
+    apiKey: _apiKeyIos,
+    appId: _appIdIos,
     messagingSenderId: _messagingSenderId,
     projectId: _projectId,
     storageBucket: _storageBucket,

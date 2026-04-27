@@ -7,7 +7,7 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:585955210188:android:14371eb6a66b9e52192369",
+        "mobilesdk_app_id": "YOUR_APP_ID",
         "android_client_info": {
           "package_name": "com.example.glass_keep_app"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDuSsHleJ-xKZc4X3CWjPzmqO-BD6kn2TE"
+          "current_key": "YOUR_API_KEY"
         }
       ],
       "services": {
