@@ -1,6 +1,7 @@
-const CACHE_NAME = 'glass-keep-v1.8.0';
+const CACHE_NAME = 'glass-keep-v1.8.1';
 
 // Assets to cache immediately on install
+// Use relative paths to support GitHub Pages sub-directory hosting
 const PRECACHE_ASSETS = [
   './',
   'index.html',
@@ -42,7 +43,7 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch listener - Improved Stale-While-Revalidate strategy
+// Fetch listener - Stale-While-Revalidate strategy
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
@@ -64,10 +65,11 @@ self.addEventListener('fetch', (event) => {
           }
           return networkResponse;
         }).catch((err) => {
-          console.warn('Network fetch failed, serving from cache if available:', err);
-          return cachedResponse;
+          // If network fails, we already have the cached response if it existed
+          return cachedResponse; 
         });
 
+        // Return cached response immediately if available, otherwise wait for network
         return cachedResponse || fetchPromise;
       });
     })
