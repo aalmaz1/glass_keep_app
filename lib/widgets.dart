@@ -148,10 +148,6 @@ class _SpecularBorderPainter extends CustomPainter {
       ..lineTo(0, size.height - br)
       ..arcToPoint(Offset(br, size.height), radius: Radius.circular(br), clockwise: false);
 
-    // Dynamic offset based on tilt
-    final double dx = tilt.dx * 10;
-    final double dy = tilt.dy * 10;
-
     // Top highlight: horizontal gradient (90deg)
     final Paint topPaint = Paint()
       ..style = PaintingStyle.stroke

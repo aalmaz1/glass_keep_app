@@ -138,7 +138,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     const SizedBox(height: 16),
                     const Text(
                       'Glass Keep',
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.white,
                         fontSize: 32,
                         fontWeight: FontWeight.w800,
@@ -344,9 +344,9 @@ class _AuthScreenState extends State<AuthScreen> {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    Text(
+                    const Text(
                       'SYSTEM-REBORN-${AppColors.appVersion}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.white54,
                         fontSize: 12,
                         letterSpacing: 1.2,
