@@ -30,7 +30,7 @@ class _NotesScreenState extends State<NotesScreen> {
   String _search = '';
   late TextEditingController _searchController;
   late ScrollController _scrollController;
-  StreamSubscription? _notesSubscription;
+  StreamSubscription<StreamedNotes>? _notesSubscription;
   
   List<Note> _streamNotes = [];
   final List<Note> _additionalNotes = [];
@@ -39,18 +39,22 @@ class _NotesScreenState extends State<NotesScreen> {
   bool _isLoadingMore = false;
   
   Timer? _searchDebounceTimer;
-  Timer? _resetLowPerfTimer;
 
   @override
   void initState() {
     super.initState();
     _searchController = TextEditingController();
-    _scrollController = ScrollController()..addListener(_onScroll);
+    _scrollController = ScrollController();
     
-    _notesSubscription = widget.storage.getNotesStream().listen((notes) {
+    _notesSubscription = widget.storage.getNotesStream().listen((data) {
       if (mounted) {
         setState(() {
-          _streamNotes = notes;
+          _streamNotes = data.notes;
+          // If we haven't successfully loaded additional notes via pagination yet,
+          // keep our pagination pointer synced with the end of the real-time stream.
+          if (_additionalNotes.isEmpty) {
+            _lastDoc = data.lastDoc;
+          }
         });
       }
     });
@@ -60,30 +64,9 @@ class _NotesScreenState extends State<NotesScreen> {
   void dispose() {
     _notesSubscription?.cancel();
     _searchDebounceTimer?.cancel();
-    _resetLowPerfTimer?.cancel();
     _searchController.dispose();
     _scrollController.dispose();
     super.dispose();
-  }
-
-  void _onScroll() {
-    // Toggle low performance mode when scrolling
-    final provider = GlassAnimationProvider.of(context);
-    if (provider != null) {
-      if (!provider.isLowPerformanceMode.value) {
-        provider.isLowPerformanceMode.value = true;
-      }
-      _resetLowPerfTimer?.cancel();
-      _resetLowPerfTimer = Timer(const Duration(milliseconds: 200), () {
-        if (mounted) {
-          provider.isLowPerformanceMode.value = false;
-        }
-      });
-    }
-
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent * 0.8) {
-      _loadMoreNotes();
-    }
   }
 
   Future<void> _loadMoreNotes() async {
@@ -91,23 +74,6 @@ class _NotesScreenState extends State<NotesScreen> {
 
     setState(() => _isLoadingMore = true);
 
-    // Use the last doc from the stream notes if additional notes is empty
-    DocumentSnapshot? startAfter = _lastDoc;
-    if (startAfter == null && _streamNotes.isNotEmpty) {
-      // This is slightly tricky, we need the last DocumentSnapshot from the stream
-      // But StorageService doesn't provide it via stream. 
-      // For simplicity, let's assume getNotesPaginated can handle startAfter=null 
-      // and we will manage it by keeping track of the last doc from the first page if needed.
-    }
-
-    // Wait, I need a way to get the last document of the stream notes to continue.
-    // Let's modify StorageService to provide the last document in some way or 
-    // just make the first call to getNotesPaginated with the last doc from the stream.
-    // But the stream doesn't give us DocumentSnapshots.
-    
-    // Alternative: If _lastDoc is null, we fetch the first page via getNotesPaginated 
-    // to get the lastDoc, and skip the notes we already have from the stream.
-    
     final result = await widget.storage.getNotesPaginated(
       startAfter: _lastDoc,
       limit: 20,
@@ -119,9 +85,12 @@ class _NotesScreenState extends State<NotesScreen> {
         _lastDoc = result.lastDoc;
         _hasMore = result.hasMore;
         
-        // Add only notes not already in stream
-        final streamIds = _streamNotes.map((n) => n.id).toSet();
-        final newNotes = result.notes.where((n) => !streamIds.contains(n.id)).toList();
+        // Add only notes not already in stream or already in additional notes
+        final existingIds = {
+          ..._streamNotes.map((n) => n.id),
+          ..._additionalNotes.map((n) => n.id),
+        };
+        final newNotes = result.notes.where((n) => !existingIds.contains(n.id)).toList();
         _additionalNotes.addAll(newNotes);
       });
     }
@@ -262,9 +231,27 @@ class _NotesScreenState extends State<NotesScreen> {
             ),
           ),
           SafeArea(
-            child: CustomScrollView(
-              controller: _scrollController,
-              slivers: [
+            child: NotificationListener<ScrollNotification>(
+              onNotification: (notification) {
+                final provider = GlassAnimationProvider.of(context);
+                if (provider != null) {
+                  if (notification is ScrollStartNotification) {
+                    provider.isLowPerformanceMode.value = true;
+                  } else if (notification is ScrollEndNotification) {
+                    provider.isLowPerformanceMode.value = false;
+                  }
+                }
+
+                if (notification is ScrollUpdateNotification) {
+                  if (notification.metrics.pixels >= notification.metrics.maxScrollExtent * 0.8) {
+                    _loadMoreNotes();
+                  }
+                }
+                return false;
+              },
+              child: CustomScrollView(
+                controller: _scrollController,
+                slivers: [
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(paddingH, 10, paddingH, 0),
@@ -764,7 +751,7 @@ class _NoteCardState extends State<NoteCard> {
   }
 }
 
-/// Вынесенный контент карточки для оптимизации перерисовки
+/// Extracted card content to optimize repainting
 class _NoteCardContent extends StatelessWidget {
   final Note note;
   final Uint8List? decodedImage;
@@ -786,7 +773,7 @@ class _NoteCardContent extends StatelessWidget {
 
     return VisionGlassCard(
       padding: EdgeInsets.zero,
-      useDistortion: false, // Отключаем искажение для карточек заметок для производительности
+      useDistortion: false, // Disable distortion for note cards for performance
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(20),
@@ -942,7 +929,10 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
       final ui.FrameInfo frameInfo = await codec.getNextFrame();
       final ui.Image image = frameInfo.image;
       
-      // Encode back to JPEG (using PNG here as simple alternative for toByteData)
+      // Encode back to image bytes. We use PNG as a simple fallback here because 
+      // dart:ui does not provide a native JPEG encoder. While JPEG would provide 
+      // better compression for photos, using dart:ui PNG avoids adding heavy 
+      // external dependencies for image processing.
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
       if (byteData == null) return null;
       final result = byteData.buffer.asUint8List();
@@ -1309,7 +1299,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
   }
 }
 
-/// TRASH SCREEN - Экран корзины
+/// TRASH SCREEN
 class TrashScreen extends StatefulWidget {
   final StorageService storage;
   const TrashScreen({super.key, required this.storage});
@@ -1319,7 +1309,7 @@ class TrashScreen extends StatefulWidget {
 }
 
 class _TrashScreenState extends State<TrashScreen> {
-  late Stream<List<Note>> _notesStream;
+  late Stream<StreamedNotes> _notesStream;
 
   @override
   void initState() {
@@ -1388,7 +1378,7 @@ class _TrashScreenState extends State<TrashScreen> {
                   ),
                 ),
                 Expanded(
-                  child: StreamBuilder<List<Note>>(
+                  child: StreamBuilder<StreamedNotes>(
                     stream: _notesStream,
                     builder: (context, snapshot) {
                       final data = snapshot.data;
@@ -1396,7 +1386,7 @@ class _TrashScreenState extends State<TrashScreen> {
                         return const Center(child: CupertinoActivityIndicator(color: AppColors.accentBlue));
                       }
 
-                      final archivedNotes = data.where((n) => n.isArchived).toList();
+                      final archivedNotes = data.notes.where((n) => n.isArchived).toList();
 
                       if (archivedNotes.isEmpty) {
                         return Center(child: Text(l10n?.trashEmptyHint ?? 'Trash is empty', style: const TextStyle(color: Colors.white70, fontSize: 17)));
