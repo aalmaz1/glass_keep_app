@@ -349,9 +349,10 @@ class _NotesScreenState extends State<NotesScreen> {
               ],
             ),
           ),
-        ],
-      ),
-      floatingActionButton: _NewNoteButton(
+        ),
+      ],
+    ),
+    floatingActionButton: _NewNoteButton(
         onPressed: () {
           HapticFeedback.mediumImpact();
           _openNote(context, Note.empty());
@@ -526,7 +527,7 @@ class _NotesScreenState extends State<NotesScreen> {
                 padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                 child: Row(
                   children: [
-                    const Icon(CupertinoIcons.globe, color: AppColors.accentBlue, size: 22, shadows: AppColors.iconShadows),
+                    Icon(CupertinoIcons.globe, color: AppColors.accentBlue, size: 22, shadows: AppColors.iconShadows),
                     SizedBox(width: 12),
                     Text('Language', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white)),
                   ],
@@ -1010,11 +1011,11 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
         });
       }
       if (widget.onSaved != null) widget.onSaved!(savedNote);
-      if (!context.mounted) return;
+      if (!mounted) return;
       _showSnackBar(l10n?.saveSuccess ?? 'Saved');
-      Navigator.pop(context);
+      if (mounted) Navigator.pop(context);
     } catch (e) {
-      if (context.mounted) {
+      if (mounted) {
         _showSnackBar('${l10n?.saveError ?? 'Save error'}: $e', isError: true);
       }
     }
@@ -1270,10 +1271,10 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                     final now = DateTime.now();
                     final d = await showDatePicker(context: context, initialDate: now, firstDate: now, lastDate: now.add(const Duration(days: 365)));
                     if (d == null) return;
-                    if (!context.mounted) return;
+                    if (!mounted) return;
                     final t = await showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(now));
                     if (t == null) return;
-                    if (!context.mounted) return;
+                    if (!mounted) return;
                     setState(() => _rem = DateTime(d.year, d.month, d.day, t.hour, t.minute));
                   }),
                   if (reminder != null) ...[
