@@ -900,6 +900,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
   String? _img;
   DateTime? _rem;
   bool _isPinned = false;
+  late String _noteId;
   final _picker = ImagePicker();
   Uint8List? _decodedImage;
   bool _isLoading = false;
@@ -968,6 +969,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
     _img = widget.note.imageBase64;
     _rem = widget.note.reminder;
     _isPinned = widget.note.isPinned;
+    _noteId = widget.note.id;
     // Use cached image from note if available
     _decodedImage = widget.note.cachedImage;
   }
@@ -1001,6 +1003,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
     final l10n = AppLocalizations.of(context);
 
     final updatedNote = widget.note.copyWith(
+      id: _noteId,
       title: _t.text.trim(),
       content: _c.text.trim(),
       labels: _l.text.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
@@ -1010,10 +1013,12 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
       updatedAt: DateTime.now(),
     );
     try {
-      // Provide immediate feedback by optimistic UI update if possible
-      // but since we are in a modal and it closes, the main screen stream will handle it.
-      // Still, let's call save.
       final savedNote = await widget.storage.save(updatedNote);
+      if (mounted) {
+        setState(() {
+          _noteId = savedNote.id;
+        });
+      }
       if (widget.onSaved != null) widget.onSaved!(savedNote);
       if (!context.mounted) return;
       _showSnackBar(l10n?.saveSuccess ?? 'Saved');
@@ -1072,6 +1077,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                           });
                           
                           final updatedNote = widget.note.copyWith(
+                            id: _noteId,
                             title: _t.text.trim(),
                             content: _c.text.trim(),
                             labels: _l.text.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
@@ -1083,6 +1089,11 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
 
                           try {
                             final savedNote = await widget.storage.save(updatedNote);
+                            if (mounted) {
+                              setState(() {
+                                _noteId = savedNote.id;
+                              });
+                            }
                             if (widget.onSaved != null) widget.onSaved!(savedNote);
                           } catch (e) {
                             if (mounted) {
@@ -1103,11 +1114,11 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                         padding: EdgeInsets.zero,
                         onPressed: () {
                           HapticFeedback.mediumImpact();
-                          if (widget.note.id.isNotEmpty) {
-                            if (widget.onDeleted != null) widget.onDeleted!(widget.note.id);
+                          if (_noteId.isNotEmpty) {
+                            if (widget.onDeleted != null) widget.onDeleted!(_noteId);
                             Navigator.pop(context);
                             // Deletion happens in background
-                            widget.storage.delete(widget.note.id).catchError((e) {
+                            widget.storage.delete(_noteId).catchError((e) {
                               debugPrint('Error deleting note in background: $e');
                             });
                           } else {
