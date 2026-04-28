@@ -899,6 +899,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
   late TextEditingController _t, _c, _l;
   String? _img;
   DateTime? _rem;
+  bool _isPinned = false;
   final _picker = ImagePicker();
   Uint8List? _decodedImage;
   bool _isLoading = false;
@@ -966,6 +967,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
     _l = TextEditingController(text: widget.note.labels.join(', '));
     _img = widget.note.imageBase64;
     _rem = widget.note.reminder;
+    _isPinned = widget.note.isPinned;
     // Use cached image from note if available
     _decodedImage = widget.note.cachedImage;
   }
@@ -1004,6 +1006,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
       labels: _l.text.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
       imageBase64: _img,
       reminder: _rem,
+      isPinned: _isPinned,
       updatedAt: DateTime.now(),
     );
     try {
@@ -1063,18 +1066,36 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                         padding: EdgeInsets.zero,
                         onPressed: () async {
                           HapticFeedback.lightImpact();
-                          final updatedNote = widget.note.copyWith(isPinned: !widget.note.isPinned);
+                          final oldPinned = _isPinned;
+                          setState(() {
+                            _isPinned = !_isPinned;
+                          });
+                          
+                          final updatedNote = widget.note.copyWith(
+                            title: _t.text.trim(),
+                            content: _c.text.trim(),
+                            labels: _l.text.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+                            imageBase64: _img,
+                            reminder: _rem,
+                            isPinned: _isPinned,
+                            updatedAt: DateTime.now(),
+                          );
+
                           try {
                             final savedNote = await widget.storage.save(updatedNote);
                             if (widget.onSaved != null) widget.onSaved!(savedNote);
-                            if (context.mounted) setState(() {});
                           } catch (e) {
-                            _showSnackBar('${l10n?.pinError ?? 'Pin error'}: $e', isError: true);
+                            if (mounted) {
+                              setState(() {
+                                _isPinned = oldPinned;
+                              });
+                              _showSnackBar('${l10n?.pinError ?? 'Pin error'}: $e', isError: true);
+                            }
                           }
                         },
                         child: Icon(
                           CupertinoIcons.pin,
-                          color: widget.note.isPinned ? accentColor : Colors.white54,
+                          color: _isPinned ? accentColor : Colors.white54,
                           size: 24,
                         ),
                       ),
