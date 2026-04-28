@@ -131,12 +131,19 @@ class PaginatedNotes {
   PaginatedNotes({required this.notes, this.lastDoc, required this.hasMore});
 }
 
+class StreamedNotes {
+  final List<Note> notes;
+  final DocumentSnapshot? lastDoc;
+
+  StreamedNotes({required this.notes, this.lastDoc});
+}
+
 class StorageService {
   final _db = FirebaseFirestore.instance;
   final _auth = FirebaseAuth.instance;
 
   // Cached stream for notes to avoid multiple subscriptions
-  Stream<List<Note>>? _notesStream;
+  Stream<StreamedNotes>? _notesStream;
   // Track if persistence is enabled
   static bool _initialized = false;
 
@@ -177,7 +184,7 @@ class StorageService {
 
   String get _uid => _auth.currentUser?.uid ?? 'anonymous';
 
-  Stream<List<Note>> getNotesStream() {
+  Stream<StreamedNotes> getNotesStream() {
     final cached = _notesStream;
     if (cached != null) {
       return cached;
@@ -197,7 +204,7 @@ class StorageService {
     return stream;
   }
 
-  Stream<List<Note>> _buildUserNotesStream(String uid) {
+  Stream<StreamedNotes> _buildUserNotesStream(String uid) {
     return _db
         .collection('notes')
         .where('userId', isEqualTo: uid)
@@ -205,7 +212,10 @@ class StorageService {
         .limit(50) // Limit initial real-time stream to 50 latest notes
         .snapshots()
         .map(
-          (snapshot) => _mapNotes(snapshot.docs),
+          (snapshot) => StreamedNotes(
+            notes: _mapNotes(snapshot.docs),
+            lastDoc: snapshot.docs.isNotEmpty ? snapshot.docs.last : null,
+          ),
         );
   }
 
