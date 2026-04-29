@@ -207,11 +207,26 @@ class _NotesScreenState extends State<NotesScreen> {
       ).toList();
     }
 
-    // Sort: pinned first, then by updatedAt
-    notes.sort((a, b) {
-      if (a.isPinned != b.isPinned) return a.isPinned ? -1 : 1;
-      return b.updatedAt.compareTo(a.updatedAt);
-    });
+    // Sort based on selected sort type
+    if (_sortType == SortType.manual) {
+      // Manual sort: use orderIndex field
+      notes.sort((a, b) {
+        if (a.isPinned != b.isPinned) return a.isPinned ? -1 : 1;
+        return a.orderIndex.compareTo(b.orderIndex);
+      });
+    } else if (_sortType == SortType.dateCreated) {
+      // Sort by createdAt
+      notes.sort((a, b) {
+        if (a.isPinned != b.isPinned) return a.isPinned ? -1 : 1;
+        return _sortAscending ? a.createdAt.compareTo(b.createdAt) : b.createdAt.compareTo(a.createdAt);
+      });
+    } else {
+      // Sort by updatedAt (default)
+      notes.sort((a, b) {
+        if (a.isPinned != b.isPinned) return a.isPinned ? -1 : 1;
+        return _sortAscending ? a.updatedAt.compareTo(b.updatedAt) : b.updatedAt.compareTo(a.updatedAt);
+      });
+    }
 
     return notes;
   }
@@ -267,6 +282,7 @@ class _NotesScreenState extends State<NotesScreen> {
                           child: GlassSearchBar(
                             controller: _searchController,
                             onChanged: _onSearchChanged,
+                            onSortPressed: () => _showSortMenu(context),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -508,6 +524,101 @@ class _NotesScreenState extends State<NotesScreen> {
     );
   }
 
+  void _showSortMenu(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) return;
+    final provider = GlassAnimationProvider.of(context);
+    final themeColor = provider?.themeColor ?? AppColors.obsidianBlack;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: themeColor.withValues(alpha: 0.95),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1.5),
+        ),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+          child: BackdropFilter(
+            filter: ui.ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 12),
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  child: Text(
+                    'Сортировка',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                _SortMenuItem(
+                  label: 'Ручной',
+                  subtitle: 'Перетаскивайте заметки для изменения порядка',
+                  isSelected: _sortType == SortType.manual,
+                  onTap: () {
+                    Navigator.pop(context);
+                    setState(() => _sortType = SortType.manual);
+                  },
+                ),
+                _SortMenuItem(
+                  label: 'По дате создания',
+                  subtitle: _sortAscending ? 'Сначала старые' : 'Сначала новые',
+                  isSelected: _sortType == SortType.dateCreated,
+                  onTap: () {
+                    Navigator.pop(context);
+                    setState(() {
+                      if (_sortType == SortType.dateCreated) {
+                        _sortAscending = !_sortAscending;
+                      } else {
+                        _sortType = SortType.dateCreated;
+                        _sortAscending = false;
+                      }
+                    });
+                  },
+                ),
+                _SortMenuItem(
+                  label: 'По дате изменения',
+                  subtitle: _sortAscending ? 'Сначала старые' : 'Сначала новые',
+                  isSelected: _sortType == SortType.dateModified,
+                  onTap: () {
+                    Navigator.pop(context);
+                    setState(() {
+                      if (_sortType == SortType.dateModified) {
+                        _sortAscending = !_sortAscending;
+                      } else {
+                        _sortType = SortType.dateModified;
+                        _sortAscending = false;
+                      }
+                    });
+                  },
+                ),
+                const SizedBox(height: 20),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   void _openBackgroundSettings(BuildContext context) {
     final provider = GlassAnimationProvider.of(context);
     Navigator.of(context).push(
@@ -646,6 +757,77 @@ class _MenuItem extends StatelessWidget {
             Icon(icon, color: isDestructive ? AppColors.accentRed : AppColors.accentBlue, size: 26, shadows: AppColors.iconShadows),
             const SizedBox(width: 16),
             Text(label, style: TextStyle(fontSize: 17, color: isDestructive ? AppColors.accentRed : Colors.white)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SortMenuItem extends StatelessWidget {
+  final String label;
+  final String subtitle;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _SortMenuItem({
+    required this.label,
+    required this.subtitle,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.mediumImpact();
+        onTap();
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.accentBlue.withValues(alpha: 0.2) : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? AppColors.accentBlue : Colors.white.withValues(alpha: 0.1),
+            width: 1.5,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                      color: isSelected ? AppColors.accentBlue : Colors.white,
+                    ),
+                  ),
+                ),
+                if (isSelected)
+                  const Icon(
+                    CupertinoIcons.check_mark_circled,
+                    color: AppColors.accentBlue,
+                    size: 22,
+                    shadows: AppColors.iconShadows,
+                  ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Text(
+              subtitle,
+              style: TextStyle(
+                fontSize: 13,
+                color: Colors.white.withValues(alpha: 0.6),
+              ),
+            ),
           ],
         ),
       ),

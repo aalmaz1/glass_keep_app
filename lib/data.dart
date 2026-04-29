@@ -62,6 +62,7 @@ class Note {
   final DateTime createdAt;
   final bool isChecklist;
   final List<ChecklistItem> checklist;
+  final int orderIndex;
 
   /// Cached decoded image bytes to avoid repeated base64 decoding
   Uint8List? _cachedImage;
@@ -79,6 +80,7 @@ class Note {
     required this.createdAt,
     this.isChecklist = false,
     this.checklist = const [],
+    this.orderIndex = 0,
   });
 
   factory Note.empty() => Note(
@@ -127,6 +129,7 @@ class Note {
     'createdAt': createdAt.millisecondsSinceEpoch,
     'isChecklist': isChecklist,
     'checklist': checklist.map((i) => i.toMap()).toList(),
+    'orderIndex': orderIndex,
   };
 
   factory Note.fromMap(Map<String, dynamic> m) {
@@ -146,6 +149,7 @@ class Note {
         checklist: m['checklist'] is List
             ? (m['checklist'] as List).map((i) => ChecklistItem.fromMap(Map<String, dynamic>.from(i))).toList()
             : [],
+        orderIndex: m['orderIndex'] is int ? m['orderIndex'] : 0,
       );
     } catch (e) {
       debugPrint('Error parsing note: $e');
@@ -167,6 +171,7 @@ class Note {
     DateTime? createdAt,
     bool? isChecklist,
     List<ChecklistItem>? checklist,
+    int? orderIndex,
   }) {
     return Note(
       id: id ?? this.id,
@@ -181,6 +186,7 @@ class Note {
       createdAt: createdAt ?? this.createdAt,
       isChecklist: isChecklist ?? this.isChecklist,
       checklist: checklist ?? this.checklist,
+      orderIndex: orderIndex ?? this.orderIndex,
     );
   }
 }

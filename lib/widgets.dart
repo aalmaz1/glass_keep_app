@@ -385,11 +385,13 @@ class _ShaderNoisePainter extends CustomPainter {
 class GlassSearchBar extends StatelessWidget {
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
+  final VoidCallback? onSortPressed;
 
   const GlassSearchBar({
     super.key,
     required this.controller,
     required this.onChanged,
+    this.onSortPressed,
   });
 
   @override
@@ -398,25 +400,51 @@ class GlassSearchBar extends StatelessWidget {
       borderRadius: 12,
       useDistortion: false,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      child: TextField(
-        controller: controller,
-        onChanged: (value) {
-          HapticFeedback.selectionClick();
-          onChanged(value);
-        },
-        style: const TextStyle(color: Colors.white, fontSize: 16),
-        decoration: const InputDecoration(
-          icon: Icon(
-            CupertinoIcons.search,
-            color: Colors.white,
-            size: 24,
-            shadows: AppColors.iconShadows,
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: controller,
+              onChanged: (value) {
+                HapticFeedback.selectionClick();
+                onChanged(value);
+              },
+              style: const TextStyle(color: Colors.white, fontSize: 16),
+              decoration: const InputDecoration(
+                icon: Icon(
+                  CupertinoIcons.search,
+                  color: Colors.white,
+                  size: 24,
+                  shadows: AppColors.iconShadows,
+                ),
+                hintText: 'Search notes...',
+                hintStyle: TextStyle(color: Colors.white54),
+                border: InputBorder.none,
+                isDense: true,
+              ),
+            ),
           ),
-          hintText: 'Search notes...',
-          hintStyle: TextStyle(color: Colors.white54),
-          border: InputBorder.none,
-          isDense: true,
-        ),
+          if (onSortPressed != null)
+            GestureDetector(
+              onTap: () {
+                HapticFeedback.lightImpact();
+                onSortPressed!();
+              },
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  CupertinoIcons.arrow_up_arrow_down,
+                  color: Colors.white,
+                  size: 20,
+                  shadows: AppColors.iconShadows,
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
