@@ -1,13 +1,15 @@
+import 'dart:convert';
 import 'package:encrypt/encrypt.dart' as encrypt_lib;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class EncryptionService {
   static final EncryptionService _instance = EncryptionService._internal();
   factory EncryptionService() => _instance;
   EncryptionService._internal();
 
-  static const _storage = FlutterSecureStorage();
+  static const _secureStorage = FlutterSecureStorage();
   static const _keyAlias = 'encryption_key';
   static const _prefix = 'enc:';
   
@@ -15,10 +17,26 @@ class EncryptionService {
 
   Future<void> init() async {
     debugPrint('[SYSTEM-REBORN] Initializing EncryptionService...');
-    String? base64Key = await _storage.read(key: _keyAlias);
+    String? base64Key;
+    
+    if (kIsWeb) {
+      // On web, use SharedPreferences (localStorage) instead of flutter_secure_storage
+      final prefs = await SharedPreferences.getInstance();
+      base64Key = prefs.getString(_keyAlias);
+    } else {
+      base64Key = await _secureStorage.read(key: _keyAlias);
+    }
+    
     if (base64Key == null) {
       final newKey = encrypt_lib.Key.fromSecureRandom(32);
-      await _storage.write(key: _keyAlias, value: newKey.base64);
+      base64Key = newKey.base64;
+      
+      if (kIsWeb) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString(_keyAlias, base64Key);
+      } else {
+        await _secureStorage.write(key: _keyAlias, value: base64Key);
+      }
       _key = newKey;
     } else {
       _key = encrypt_lib.Key.fromBase64(base64Key);
