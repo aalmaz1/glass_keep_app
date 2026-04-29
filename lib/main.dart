@@ -135,7 +135,6 @@ class _GlassKeepAppState extends State<GlassKeepApp>
   Color? _themeColor;
   List<Color>? _blobColors;
   Color? _accentColor;
-  AppTheme? _currentTheme;
 
   final ValueNotifier<Offset> _pointerPosition =
       ValueNotifier<Offset>(const Offset(-1000, -1000));
