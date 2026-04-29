@@ -10,7 +10,7 @@ import 'package:glass_keep/providers.dart';
 /// Updated in V1.7.0 with curated theme collections.
 class SettingsScreen extends StatelessWidget {
   final StorageService storage;
-  final Function(Color? backgroundColor, List<Color>? blobColors, Color? accentColor) onThemeChanged;
+  final Function(AppTheme) onThemeChanged;
 
   const SettingsScreen({super.key, required this.storage, required this.onThemeChanged});
 
@@ -155,7 +155,7 @@ class SettingsScreen extends StatelessWidget {
             padding: const EdgeInsets.only(right: 12),
             child: GestureDetector(
               onTap: () {
-                onThemeChanged(theme.backgroundColor, theme.blobColors, theme.accentColor);
+                onThemeChanged(theme);
               },
               child: Column(
                 children: [

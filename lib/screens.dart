@@ -508,10 +508,10 @@ class _NotesScreenState extends State<NotesScreen> {
       MaterialPageRoute(
         builder: (context) => SettingsScreen(
           storage: widget.storage,
-          onThemeChanged: (Color? color, List<Color>? blobs, Color? accent) {
-            debugPrint('[SYSTEM-REBORN] Theme change requested: color=$color, blobs=${blobs?.map((c) => c.toARGB32()).toList()}, accent=$accent');
+          onThemeChanged: (AppTheme theme) {
+            debugPrint('[SYSTEM-REBORN] Theme change requested: theme=${theme.name}');
             if (provider?.onThemeChanged != null) {
-              provider!.onThemeChanged!(color, blobs, accent);
+              provider!.onThemeChanged!(theme);
               debugPrint('[SYSTEM-REBORN] Theme change callback executed');
             } else {
               debugPrint('[SYSTEM-REBORN] ERROR: onThemeChanged is null in provider');

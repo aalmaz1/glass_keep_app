@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:glass_keep/constants.dart';
 
 /// Global provider for sharing a single AnimationController across all glass effects
 /// and managing app locale state, sensor data, and pointer positions
@@ -15,7 +16,7 @@ class GlassAnimationProvider extends InheritedWidget {
   final Color? themeColor;
   final List<Color>? blobColors;
   final Color? accentColor;
-  final Function(Color?, List<Color>?, Color?)? onThemeChanged;
+  final Function(AppTheme)? onThemeChanged;
 
   const GlassAnimationProvider({
     super.key,
