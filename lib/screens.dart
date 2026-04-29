@@ -796,7 +796,7 @@ class _NoteCardContent extends StatelessWidget {
                   child: Row(
                     children: [
                       Icon(
-                        item.isChecked ? CupertinoIcons.check_mark_circled_fill : CupertinoIcons.circle,
+                        item.isChecked ? CupertinoIcons.checkmark_circle_fill : CupertinoIcons.circle,
                         size: 14,
                         color: item.isChecked ? accentColor : Colors.white54,
                       ),
