@@ -42,5 +42,7 @@
   "appLocked": "App Locked",
   "authenticateToUnlock": "Please authenticate to access your notes",
   "unlock": "Unlock",
-  "biometricLock": "Biometric Lock"
+  "biometricLock": "Biometric Lock",
+  "checklist": "Checklist",
+  "addItem": "Add Item"
 }

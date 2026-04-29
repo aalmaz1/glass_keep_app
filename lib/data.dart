@@ -11,6 +11,44 @@ import 'package:file_picker/file_picker.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+class ChecklistItem {
+  final String id;
+  final String text;
+  final bool isChecked;
+
+  ChecklistItem({
+    required this.id,
+    required this.text,
+    this.isChecked = false,
+  });
+
+  Map<String, dynamic> toMap() => {
+        'id': id,
+        'text': text,
+        'isChecked': isChecked,
+      };
+
+  factory ChecklistItem.fromMap(Map<String, dynamic> m) {
+    return ChecklistItem(
+      id: m['id']?.toString() ?? '',
+      text: m['text']?.toString() ?? '',
+      isChecked: m['isChecked'] == true,
+    );
+  }
+
+  ChecklistItem copyWith({
+    String? id,
+    String? text,
+    bool? isChecked,
+  }) {
+    return ChecklistItem(
+      id: id ?? this.id,
+      text: text ?? this.text,
+      isChecked: isChecked ?? this.isChecked,
+    );
+  }
+}
+
 class Note {
   final String id;
   final String title;
@@ -21,6 +59,8 @@ class Note {
   final DateTime? reminder;
   final String? imageBase64;
   final DateTime updatedAt;
+  final bool isChecklist;
+  final List<ChecklistItem> checklist;
 
   /// Cached decoded image bytes to avoid repeated base64 decoding
   Uint8List? _cachedImage;
@@ -35,14 +75,18 @@ class Note {
     this.reminder,
     this.imageBase64,
     required this.updatedAt,
+    this.isChecklist = false,
+    this.checklist = const [],
   });
 
   factory Note.empty() => Note(
-    id: '',
-    title: '',
-    content: '',
-    updatedAt: DateTime.now(),
-  );
+        id: '',
+        title: '',
+        content: '',
+        updatedAt: DateTime.now(),
+        isChecklist: false,
+        checklist: [],
+      );
 
   /// Get cached image bytes, decoding only on first access
   Uint8List? get cachedImage {
@@ -77,6 +121,8 @@ class Note {
     'reminder': reminder?.millisecondsSinceEpoch,
     'imageBase64': imageBase64,
     'updatedAt': updatedAt.millisecondsSinceEpoch,
+    'isChecklist': isChecklist,
+    'checklist': checklist.map((i) => i.toMap()).toList(),
   };
 
   factory Note.fromMap(Map<String, dynamic> m) {
@@ -91,6 +137,10 @@ class Note {
         reminder: m['reminder'] is int ? DateTime.fromMillisecondsSinceEpoch(m['reminder']) : null,
         imageBase64: m['imageBase64']?.toString(),
         updatedAt: DateTime.fromMillisecondsSinceEpoch(m['updatedAt'] is int ? m['updatedAt'] : DateTime.now().millisecondsSinceEpoch),
+        isChecklist: m['isChecklist'] == true,
+        checklist: m['checklist'] is List
+            ? (m['checklist'] as List).map((i) => ChecklistItem.fromMap(Map<String, dynamic>.from(i))).toList()
+            : [],
       );
     } catch (e) {
       debugPrint('Error parsing note: $e');
@@ -109,6 +159,8 @@ class Note {
     DateTime? reminder,
     String? imageBase64,
     DateTime? updatedAt,
+    bool? isChecklist,
+    List<ChecklistItem>? checklist,
   }) {
     return Note(
       id: id ?? this.id,
@@ -120,6 +172,8 @@ class Note {
       reminder: reminder ?? this.reminder,
       imageBase64: imageBase64 ?? this.imageBase64,
       updatedAt: updatedAt ?? this.updatedAt,
+      isChecklist: isChecklist ?? this.isChecklist,
+      checklist: checklist ?? this.checklist,
     );
   }
 }
@@ -254,6 +308,9 @@ class StorageService {
         return note.copyWith(
           title: EncryptionService().decryptText(note.title),
           content: EncryptionService().decryptText(note.content),
+          checklist: note.checklist.map((item) => item.copyWith(
+            text: EncryptionService().decryptText(item.text),
+          )).toList(),
         );
       } catch (e) {
         debugPrint('[SYSTEM-REBORN] Skipping corrupted note: $e');
@@ -273,6 +330,9 @@ class StorageService {
       final encryptedNote = note.copyWith(
         title: EncryptionService().encryptText(note.title),
         content: EncryptionService().encryptText(note.content),
+        checklist: note.checklist.map((item) => item.copyWith(
+          text: EncryptionService().encryptText(item.text),
+        )).toList(),
       );
 
       final map = encryptedNote.toMap();
@@ -325,6 +385,9 @@ class StorageService {
         return note.copyWith(
           title: EncryptionService().decryptText(note.title),
           content: EncryptionService().decryptText(note.content),
+          checklist: note.checklist.map((item) => item.copyWith(
+            text: EncryptionService().decryptText(item.text),
+          )).toList(),
         );
       } catch (e) {
         return null;
@@ -353,6 +416,9 @@ class StorageService {
         final encryptedNote = note.copyWith(
           title: EncryptionService().encryptText(note.title),
           content: EncryptionService().encryptText(note.content),
+          checklist: note.checklist.map((item) => item.copyWith(
+            text: EncryptionService().encryptText(item.text),
+          )).toList(),
         );
         
         final map = encryptedNote.toMap();

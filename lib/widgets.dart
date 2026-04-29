@@ -485,3 +485,145 @@ class GlassButton extends StatelessWidget {
     );
   }
 }
+
+/// A premium glassy checkbox with accent color glows
+class GlassCheckbox extends StatelessWidget {
+  final bool value;
+  final ValueChanged<bool?> onChanged;
+  final Color accentColor;
+
+  const GlassCheckbox({
+    super.key,
+    required this.value,
+    required this.onChanged,
+    required this.accentColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.lightImpact();
+        onChanged(!value);
+      },
+      child: Container(
+        width: 22,
+        height: 22,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(
+            color: value ? accentColor : Colors.white.withValues(alpha: 0.3),
+            width: 1.5,
+          ),
+          color: value ? accentColor.withValues(alpha: 0.2) : Colors.transparent,
+          boxShadow: value ? [
+            BoxShadow(
+              color: accentColor.withValues(alpha: 0.3),
+              blurRadius: 8,
+              spreadRadius: 1,
+            )
+          ] : [],
+        ),
+        child: value
+            ? Icon(
+                CupertinoIcons.checkmark,
+                size: 14,
+                color: accentColor,
+              )
+            : null,
+      ),
+    );
+  }
+}
+
+class GlassChecklistItemWidget extends StatefulWidget {
+  final String text;
+  final bool isChecked;
+  final ValueChanged<bool?> onChecked;
+  final ValueChanged<String> onChanged;
+  final VoidCallback onRemoved;
+  final VoidCallback? onSubmitted;
+  final Color accentColor;
+
+  const GlassChecklistItemWidget({
+    super.key,
+    required this.text,
+    required this.isChecked,
+    required this.onChecked,
+    required this.onChanged,
+    required this.onRemoved,
+    this.onSubmitted,
+    required this.accentColor,
+  });
+
+  @override
+  State<GlassChecklistItemWidget> createState() => _GlassChecklistItemWidgetState();
+}
+
+class _GlassChecklistItemWidgetState extends State<GlassChecklistItemWidget> {
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.text);
+  }
+
+  @override
+  void didUpdateWidget(GlassChecklistItemWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.text != _controller.text) {
+      _controller.text = widget.text;
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: VisionGlassCard(
+        borderRadius: 12,
+        useDistortion: false,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        child: Row(
+          children: [
+            const Icon(CupertinoIcons.bars, color: Colors.white24, size: 20),
+            const SizedBox(width: 8),
+            GlassCheckbox(
+              value: widget.isChecked,
+              onChanged: widget.onChecked,
+              accentColor: widget.accentColor,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: TextField(
+                controller: _controller,
+                onChanged: widget.onChanged,
+                onSubmitted: (_) => widget.onSubmitted?.call(),
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: widget.isChecked ? 0.5 : 1.0),
+                  decoration: widget.isChecked ? TextDecoration.lineThrough : null,
+                  fontSize: 16,
+                ),
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  isDense: true,
+                ),
+              ),
+            ),
+            IconButton(
+              icon: const Icon(CupertinoIcons.multiply, color: Colors.white54, size: 20),
+              onPressed: widget.onRemoved,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
