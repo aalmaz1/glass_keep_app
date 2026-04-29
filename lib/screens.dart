@@ -18,6 +18,9 @@ import 'package:glass_keep/providers.dart';
 import 'package:glass_keep/settings_screen.dart';
 import 'package:glass_keep/biometric_service.dart';
 
+
+enum SortType { manual, dateCreated, dateModified }
+
 class NotesScreen extends StatefulWidget {
   final StorageService storage;
   const NotesScreen({super.key, required this.storage});
@@ -39,6 +42,8 @@ class _NotesScreenState extends State<NotesScreen> {
   bool _isLoadingMore = false;
   
   Timer? _searchDebounceTimer;
+  SortType _sortType = SortType.dateModified;
+  bool _sortAscending = false;
 
   @override
   void initState() {

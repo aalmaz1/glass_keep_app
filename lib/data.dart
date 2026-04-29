@@ -59,6 +59,7 @@ class Note {
   final DateTime? reminder;
   final String? imageBase64;
   final DateTime updatedAt;
+  final DateTime createdAt;
   final bool isChecklist;
   final List<ChecklistItem> checklist;
 
@@ -75,6 +76,7 @@ class Note {
     this.reminder,
     this.imageBase64,
     required this.updatedAt,
+    required this.createdAt,
     this.isChecklist = false,
     this.checklist = const [],
   });
@@ -84,6 +86,7 @@ class Note {
         title: '',
         content: '',
         updatedAt: DateTime.now(),
+        createdAt: DateTime.now(),
         isChecklist: false,
         checklist: [],
       );
@@ -121,6 +124,7 @@ class Note {
     'reminder': reminder?.millisecondsSinceEpoch,
     'imageBase64': imageBase64,
     'updatedAt': updatedAt.millisecondsSinceEpoch,
+    'createdAt': createdAt.millisecondsSinceEpoch,
     'isChecklist': isChecklist,
     'checklist': checklist.map((i) => i.toMap()).toList(),
   };
@@ -137,6 +141,7 @@ class Note {
         reminder: m['reminder'] is int ? DateTime.fromMillisecondsSinceEpoch(m['reminder']) : null,
         imageBase64: m['imageBase64']?.toString(),
         updatedAt: DateTime.fromMillisecondsSinceEpoch(m['updatedAt'] is int ? m['updatedAt'] : DateTime.now().millisecondsSinceEpoch),
+        createdAt: m['createdAt'] is int ? DateTime.fromMillisecondsSinceEpoch(m['createdAt']) : DateTime.now(),
         isChecklist: m['isChecklist'] == true,
         checklist: m['checklist'] is List
             ? (m['checklist'] as List).map((i) => ChecklistItem.fromMap(Map<String, dynamic>.from(i))).toList()
@@ -159,6 +164,7 @@ class Note {
     DateTime? reminder,
     String? imageBase64,
     DateTime? updatedAt,
+    DateTime? createdAt,
     bool? isChecklist,
     List<ChecklistItem>? checklist,
   }) {
@@ -172,6 +178,7 @@ class Note {
       reminder: reminder ?? this.reminder,
       imageBase64: imageBase64 ?? this.imageBase64,
       updatedAt: updatedAt ?? this.updatedAt,
+      createdAt: createdAt ?? this.createdAt,
       isChecklist: isChecklist ?? this.isChecklist,
       checklist: checklist ?? this.checklist,
     );
