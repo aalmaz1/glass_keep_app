@@ -367,118 +367,135 @@ class _NotesScreenState extends State<NotesScreen> {
     final l10n = AppLocalizations.of(context);
     if (l10n == null) return;
     final outerContext = context;
+    final provider = GlassAnimationProvider.of(context);
+    final themeColor = provider?.themeColor ?? AppColors.obsidianBlack;
+
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: VisionGlassCard(
-          borderRadius: 24,
-          color: AppColors.obsidianBlack.withValues(alpha: 0.9),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 12),
-              Container(width: 36, height: 5, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2.5))),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [AppColors.accentBlue, AppColors.accentDeepPurple],
-                      ),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(Icons.blur_on, size: 20, color: Colors.white),
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: themeColor.withValues(alpha: 0.95),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1.5),
+        ),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+          child: BackdropFilter(
+            filter: ui.ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 12),
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(2),
                   ),
-                  const SizedBox(width: 12),
-                  const Text(
-                    'Glass Keep',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: -0.5,
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [AppColors.accentBlue, AppColors.accentDeepPurple],
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Icons.blur_on, size: 20, color: Colors.white),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              _MenuItem(icon: CupertinoIcons.paintbrush, label: l10n.appearance, onTap: () { Navigator.pop(context); _openBackgroundSettings(outerContext); }),
-              _MenuItem(icon: CupertinoIcons.globe, label: l10n.language, onTap: () { Navigator.pop(context); _showLanguagePicker(outerContext); }),
-              _MenuItem(icon: CupertinoIcons.trash, label: l10n.trash, onTap: () { Navigator.pop(context); _openTrash(outerContext); }),
-              _MenuItem(icon: Icons.upload_file, label: l10n.exportBackup, onTap: () async {
-                Navigator.pop(context);
-                try {
-                  await widget.storage.exportNotes();
-                  if (outerContext.mounted) {
-                    final exportL10n = AppLocalizations.of(outerContext);
-                    ScaffoldMessenger.of(outerContext).showSnackBar(
-                      SnackBar(
-                        content: Text(exportL10n?.exportSuccess ?? 'Exported successfully'),
-                        backgroundColor: AppColors.accentBlue,
-                        behavior: SnackBarBehavior.floating,
-                        margin: const EdgeInsets.all(16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    const SizedBox(width: 12),
+                    const Text(
+                      'Glass Keep',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: -0.5,
                       ),
-                    );
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                _MenuItem(icon: CupertinoIcons.paintbrush, label: l10n.appearance, onTap: () { Navigator.pop(context); _openBackgroundSettings(outerContext); }),
+                _MenuItem(icon: CupertinoIcons.globe, label: l10n.language, onTap: () { Navigator.pop(context); _showLanguagePicker(outerContext); }),
+                _MenuItem(icon: CupertinoIcons.trash, label: l10n.trash, onTap: () { Navigator.pop(context); _openTrash(outerContext); }),
+                _MenuItem(icon: Icons.upload_file, label: l10n.exportBackup, onTap: () async {
+                  Navigator.pop(context);
+                  try {
+                    await widget.storage.exportNotes();
+                    if (outerContext.mounted) {
+                      final exportL10n = AppLocalizations.of(outerContext);
+                      ScaffoldMessenger.of(outerContext).showSnackBar(
+                        SnackBar(
+                          content: Text(exportL10n?.exportSuccess ?? 'Exported successfully'),
+                          backgroundColor: AppColors.accentBlue,
+                          behavior: SnackBarBehavior.floating,
+                          margin: const EdgeInsets.all(16),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                      );
+                    }
+                  } catch (e) {
+                    if (outerContext.mounted) {
+                      final exportL10n = AppLocalizations.of(outerContext);
+                      ScaffoldMessenger.of(outerContext).showSnackBar(
+                        SnackBar(
+                          content: Text('${exportL10n?.exportError ?? 'Export error'}: $e'),
+                          backgroundColor: AppColors.accentRed,
+                          behavior: SnackBarBehavior.floating,
+                          margin: const EdgeInsets.all(16),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                      );
+                    }
                   }
-                } catch (e) {
-                  if (outerContext.mounted) {
-                    final exportL10n = AppLocalizations.of(outerContext);
-                    ScaffoldMessenger.of(outerContext).showSnackBar(
-                      SnackBar(
-                        content: Text('${exportL10n?.exportError ?? 'Export error'}: $e'),
-                        backgroundColor: AppColors.accentRed,
-                        behavior: SnackBarBehavior.floating,
-                        margin: const EdgeInsets.all(16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                    );
+                }),
+                _MenuItem(icon: Icons.download, label: l10n.importBackup, onTap: () async {
+                  Navigator.pop(context);
+                  try {
+                    await widget.storage.importNotes();
+                    if (outerContext.mounted) {
+                      final importL10n = AppLocalizations.of(outerContext);
+                      ScaffoldMessenger.of(outerContext).showSnackBar(
+                        SnackBar(
+                          content: Text(importL10n?.importSuccess ?? 'Imported successfully'),
+                          backgroundColor: AppColors.accentBlue,
+                          behavior: SnackBarBehavior.floating,
+                          margin: const EdgeInsets.all(16),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                      );
+                    }
+                  } catch (e) {
+                    if (outerContext.mounted) {
+                      final importL10n = AppLocalizations.of(outerContext);
+                      ScaffoldMessenger.of(outerContext).showSnackBar(
+                        SnackBar(
+                          content: Text('${importL10n?.importError ?? 'Import error'}: $e'),
+                          backgroundColor: AppColors.accentRed,
+                          behavior: SnackBarBehavior.floating,
+                          margin: const EdgeInsets.all(16),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                      );
+                    }
                   }
-                }
-              }),
-              _MenuItem(icon: Icons.download, label: l10n.importBackup, onTap: () async {
-                Navigator.pop(context);
-                try {
-                  await widget.storage.importNotes();
-                  if (outerContext.mounted) {
-                    final importL10n = AppLocalizations.of(outerContext);
-                    ScaffoldMessenger.of(outerContext).showSnackBar(
-                      SnackBar(
-                        content: Text(importL10n?.importSuccess ?? 'Imported successfully'),
-                        backgroundColor: AppColors.accentBlue,
-                        behavior: SnackBarBehavior.floating,
-                        margin: const EdgeInsets.all(16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                    );
-                  }
-                } catch (e) {
-                  if (outerContext.mounted) {
-                    final importL10n = AppLocalizations.of(outerContext);
-                    ScaffoldMessenger.of(outerContext).showSnackBar(
-                      SnackBar(
-                        content: Text('${importL10n?.importError ?? 'Import error'}: $e'),
-                        backgroundColor: AppColors.accentRed,
-                        behavior: SnackBarBehavior.floating,
-                        margin: const EdgeInsets.all(16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                    );
-                  }
-                }
-              }),
-              const _BiometricToggle(),
-              _MenuItem(icon: Icons.logout, label: l10n.logout, onTap: () { Navigator.pop(context); _logout(); }, isDestructive: true),
-              const SizedBox(height: 20),
-            ],
+                }),
+                const _BiometricToggle(),
+                _MenuItem(icon: Icons.logout, label: l10n.logout, onTap: () { Navigator.pop(context); _logout(); }, isDestructive: true),
+                const SizedBox(height: 20),
+              ],
+            ),
           ),
         ),
       ),
@@ -1029,14 +1046,14 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
       child: Container(
         height: size.height * 0.85,
         decoration: BoxDecoration(
-          color: themeColor.withValues(alpha: 0.85),
+          color: themeColor.withValues(alpha: 0.95),
           borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-          border: Border.all(color: accentColor.withValues(alpha: 0.25), width: 1.5),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1.5),
         ),
         child: ClipRRect(
           borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
           child: BackdropFilter(
-            filter: ui.ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+            filter: ui.ImageFilter.blur(sigmaX: 15, sigmaY: 15),
             child: Column(
               children: [
                 const SizedBox(height: 12),
@@ -1044,7 +1061,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: accentColor.withValues(alpha: 0.4),
+                    color: Colors.white.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -1130,7 +1147,8 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                           _save();
                         },
                         child: VisionGlassCard(
-                          borderRadius: 28,
+                          borderRadius: 16,
+                          useDistortion: false,
                           color: themeColor.withValues(alpha: 0.8),
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           child: Row(
