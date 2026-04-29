@@ -160,7 +160,6 @@ class _GlassKeepAppState extends State<GlassKeepApp>
       _themeColor = theme.backgroundColor;
       _blobColors = theme.blobColors;
       _accentColor = theme.accentColor;
-      _currentTheme = theme;
     });
 
     // Save theme
@@ -199,7 +198,6 @@ class _GlassKeepAppState extends State<GlassKeepApp>
     _themeColor = theme.backgroundColor;
     _blobColors = theme.blobColors;
     _accentColor = theme.accentColor;
-    _currentTheme = theme;
 
     // Initialize streams and futures once to avoid rebuilding
     _authStream = FirebaseAuth.instance.authStateChanges();
