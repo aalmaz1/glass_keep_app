@@ -124,6 +124,35 @@ class _NotesScreenState extends State<NotesScreen> {
     });
   }
 
+  /// Update note order in Firestore for manual sorting
+  Future<void> _updateNoteOrder(List<String> orderedIds) async {
+    // Update orderIndex for each note
+    for (int i = 0; i < orderedIds.length; i++) {
+      final id = orderedIds[i];
+      // Find the note in either stream or additional notes
+      Note? note;
+      final streamIdx = _streamNotes.indexWhere((n) => n.id == id);
+      if (streamIdx != -1) {
+        note = _streamNotes[streamIdx];
+      } else {
+        final addIdx = _additionalNotes.indexWhere((n) => n.id == id);
+        if (addIdx != -1) {
+          note = _additionalNotes[addIdx];
+        }
+      }
+      if (note != null && note.orderIndex != i) {
+        final updatedNote = note.copyWith(orderIndex: i);
+        await widget.storage.save(updatedNote);
+        // Update local list
+        if (streamIdx != -1) {
+          _streamNotes[streamIdx] = updatedNote;
+        } else if (addIdx != -1) {
+          _additionalNotes[addIdx] = updatedNote;
+        }
+      }
+    }
+  }
+
   void _logout() async {
     widget.storage.clearCache();
     await FirebaseAuth.instance.signOut();
@@ -341,23 +370,55 @@ class _NotesScreenState extends State<NotesScreen> {
                         .clamp(1, 6)
                         .toInt();
 
-                    return SliverPadding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24.0,
-                        vertical: 24.0,
-                      ),
-                      sliver: SliverMasonryGrid.count(
-                        crossAxisCount: crossAxisCount,
-                        mainAxisSpacing: 18.0,
-                        crossAxisSpacing: 18.0,
-                        itemBuilder: (context, i) => NoteCard(
-                          key: ValueKey('note_${notes[i].id}'),
-                          note: notes[i],
-                          onTap: () => _openNote(context, notes[i]),
+                    // For manual sort mode, use ReorderableListView; otherwise use MasonryGrid for performance
+                    if (_sortType == SortType.manual) {
+                      return SliverPadding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24.0,
+                          vertical: 24.0,
                         ),
-                        childCount: notes.length,
-                      ),
-                    );
+                        sliver: ReorderableListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: notes.length,
+                          onReorder: (oldIndex, newIndex) {
+                            setState(() {
+                              if (newIndex > oldIndex) newIndex -= 1;
+                              final note = notes.removeAt(oldIndex);
+                              notes.insert(newIndex, note);
+                              // Update the order in additionalNotes or streamNotes accordingly
+                              _updateNoteOrder(notes.map((n) => n.id).toList());
+                            });
+                          },
+                          itemBuilder: (context, i) => Padding(
+                            key: ValueKey('note_${notes[i].id}'),
+                            padding: const EdgeInsets.only(bottom: 18.0),
+                            child: NoteCard(
+                              note: notes[i],
+                              onTap: () => _openNote(context, notes[i]),
+                            ),
+                          ),
+                        ),
+                      );
+                    } else {
+                      return SliverPadding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24.0,
+                          vertical: 24.0,
+                        ),
+                        sliver: SliverMasonryGrid.count(
+                          crossAxisCount: crossAxisCount,
+                          mainAxisSpacing: 18.0,
+                          crossAxisSpacing: 18.0,
+                          itemBuilder: (context, i) => NoteCard(
+                            key: ValueKey('note_${notes[i].id}'),
+                            note: notes[i],
+                            onTap: () => _openNote(context, notes[i]),
+                          ),
+                          childCount: notes.length,
+                        ),
+                      );
+                    }
                   },
                 ),
                 if (_isLoadingMore)
