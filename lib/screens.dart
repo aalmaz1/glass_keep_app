@@ -893,12 +893,6 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
   Uint8List? _decodedImage;
   bool _isLoading = false;
 
-  /// Get current accent color from provider
-  Color _getAccentColor() {
-    final provider = GlassAnimationProvider.of(context);
-    return provider?.accentColor ?? AppColors.accentBlue;
-  }
-
   /// Compress image to fit within maxBytes limit using a robust approach
   Future<Uint8List?> _compressImage(Uint8List bytes, int maxBytes) async {
     if (bytes.length <= maxBytes) return bytes;
@@ -1026,21 +1020,23 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
     final size = MediaQuery.sizeOf(context);
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     final l10n = AppLocalizations.of(context);
-    final accentColor = _getAccentColor();
+    final provider = GlassAnimationProvider.of(context);
+    final themeColor = provider?.themeColor ?? AppColors.obsidianBlack;
+    final accentColor = provider?.accentColor ?? AppColors.accentBlue;
 
     return Padding(
       padding: EdgeInsets.only(bottom: bottomInset),
       child: Container(
         height: size.height * 0.85,
         decoration: BoxDecoration(
-          color: AppColors.obsidianBlack.withValues(alpha: 0.95),
+          color: themeColor.withValues(alpha: 0.85),
           borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1),
+          border: Border.all(color: accentColor.withValues(alpha: 0.25), width: 1.5),
         ),
         child: ClipRRect(
           borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
           child: BackdropFilter(
-            filter: ui.ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+            filter: ui.ImageFilter.blur(sigmaX: 30, sigmaY: 30),
             child: Column(
               children: [
                 const SizedBox(height: 12),
@@ -1048,7 +1044,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.3),
+                    color: accentColor.withValues(alpha: 0.4),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -1135,7 +1131,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                         },
                         child: VisionGlassCard(
                           borderRadius: 28,
-                          color: (GlassAnimationProvider.of(context)?.themeColor ?? Colors.black).withValues(alpha: 0.8),
+                          color: themeColor.withValues(alpha: 0.8),
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -1168,6 +1164,9 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
   Widget _buildBody(AppLocalizations? l10n) {
     final image = _decodedImage;
     final reminder = _rem;
+    final provider = GlassAnimationProvider.of(context);
+    final accentColor = provider?.accentColor ?? AppColors.accentBlue;
+
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
@@ -1190,9 +1189,9 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                   top: 8,
                   child: CupertinoButton(
                     padding: EdgeInsets.zero,
-                    child: const Icon(
+                    child: Icon(
                       CupertinoIcons.multiply_circle,
-                      color: Colors.white70,
+                      color: accentColor.withValues(alpha: 0.8),
                       shadows: AppColors.iconShadows,
                     ),
                     onPressed: () {
@@ -1215,13 +1214,15 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
           VisionGlassCard(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             useDistortion: false,
+            accentColor: accentColor,
+            border: Border.all(color: accentColor.withValues(alpha: 0.15), width: 1),
             child: IntrinsicHeight(
               child: Row(
                 children: [
                   IconButton(
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
-                    icon: const Icon(CupertinoIcons.photo, color: Colors.white, shadows: AppColors.iconShadows),
+                    icon: Icon(CupertinoIcons.photo, color: accentColor, shadows: AppColors.iconShadows),
                     onPressed: _isLoading ? null : () async {
                       HapticFeedback.lightImpact();
                       if (context.mounted) setState(() => _isLoading = true);
@@ -1266,7 +1267,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                     },
                   ),
                   const VerticalDivider(color: Colors.white24, indent: 8, endIndent: 8),
-                  IconButton(padding: EdgeInsets.zero, constraints: const BoxConstraints(), icon: const Icon(CupertinoIcons.alarm, color: Colors.white, shadows: AppColors.iconShadows), onPressed: () async {
+                  IconButton(padding: EdgeInsets.zero, constraints: const BoxConstraints(), icon: Icon(CupertinoIcons.alarm, color: accentColor, shadows: AppColors.iconShadows), onPressed: () async {
                     HapticFeedback.lightImpact();
                     final now = DateTime.now();
                     final d = await showDatePicker(context: context, initialDate: now, firstDate: now, lastDate: now.add(const Duration(days: 365)));
@@ -1279,11 +1280,11 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                   }),
                   if (reminder != null) ...[
                     const SizedBox(width: 8),
-                    Expanded(child: Text(DateFormat('dd.MM HH:mm').format(reminder), style: const TextStyle(fontSize: 12, color: Colors.white, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)),
+                    Expanded(child: Text(DateFormat('dd.MM HH:mm').format(reminder), style: TextStyle(fontSize: 12, color: accentColor, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)),
                     CupertinoButton(
                       padding: EdgeInsets.zero,
                       minimumSize: Size.zero,
-                      child: const Icon(CupertinoIcons.xmark_circle_fill, size: 18, color: Colors.white),
+                      child: Icon(CupertinoIcons.xmark_circle_fill, size: 18, color: accentColor),
                       onPressed: () => setState(() => _rem = null),
                     ),
                   ],
