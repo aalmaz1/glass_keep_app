@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 /// Core color constants for the app - Luxury Collection Premium Themes
 class AppColors {
-  static const String appVersion = 'V1.8.0';
+  static const String appVersion = 'V1.8.1';
 
   // Text colors
   static const Color secondaryText = Color.fromRGBO(255, 255, 255, 0.7); // 70% opacity white

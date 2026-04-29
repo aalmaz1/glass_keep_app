@@ -65,10 +65,18 @@ class NotificationService {
     // Since note.id is a string (Firestore ID), we need a way to convert it to an int.
     final int id = note.id.hashCode;
 
+    String body;
+    if (note.isChecklist) {
+      body = note.checklist.map((i) => '${i.isChecked ? "☑" : "☐"} ${i.text}').join('\n');
+      if (body.isEmpty) body = 'Checklist reminder';
+    } else {
+      body = note.content.isEmpty ? 'Note reminder' : note.content;
+    }
+
     await _notificationsPlugin.zonedSchedule(
       id,
       note.title.isEmpty ? 'Reminder' : note.title,
-      note.content.isEmpty ? 'Note reminder' : note.content,
+      body,
       tz.TZDateTime.from(reminder, tz.local),
       const NotificationDetails(
         android: AndroidNotificationDetails(

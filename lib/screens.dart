@@ -197,7 +197,8 @@ class _NotesScreenState extends State<NotesScreen> {
       notes = notes.where((n) =>
         n.title.toLowerCase().contains(q) ||
         n.content.toLowerCase().contains(q) ||
-        n.labels.any((l) => l.toLowerCase().contains(q))
+        n.labels.any((l) => l.toLowerCase().contains(q)) ||
+        n.checklist.any((item) => item.text.toLowerCase().contains(q))
       ).toList();
     }
 
@@ -784,6 +785,42 @@ class _NoteCardContent extends StatelessWidget {
     required this.accentColor,
   });
 
+  Widget _buildChecklistPreview(BuildContext context) {
+    final itemsToShow = note.checklist.take(4).toList();
+    return Padding(
+      padding: const EdgeInsets.only(top: 8.0),
+      child: Column(
+        children: itemsToShow
+            .map((item) => Padding(
+                  padding: const EdgeInsets.only(bottom: 4.0),
+                  child: Row(
+                    children: [
+                      Icon(
+                        item.isChecked ? CupertinoIcons.check_mark_circled_fill : CupertinoIcons.circle,
+                        size: 14,
+                        color: item.isChecked ? accentColor : Colors.white54,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          item.text,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: item.isChecked ? Colors.white54 : Colors.white,
+                            fontSize: 14,
+                            decoration: item.isChecked ? TextDecoration.lineThrough : null,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ))
+            .toList(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final image = decodedImage;
@@ -836,7 +873,9 @@ class _NoteCardContent extends StatelessWidget {
                   ),
                 ],
               ),
-              if (note.content.isNotEmpty)
+              if (note.isChecklist && note.checklist.isNotEmpty)
+                _buildChecklistPreview(context)
+              else if (note.content.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(top: 6),
                   child: Text(
@@ -909,6 +948,8 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
   final _picker = ImagePicker();
   Uint8List? _decodedImage;
   bool _isLoading = false;
+  bool _isChecklist = false;
+  List<ChecklistItem> _checklist = [];
 
   /// Compress image to fit within maxBytes limit using a robust approach
   Future<Uint8List?> _compressImage(Uint8List bytes, int maxBytes) async {
@@ -974,6 +1015,8 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
     _noteId = widget.note.id;
     // Use cached image from note if available
     _decodedImage = widget.note.cachedImage;
+    _isChecklist = widget.note.isChecklist;
+    _checklist = List.from(widget.note.checklist);
   }
 
   @override
@@ -997,8 +1040,33 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
     );
   }
 
+  void _toggleChecklist() {
+    HapticFeedback.mediumImpact();
+    setState(() {
+      if (_isChecklist) {
+        // Converting from checklist to text
+        _c.text = _checklist.map((i) => i.text).join('\n');
+        _isChecklist = false;
+      } else {
+        // Converting from text to checklist
+        final lines = _c.text.split('\n').where((l) => l.trim().isNotEmpty).toList();
+        if (lines.isEmpty) {
+          _checklist = [ChecklistItem(id: DateTime.now().millisecondsSinceEpoch.toString(), text: '')];
+        } else {
+          _checklist = lines
+              .map((l) => ChecklistItem(
+                    id: DateTime.now().add(Duration(milliseconds: lines.indexOf(l))).millisecondsSinceEpoch.toString(),
+                    text: l,
+                  ))
+              .toList();
+        }
+        _isChecklist = true;
+      }
+    });
+  }
+
   void _save() async {
-    if (_t.text.trim().isEmpty && _c.text.trim().isEmpty && _img == null) {
+    if (_t.text.trim().isEmpty && (_isChecklist ? _checklist.isEmpty : _c.text.trim().isEmpty) && _img == null) {
       if (context.mounted) Navigator.pop(context);
       return;
     }
@@ -1007,12 +1075,14 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
     final updatedNote = widget.note.copyWith(
       id: _noteId,
       title: _t.text.trim(),
-      content: _c.text.trim(),
+      content: _isChecklist ? '' : _c.text.trim(),
       labels: _l.text.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
       imageBase64: _img,
       reminder: _rem,
       isPinned: _isPinned,
       updatedAt: DateTime.now(),
+      isChecklist: _isChecklist,
+      checklist: _isChecklist ? _checklist : [],
     );
     try {
       final savedNote = await widget.storage.save(updatedNote);
@@ -1030,6 +1100,89 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
         _showSnackBar('${l10n?.saveError ?? 'Save error'}: $e', isError: true);
       }
     }
+  }
+
+  Widget _buildChecklistEditor() {
+    final l10n = AppLocalizations.of(context);
+    final provider = GlassAnimationProvider.of(context);
+    final accentColor = provider?.accentColor ?? AppColors.accentBlue;
+
+    return Column(
+      children: [
+        ReorderableListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: _checklist.length,
+          onReorder: (oldIndex, newIndex) {
+            setState(() {
+              if (newIndex > oldIndex) newIndex -= 1;
+              final item = _checklist.removeAt(oldIndex);
+              _checklist.insert(newIndex, item);
+            });
+          },
+          itemBuilder: (context, index) {
+            final item = _checklist[index];
+            return GlassChecklistItemWidget(
+              key: ValueKey('item_${item.id}'),
+              text: item.text,
+              isChecked: item.isChecked,
+              accentColor: accentColor,
+              onChecked: (val) {
+                setState(() {
+                  _checklist[index] = item.copyWith(isChecked: val ?? false);
+                });
+              },
+              onChanged: (val) {
+                _checklist[index] = item.copyWith(text: val);
+              },
+              onRemoved: () {
+                setState(() {
+                  _checklist.removeAt(index);
+                });
+              },
+              onSubmitted: () {
+                setState(() {
+                  _checklist.insert(
+                      index + 1,
+                      ChecklistItem(
+                        id: DateTime.now().millisecondsSinceEpoch.toString(),
+                        text: '',
+                      ));
+                });
+              },
+            );
+          },
+        ),
+        const SizedBox(height: 12),
+        GestureDetector(
+          onTap: () {
+            HapticFeedback.lightImpact();
+            setState(() {
+              _checklist.add(ChecklistItem(
+                id: DateTime.now().millisecondsSinceEpoch.toString(),
+                text: '',
+              ));
+            });
+          },
+          child: VisionGlassCard(
+            borderRadius: 12,
+            useDistortion: false,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            color: Colors.white.withValues(alpha: 0.05),
+            child: Row(
+              children: [
+                Icon(CupertinoIcons.plus, color: accentColor, size: 20),
+                const SizedBox(width: 12),
+                Text(
+                  l10n?.addItem ?? 'Add Item',
+                  style: TextStyle(color: accentColor, fontSize: 16, fontWeight: FontWeight.w600),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   @override
@@ -1071,6 +1224,15 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
+                      CupertinoButton(
+                        padding: EdgeInsets.zero,
+                        onPressed: _toggleChecklist,
+                        child: Icon(
+                          CupertinoIcons.list_bullet,
+                          color: _isChecklist ? accentColor : Colors.white54,
+                          size: 24,
+                        ),
+                      ),
                       CupertinoButton(
                         padding: EdgeInsets.zero,
                         onPressed: () async {
@@ -1226,8 +1388,28 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                 ),
               ],
             ),
-          TextField(controller: _t, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: -0.5), decoration: InputDecoration(hintText: l10n?.title ?? 'Title', hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.5)), border: InputBorder.none)),
-          TextField(controller: _c, maxLines: null, style: const TextStyle(color: Colors.white, fontSize: 18, height: 1.5), decoration: InputDecoration(hintText: l10n?.note ?? 'Note', hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.5)), border: InputBorder.none)),
+          TextField(
+            controller: _t,
+            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: -0.5),
+            decoration: InputDecoration(
+              hintText: l10n?.title ?? 'Title',
+              hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
+              border: InputBorder.none,
+            ),
+          ),
+          if (_isChecklist)
+            _buildChecklistEditor()
+          else
+            TextField(
+              controller: _c,
+              maxLines: null,
+              style: const TextStyle(color: Colors.white, fontSize: 18, height: 1.5),
+              decoration: InputDecoration(
+                hintText: l10n?.note ?? 'Note',
+                hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
+                border: InputBorder.none,
+              ),
+            ),
           const SizedBox(height: 24),
           VisionGlassCard(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),

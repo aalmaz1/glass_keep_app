@@ -42,5 +42,7 @@
   "appLocked": "앱이 잠겼습니다",
   "authenticateToUnlock": "메모에 접근하려면 인증이 필요합니다",
   "unlock": "잠금 해제",
-  "biometricLock": "생체 인식 잠금"
+  "biometricLock": "생체 인식 잠금",
+  "checklist": "체크리스트",
+  "addItem": "항목 추가"
 }
