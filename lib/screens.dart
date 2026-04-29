@@ -877,7 +877,7 @@ class _SortMenuItem extends StatelessWidget {
                 ),
                 if (isSelected)
                   const Icon(
-                    CupertinoIcons.check_mark_circled,
+                    CupertinoIcons.checkmark_circle_fill,
                     color: AppColors.accentBlue,
                     size: 22,
                     shadows: AppColors.iconShadows,
@@ -949,7 +949,7 @@ class _LanguageOption extends StatelessWidget {
             ),
             if (isSelected)
               const Icon(
-                CupertinoIcons.check_mark_circled,
+                CupertinoIcons.checkmark_circle_fill,
                 color: AppColors.accentBlue,
                 size: 22,
                 shadows: AppColors.iconShadows,
