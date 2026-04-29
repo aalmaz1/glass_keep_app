@@ -1150,7 +1150,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                           borderRadius: 16,
                           useDistortion: false,
                           color: themeColor.withValues(alpha: 0.8),
-                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
