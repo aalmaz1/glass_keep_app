@@ -578,6 +578,41 @@ class _NotesScreenState extends State<NotesScreen> {
                   }
                 }),
                 const _BiometricToggle(),
+                _MenuItem(
+                  icon: Icons.delete_forever,
+                  label: 'Удалить все заметки',
+                  onTap: () async {
+                    Navigator.pop(context);
+                    final confirm = await showDialog<bool>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        backgroundColor: themeColor,
+                        title: const Text('Вы уверены?', style: TextStyle(color: Colors.white)),
+                        content: const Text('Это действие удалит все зашифрованные заметки. Это нельзя отменить!', style: TextStyle(color: Colors.white70)),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(ctx, false),
+                            child: const Text('Отмена', style: TextStyle(color: Colors.white70)),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.pop(ctx, true),
+                            child: const Text('Удалить', style: TextStyle(color: AppColors.accentRed)),
+                          ),
+                        ],
+                      ),
+                    );
+                    if (confirm == true && mounted) {
+                      await widget.storage.deleteAllNotes();
+                      if (mounted) {
+                        setState(() {
+                          _streamNotes.clear();
+                          _additionalNotes.clear();
+                        });
+                      }
+                    }
+                  },
+                  isDestructive: true,
+                ),
                 _MenuItem(icon: Icons.logout, label: l10n.logout, onTap: () { Navigator.pop(context); _logout(); }, isDestructive: true),
                 const SizedBox(height: 20),
               ],
