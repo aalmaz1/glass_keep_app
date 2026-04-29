@@ -84,6 +84,13 @@ class AppThemes {
       accentColor: Color(0xFFFAFAFA),
     ),
   ];
+
+  static AppTheme getThemeByName(String name) {
+    return all.firstWhere(
+      (theme) => theme.name == name,
+      orElse: () => all[0],
+    );
+  }
 }
 
 /// Utility class for common operations

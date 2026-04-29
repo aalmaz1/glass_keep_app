@@ -19,6 +19,7 @@ import 'package:glass_keep/firebase_options.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:glass_keep/notifications_service.dart';
 import 'package:glass_keep/biometric_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   runZonedGuarded(() async {
@@ -101,7 +102,11 @@ void main() async {
       });
     }
 
-    runApp(const GlassKeepApp());
+    // Load initial theme from SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+    final initialThemeName = prefs.getString('last_theme_name') ?? 'Titanium';
+
+    runApp(GlassKeepApp(initialThemeName: initialThemeName));
   }, (error, stack) {
     debugPrint('----------------------------------------');
     debugPrint('ZONED GUARDED ERROR');
@@ -113,7 +118,8 @@ void main() async {
 
 /// Global provider for sharing a single AnimationController across all glass effects
 class GlassKeepApp extends StatefulWidget {
-  const GlassKeepApp({super.key});
+  final String initialThemeName;
+  const GlassKeepApp({super.key, required this.initialThemeName});
 
   @override
   State<GlassKeepApp> createState() => _GlassKeepAppState();
@@ -122,12 +128,14 @@ class GlassKeepApp extends StatefulWidget {
 class _GlassKeepAppState extends State<GlassKeepApp>
     with TickerProviderStateMixin {
   late Stream<User?> _authStream;
+  StreamSubscription<User?>? _authSubscription;
   late Future<StorageService> _storageFuture;
   late AnimationController _glassAnimationController;
   Locale _locale = const Locale('en');
   Color? _themeColor;
   List<Color>? _blobColors;
   Color? _accentColor;
+  AppTheme? _currentTheme;
 
   final ValueNotifier<Offset> _pointerPosition =
       ValueNotifier<Offset>(const Offset(-1000, -1000));
@@ -142,20 +150,61 @@ class _GlassKeepAppState extends State<GlassKeepApp>
     setState(() => _locale = newLocale);
   }
 
-  void _changeTheme(Color? color, List<Color>? blobs, Color? accent) {
-    debugPrint('[SYSTEM-REBORN] _changeTheme called: color=$color, blobs=${blobs?.map((c) => c.toARGB32()).toList()}, accent=$accent');
+  void _applyThemeByName(String name) {
+    final theme = AppThemes.getThemeByName(name);
+    _changeTheme(theme);
+  }
+
+  void _changeTheme(AppTheme theme) {
+    debugPrint('[SYSTEM-REBORN] _changeTheme called: theme=${theme.name}');
     setState(() {
-      _themeColor = color;
-      _blobColors = blobs;
-      _accentColor = accent;
+      _themeColor = theme.backgroundColor;
+      _blobColors = theme.blobColors;
+      _accentColor = theme.accentColor;
+      _currentTheme = theme;
     });
+
+    // Save theme
+    _storageFuture.then((storage) => storage.saveTheme(theme.name));
+  }
+
+  void _handleAuthChange(User? user) async {
+    if (user != null) {
+      debugPrint('[SYSTEM-REBORN] Auth change: User logged in, syncing theme...');
+      final prefs = await SharedPreferences.getInstance();
+      final localThemeName = prefs.getString('theme_name_${user.uid}');
+
+      if (localThemeName != null) {
+        debugPrint('[SYSTEM-REBORN] Applying local theme: $localThemeName');
+        _applyThemeByName(localThemeName);
+      }
+
+      // Sync with remote
+      final storage = await _storageFuture;
+      final remoteThemeName = await storage.getRemoteTheme();
+      if (remoteThemeName != null && remoteThemeName != localThemeName) {
+        debugPrint('[SYSTEM-REBORN] Remote theme found: $remoteThemeName, updating local...');
+        _applyThemeByName(remoteThemeName);
+        // Update local storage
+        await prefs.setString('theme_name_${user.uid}', remoteThemeName);
+        await prefs.setString('last_theme_name', remoteThemeName);
+      }
+    }
   }
 
   @override
   void initState() {
     super.initState();
+    // Initialize theme from widget
+    final theme = AppThemes.getThemeByName(widget.initialThemeName);
+    _themeColor = theme.backgroundColor;
+    _blobColors = theme.blobColors;
+    _accentColor = theme.accentColor;
+    _currentTheme = theme;
+
     // Initialize streams and futures once to avoid rebuilding
     _authStream = FirebaseAuth.instance.authStateChanges();
+    _authSubscription = _authStream.listen(_handleAuthChange);
     _storageFuture = StorageService.init();
 
     // Single AnimationController for all glass distortion effects (8s duration for optimal visual)
@@ -253,6 +302,7 @@ class _GlassKeepAppState extends State<GlassKeepApp>
   @override
   void dispose() {
     _glassAnimationController.dispose();
+    _authSubscription?.cancel();
     _accelerometerSubscription?.cancel();
     _gyroscopeSubscription?.cancel();
     _pointerPosition.dispose();

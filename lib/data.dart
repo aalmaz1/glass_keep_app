@@ -9,6 +9,7 @@ import 'package:glass_keep/encryption_service.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Note {
   final String id;
@@ -410,5 +411,43 @@ class StorageService {
       debugPrint('Import error: $e');
       rethrow;
     }
+  }
+
+  Future<void> saveTheme(String themeName) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final uid = _auth.currentUser?.uid;
+
+      // Save locally
+      if (uid != null) {
+        await prefs.setString('theme_name_$uid', themeName);
+      }
+      await prefs.setString('last_theme_name', themeName);
+
+      // Save to Firestore
+      if (uid != null) {
+        await _db.collection('users').doc(uid).set({
+          'themeName': themeName,
+          'updatedAt': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
+      }
+    } catch (e) {
+      debugPrint('saveTheme error: $e');
+    }
+  }
+
+  Future<String?> getRemoteTheme() async {
+    try {
+      final uid = _auth.currentUser?.uid;
+      if (uid == null) return null;
+
+      final doc = await _db.collection('users').doc(uid).get();
+      if (doc.exists) {
+        return doc.data()?['themeName'] as String?;
+      }
+    } catch (e) {
+      debugPrint('getRemoteTheme error: $e');
+    }
+    return null;
   }
 }
