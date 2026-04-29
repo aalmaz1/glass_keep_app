@@ -529,4 +529,24 @@ class StorageService {
     }
     return null;
   }
+
+  /// Delete all notes for the current user (useful for clearing corrupted/encrypted data)
+  Future<void> deleteAllNotes() async {
+    try {
+      final uid = _uid;
+      final snapshot = await _db.collection('notes')
+          .where('userId', isEqualTo: uid)
+          .get();
+      
+      final batch = _db.batch();
+      for (var doc in snapshot.docs) {
+        batch.delete(doc.reference);
+      }
+      await batch.commit();
+      debugPrint('[SYSTEM-REBORN] All notes deleted successfully');
+    } catch (e) {
+      debugPrint('deleteAllNotes error: $e');
+      rethrow;
+    }
+  }
 }
