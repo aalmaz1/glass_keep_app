@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:encrypt/encrypt.dart' as encrypt_lib;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter/foundation.dart';

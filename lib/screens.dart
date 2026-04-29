@@ -131,11 +131,14 @@ class _NotesScreenState extends State<NotesScreen> {
       final id = orderedIds[i];
       // Find the note in either stream or additional notes
       Note? note;
-      final streamIdx = _streamNotes.indexWhere((n) => n.id == id);
+      int streamIdx = -1;
+      int addIdx = -1;
+      
+      streamIdx = _streamNotes.indexWhere((n) => n.id == id);
       if (streamIdx != -1) {
         note = _streamNotes[streamIdx];
       } else {
-        final addIdx = _additionalNotes.indexWhere((n) => n.id == id);
+        addIdx = _additionalNotes.indexWhere((n) => n.id == id);
         if (addIdx != -1) {
           note = _additionalNotes[addIdx];
         }
@@ -618,11 +621,11 @@ class _NotesScreenState extends State<NotesScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                   child: Text(
                     'Сортировка',
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Colors.white,
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
