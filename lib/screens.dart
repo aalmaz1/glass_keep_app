@@ -345,10 +345,26 @@ class _NotesScreenState extends State<NotesScreen> {
                     final notes = _getFilteredAndSortedNotes(sourceNotes);
 
                     if (notes.isEmpty && _streamNotes.isEmpty) {
-                      return const SliverFillRemaining(
+                      // Initial load state - show loading indicator only if we haven't loaded anything yet
+                      // If data is empty but we've loaded before, show empty state immediately
+                      if (_isLoadingMore && notes.isEmpty) {
+                        return const SliverFillRemaining(
+                          child: Center(
+                            child: CupertinoActivityIndicator(
+                              radius: 15,
+                            ),
+                          ),
+                        );
+                      }
+                      // Show empty state immediately if no data is loading
+                      return SliverFillRemaining(
                         child: Center(
-                          child: CupertinoActivityIndicator(
-                            radius: 15,
+                          child: Text(
+                            l10n?.noNotes ?? 'No notes found',
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 17,
+                            ),
                           ),
                         ),
                       );
