@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:glass_keep/constants.dart';
 import 'package:glass_keep/glass_effect.dart';
 import 'package:glass_keep/providers.dart';
+import 'package:glass_keep/l10n/app_localizations.dart';
 
 /// A premium glass morphism card that uses BackdropFilter and optional distortion
 /// Refactored in V1.8.1: Removed internal hover state to strictly follow premium spec.
@@ -396,6 +397,7 @@ class GlassSearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return VisionGlassCard(
       borderRadius: 12,
       useDistortion: false,
@@ -410,14 +412,14 @@ class GlassSearchBar extends StatelessWidget {
                 onChanged(value);
               },
               style: const TextStyle(color: Colors.white, fontSize: 16),
-              decoration: const InputDecoration(
-                icon: Icon(
+              decoration: InputDecoration(
+                icon: const Icon(
                   CupertinoIcons.search,
                   color: Colors.white,
                   size: 24,
                   shadows: AppColors.iconShadows,
                 ),
-                hintText: 'Search notes...',
+                hintText: l10n?.searchHint ?? 'Search notes...',
                 hintStyle: TextStyle(color: Colors.white54),
                 border: InputBorder.none,
                 isDense: true,

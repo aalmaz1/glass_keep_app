@@ -1,61 +1,37 @@
 ```
-# Build outputs
-build/
-dist/
-
 # Dependencies
-.pub-cache/
 .dart_tool/
 .packages
+.pub-cache/
+pubspec.lock
 
-# Environment variables
-.env
-.env.local
-*.env.*
+# Build artifacts
+build/
 
 # Logs
 *.log
 
-# OS generated files
-.DS_Store
-Thumbs.db
+# Environment
+.env
+.env.local
+*.env.*
 
-# IDE
+# Editor
 .vscode/
 .idea/
 *.swp
 *.swo
+
+# OS generated
+.DS_Store
+Thumbs.db
 
 # Coverage
 coverage/
 htmlcov/
 .coverage
 
-# Temporary files
+# Temporary
 *.tmp
 *.temp
-
-# Compressed files
-*.zip
-*.gz
-*.tar
-*.tgz
-*.bz2
-*.xz
-*.7z
-*.rar
-*.zst
-*.lz4
-*.lzh
-*.cab
-*.arj
-*.rpm
-*.deb
-*.Z
-*.lz
-*.lzo
-*.tar.gz
-*.tar.bz2
-*.tar.xz
-*.tar.zst
 ```
