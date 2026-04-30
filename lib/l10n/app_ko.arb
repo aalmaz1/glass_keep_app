@@ -44,5 +44,7 @@
   "unlock": "잠금 해제",
   "biometricLock": "생체 인식 잠금",
   "checklist": "체크리스트",
-  "addItem": "항목 추가"
+  "addItem": "항목 추가",
+  "noteMovedToTrash": "메모가 휴지통으로 이동되었습니다",
+  "moveToTrashError": "휴지통으로 이동 실패"
 }
