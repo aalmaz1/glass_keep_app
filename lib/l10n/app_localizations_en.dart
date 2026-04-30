@@ -89,4 +89,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get unlock => 'Unlock';
+
+  @override
+  String get noteMovedToTrash => 'Note moved to trash';
+
+  @override
+  String get moveToTrashError => 'Error moving to trash';
 }

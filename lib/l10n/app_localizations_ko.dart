@@ -89,4 +89,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get unlock => '해제';
+
+  @override
+  String get noteMovedToTrash => '메모가 휴지통으로 이동되었습니다';
+
+  @override
+  String get moveToTrashError => '휴지통 이동 오류';
 }
