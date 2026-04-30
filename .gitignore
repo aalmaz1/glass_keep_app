@@ -1,29 +1,26 @@
 ```
-# Build artifacts
+# Build outputs
 build/
-*.js
-*.dart.js
-*.part.js
-*.map
+dist/
 
 # Dependencies
-.pub/
+.pub-cache/
 .dart_tool/
-packages/
+.packages
 
-# Logs
-*.log
-
-# Environment
+# Environment variables
 .env
 .env.local
 *.env.*
+
+# Logs
+*.log
 
 # OS generated files
 .DS_Store
 Thumbs.db
 
-# IDE specific
+# IDE
 .vscode/
 .idea/
 *.swp
@@ -33,6 +30,10 @@ Thumbs.db
 coverage/
 htmlcov/
 .coverage
+
+# Temporary files
+*.tmp
+*.temp
 
 # Compressed files
 *.zip

@@ -44,5 +44,7 @@
   "unlock": "Unlock",
   "biometricLock": "Biometric Lock",
   "checklist": "Checklist",
-  "addItem": "Add Item"
+  "addItem": "Add Item",
+  "noteMovedToTrash": "Note moved to trash",
+  "moveToTrashError": "Error moving to trash"
 }
