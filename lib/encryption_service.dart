@@ -73,8 +73,9 @@ class EncryptionService {
       final decrypted = encrypter.decrypt64(encryptedBase64, iv: iv);
       return decrypted;
     } catch (e) {
-      // If decryption fails, it might be because the text was not encrypted or key changed
-      return encryptedWithIv;
+      // If decryption fails, return empty string instead of showing encrypted data
+      debugPrint('[ENCRYPTION] Decryption failed: $e');
+      return '';
     }
   }
 }
