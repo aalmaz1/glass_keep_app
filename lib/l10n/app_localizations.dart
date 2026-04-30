@@ -66,6 +66,8 @@ abstract class AppLocalizations {
   String get appLocked;
   String get authenticateToUnlock;
   String get unlock;
+  String get noteMovedToTrash;
+  String get moveToTrashError;
 }
 
 class _AppLocalizationsDelegate

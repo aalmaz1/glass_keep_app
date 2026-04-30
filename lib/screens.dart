@@ -1534,13 +1534,38 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                           if (_noteId.isNotEmpty) {
                             // Move note to trash by setting isArchived to true
                             try {
+                              // Optimistic UI update: close immediately for better UX on slow networks
+                              Navigator.pop(context);
+                              // Show feedback
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(l10n?.noteMovedToTrash ?? 'Note moved to trash'),
+                                  backgroundColor: AppColors.accentBlue,
+                                  behavior: SnackBarBehavior.floating,
+                                  margin: const EdgeInsets.all(16),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  duration: const Duration(seconds: 2),
+                                ),
+                              );
+                              // Update in background - works even on slow connection
                               final updatedNote = widget.note.copyWith(isArchived: true, updatedAt: DateTime.now());
                               await widget.storage.save(updatedNote);
+                              // Notify parent to remove from list
                               if (widget.onDeleted != null) widget.onDeleted!(_noteId);
                             } catch (e) {
                               debugPrint('Error moving note to trash: $e');
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('${l10n?.moveToTrashError ?? 'Error moving to trash'}: $e'),
+                                    backgroundColor: AppColors.accentRed,
+                                    behavior: SnackBarBehavior.floating,
+                                    margin: const EdgeInsets.all(16),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  ),
+                                );
+                              }
                             }
-                            Navigator.pop(context);
                           } else {
                             Navigator.pop(context);
                           }

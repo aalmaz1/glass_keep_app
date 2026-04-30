@@ -89,4 +89,10 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get unlock => 'Разблокировать';
+
+  @override
+  String get noteMovedToTrash => 'Заметка перемещена в корзину';
+
+  @override
+  String get moveToTrashError => 'Ошибка перемещения в корзину';
 }
